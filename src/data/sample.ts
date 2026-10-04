@@ -1,5 +1,6 @@
 // Sample data for the Phase A prototype.
 // Every person and photo here is fictional. Real content arrives in Phase B.
+import { asset } from '../asset.ts'
 
 export type Person = {
   id: string
@@ -164,7 +165,7 @@ export const photos: Photo[] = [
     year: '1990',
     place: 'Sheldonian Theatre',
     caption: 'Sub fusc, nerves, and a lot of squinting into the sun.',
-    src: '/photos/photo-01.svg',
+    src: asset('/photos/photo-01.svg'),
     tags: [
       { personId: 'sample-alder', x: 22, y: 48, status: 'confirmed' },
       { personId: 'sample-birch', x: 50, y: 46, status: 'confirmed' },
@@ -177,7 +178,7 @@ export const photos: Photo[] = [
     year: '1991',
     place: 'Department of Human Anatomy',
     caption: 'Second year. White coats, dissection manuals, and the smell of formalin.',
-    src: '/photos/photo-02.svg',
+    src: asset('/photos/photo-02.svg'),
     tags: [
       { personId: 'sample-cedar', x: 30, y: 45, status: 'confirmed' },
       { personId: 'sample-willow', x: 68, y: 47, status: 'confirmed' },
@@ -189,7 +190,7 @@ export const photos: Photo[] = [
     year: '1995',
     place: 'Tingewick pantomime',
     caption: 'Rita the Pink Elephant made her usual appearance. So did the Dame.',
-    src: '/photos/photo-03.svg',
+    src: asset('/photos/photo-03.svg'),
     tags: [
       { personId: 'sample-hazel', x: 48, y: 42, status: 'confirmed' },
       { personId: 'sample-rowan', x: 20, y: 55, status: 'confirmed' },
@@ -202,7 +203,7 @@ export const photos: Photo[] = [
     year: '1994',
     place: 'Osler House',
     caption: 'The garden, a borrowed sound system, and most of the year.',
-    src: '/photos/photo-04.svg',
+    src: asset('/photos/photo-04.svg'),
     tags: [
       { personId: 'sample-elm', x: 35, y: 50, status: 'pending' },
       { personId: 'sample-linden', x: 62, y: 48, status: 'confirmed' },
@@ -214,7 +215,7 @@ export const photos: Photo[] = [
     year: '1995',
     place: 'John Radcliffe Hospital',
     caption: 'Clinical years. Stethoscopes finally earned.',
-    src: '/photos/photo-05.svg',
+    src: asset('/photos/photo-05.svg'),
     tags: [{ personId: 'sample-alder', x: 55, y: 44, status: 'confirmed' }],
   },
   {
@@ -223,7 +224,7 @@ export const photos: Photo[] = [
     year: '1996',
     place: 'Sheldonian Theatre',
     caption: 'Done. Six years, one degree, and a very long lunch afterwards.',
-    src: '/photos/photo-06.svg',
+    src: asset('/photos/photo-06.svg'),
     tags: [
       { personId: 'sample-cedar', x: 18, y: 50, status: 'confirmed' },
       { personId: 'sample-rowan', x: 40, y: 48, status: 'confirmed' },

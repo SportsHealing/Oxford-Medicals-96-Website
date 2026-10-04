@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth.tsx'
+import { asset } from '../asset.ts'
 
 export default function Landing() {
   const { email } = useAuth()
@@ -29,7 +30,7 @@ export default function Landing() {
           </div>
         </div>
         <div className="rounded-2xl bg-blush p-8 text-center">
-          <img src="/rita.svg" alt="Rita the Pink Elephant" className="mx-auto h-40 w-40" />
+          <img src={asset('/rita.svg')} alt="Rita the Pink Elephant" className="mx-auto h-40 w-40" />
           <p className="mt-4 font-serif text-lg text-navy">In Rita we trust.</p>
         </div>
       </section>

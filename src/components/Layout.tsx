@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth.tsx'
+import { asset } from '../asset.ts'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-md px-3 py-1.5 font-sans font-semibold no-underline ${
@@ -15,7 +16,7 @@ export default function Layout() {
       <header className="bg-navy text-white">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-4">
           <Link to="/" className="flex items-center gap-3 text-white no-underline">
-            <img src="/rita.svg" alt="" className="h-10 w-10" />
+            <img src={asset('/rita.svg')} alt="" className="h-10 w-10" />
             <span className="font-serif text-2xl leading-none">Oxford Medics 96</span>
           </Link>
           <nav className="flex flex-wrap gap-1 text-base sm:ml-auto">
