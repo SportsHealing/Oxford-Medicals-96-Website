@@ -4,14 +4,14 @@ Last updated: 2026-10-04 (Europe/London)
 
 ## Current phase
 
-Phase 1: Understand. Step 5 (final brief shown, awaiting build approval).
+Phase 2: Build. Phase A prototype in progress.
 
 ## Site brief
 
 - **Site name and domain:** Oxford Medics 96. Domain: oxfordmedics96.com (obtained).
 - **Purpose:** A private place for the Oxford medical students of 1996 to view old photos, identify classmates, and see what they do now.
-- **Audience:** Oxford medical student alumni from 1996, across multiple colleges. Now in their 50s. Needs: large readable text, simple navigation, works on phone and desktop.
-- **Access:** Signed-in members only. Alternative: each member gets a unique personal access code. Public sees a landing page only.
+- **Audience:** Oxford medical alumni who graduated in 1996, across multiple colleges. Now in their 50s. Needs: large readable text, simple navigation, works on phone and desktop.
+- **Access:** Signed-in members only, with email login. Public sees a landing page only.
 - **Core features:**
   - View all photos.
   - Look up classmates: who they are and what they do now.
@@ -25,35 +25,35 @@ Phase 1: Understand. Step 5 (final brief shown, awaiting build approval).
 - **Data collected:** Name, college, photos, questionnaire answers, contact preferences, tag confirmations. Facial data only in the later opt-in phase.
 - **Visual style:** Clean serif headings, clean sans body. Oxford navy with a softened Tingewick pink (Rita the Pink Elephant).
   - Navy `#002147`: text, headers. 16:1 on white.
-  - Rita pink, soft `#F4B6CF`: highlights, tag markers, backgrounds behind navy text. 9.5:1 with navy.
-  - Rita pink, deep `#B03A6F`: links and buttons. 5.7:1 on white.
-  - Blush `#FBE6EE`: section backgrounds.
+  - Tingewick pink `#FB67AA` (from tingewick.org): accents, brand marks, backgrounds behind navy text. 5.8:1 with navy.
+  - Rita pink `#F7B7D0` (sampled from the Rita logo): tag markers, soft highlights. 9.7:1 with navy.
+  - Deep pink `#B8396F`: links and buttons on white. 5.5:1 on white.
+  - Blush `#FDEAF2`: section backgrounds.
   - White `#FFFFFF`: page background.
-  - Pink values are provisional. tingewick.org could not be fetched from this environment.
 - **Tone:** Warm, plain, a little nostalgic. Short sentences.
 - **Legal and safety:** UK GDPR. Consent before a tag is published. Any member can remove a tag of themselves. Privacy notice. Facial recognition needs explicit opt-in and a DPIA. Avoid official University of Oxford crests or logos without permission.
 
 ## Build scope
 
-- Phase A (now): clickable static prototype with sample photos and sample profiles.
-- Phase B: real sign-in or access codes, real photos and profiles, tagging with confirmation. Needs a backend.
+- Phase A (now): clickable static prototype with sample photos and sample profiles. Vite + React + Tailwind, builds to static files.
+- Phase B: email sign-in, private photo storage, real profiles, tagging with confirmation. Small private backend (Supabase) approved. Non-members must not be able to access anything.
 - Phase C: opt-in face matching that suggests tags for a human to confirm.
 
 ## Decisions made
 
 - Project lives in `SportsHealing/oxford-medicals-96-website`. Unrelated to kneescore-research.
 - Community is the 1996 Oxford medical cohort, all colleges.
-- Members-only access, with personal codes as an option.
+- Members-only access with email login.
+- Small private backend approved for Phase B.
+- 1996 is the graduation year.
+- Tingewick pink taken from tingewick.org (#FB67AA) and the Rita logo.
 - Manual tagging first. Face recognition later and opt-in only.
 - Profiles are built from questionnaire answers.
 - Palette: Oxford navy plus softened Tingewick pink.
 
 ## Open questions
 
-- Sign-in method: email login or personal access codes?
-- Static-only rule: a static site cannot truly protect members-only photos. Allow a small backend from Phase B?
-- Tingewick pink: confirm or supply the exact shade.
-- "1996": year of matriculation or graduation?
+- None blocking. Hosting provider for oxfordmedics96.com to be chosen before Phase B.
 
 ## Files
 
@@ -62,7 +62,7 @@ Phase 1: Understand. Step 5 (final brief shown, awaiting build approval).
 
 ## Next step
 
-Ask: "Shall I build the site from this brief?" Then build Phase A.
+Build Phase A prototype: scaffold app, sample data, pages, deploy preview.
 
 ## Handover notes
 

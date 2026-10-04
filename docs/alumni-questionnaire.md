@@ -6,7 +6,7 @@ Answers will build your profile on oxfordmedics96.com. Only signed-in classmates
 
 1. Full name, and the name classmates knew you by.
 2. Your Oxford college.
-3. Did you start or finish your Oxford medical studies in 1996?
+3. Confirm you graduated in 1996. If not, which year?
 
 ## Then
 
