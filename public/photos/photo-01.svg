@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Sample photo: Matriculation, 1990">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9d9c0"/>
+      <stop offset="1" stop-color="#c9b28e"/>
+    </linearGradient>
+    <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.75">
+      <stop offset="0.6" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.35"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#sky)"/>
+  <rect y="372" width="800" height="228" fill="#b89b74"/>
+  <circle cx="176" cy="288" r="34" fill="#8a6f52"/><path d="M106 600 C106 348 246 348 246 600 Z" fill="#6f563d"/><circle cx="400" cy="276" r="34" fill="#8a6f52"/><path d="M330 600 C330 336 470 336 470 600 Z" fill="#6f563d"/><circle cx="608" cy="300" r="34" fill="#8a6f52"/><path d="M538 600 C538 360 678 360 678 600 Z" fill="#6f563d"/>
+  <rect width="800" height="600" fill="url(#vignette)"/>
+  <text x="24" y="576" font-family="Georgia, serif" font-size="26" fill="#fff8ec" opacity="0.9">Matriculation, 1990</text>
+  <text x="776" y="576" text-anchor="end" font-family="sans-serif" font-size="18" fill="#fff8ec" opacity="0.8">sample</text>
+</svg>

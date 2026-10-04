@@ -4,7 +4,7 @@ Last updated: 2026-10-04 (Europe/London)
 
 ## Current phase
 
-Phase 2: Build. Phase A prototype in progress.
+Phase 2: Build. Phase A prototype built and pushed. Awaiting review.
 
 ## Site brief
 
@@ -59,10 +59,13 @@ Phase 2: Build. Phase A prototype in progress.
 
 - `STATUS.md`: project status and brief. In progress.
 - `docs/alumni-questionnaire.md`: draft questions for alumni. Draft.
+- `src/`: Phase A prototype (Vite, React, Tailwind). Built, lint clean, screenshots checked.
+- `src/data/sample.ts`: fictional sample people, photos, tags.
+- `scripts/make-sample-photos.py`: generates placeholder photos.
 
 ## Next step
 
-Build Phase A prototype: scaffold app, sample data, pages, deploy preview.
+User reviews the prototype (`npm run dev`). Then choose hosting and start Phase B (Supabase email sign-in).
 
 ## Handover notes
 

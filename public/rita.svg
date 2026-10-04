@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Rita the Pink Elephant">
+  <circle cx="50" cy="50" r="48" fill="#fdeaf2"/>
+  <g fill="#f7b7d0" stroke="#fb67aa" stroke-width="2" stroke-linejoin="round">
+    <ellipse cx="55" cy="58" rx="24" ry="18"/>
+    <circle cx="36" cy="46" r="13"/>
+    <path d="M28 52 C18 56 14 66 20 72 C24 74 27 70 25 66 C23 62 27 58 32 57 Z"/>
+    <ellipse cx="42" cy="44" rx="7" ry="9"/>
+    <rect x="38" y="70" width="7" height="12" rx="3"/>
+    <rect x="50" y="72" width="7" height="12" rx="3"/>
+    <rect x="62" y="72" width="7" height="12" rx="3"/>
+    <path d="M78 54 C84 56 84 62 80 64" fill="none"/>
+  </g>
+  <circle cx="31" cy="44" r="1.6" fill="#002147"/>
+</svg>

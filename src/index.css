@@ -1,0 +1,49 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-navy: #002147;
+  --color-navy-soft: #1f3a63;
+  --color-pink: #fb67aa;
+  --color-rita: #f7b7d0;
+  --color-pink-deep: #b8396f;
+  --color-blush: #fdeaf2;
+  --color-ink: #1f2933;
+  --color-mist: #f5f4f0;
+
+  --font-serif: 'Source Serif 4', Georgia, serif;
+  --font-sans: 'Source Sans 3', system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    font-size: 18px;
+  }
+  body {
+    @apply bg-white font-sans text-ink antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-serif text-navy;
+  }
+  a {
+    @apply text-pink-deep underline-offset-2;
+  }
+}
+
+@utility btn {
+  @apply inline-block rounded-md px-5 py-2.5 font-sans font-semibold no-underline transition;
+}
+@utility btn-primary {
+  @apply btn bg-navy text-white hover:bg-navy-soft;
+}
+@utility btn-pink {
+  @apply btn bg-pink-deep text-white hover:bg-[#9c2f5e];
+}
+@utility btn-outline {
+  @apply btn border-2 border-navy text-navy hover:bg-blush;
+}
+
+@utility field {
+  @apply w-full rounded-md border border-gray-300 px-3 py-2 text-ink focus:border-navy focus:ring-2 focus:ring-rita focus:outline-none;
+}
