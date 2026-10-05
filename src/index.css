@@ -2,48 +2,79 @@
 
 @theme {
   --color-navy: #002147;
-  --color-navy-soft: #1f3a63;
+  --color-navy-soft: #1c3a66;
   --color-pink: #fb67aa;
   --color-rita: #f7b7d0;
   --color-pink-deep: #b8396f;
   --color-blush: #fdeaf2;
-  --color-ink: #1f2933;
-  --color-mist: #f5f4f0;
+  --color-ink: #26303b;
+  --color-muted: #6b7280;
+  --color-paper: #fbfaf8;
+  --color-line: #e8e4de;
 
-  --font-serif: 'Source Serif 4', Georgia, serif;
-  --font-sans: 'Source Sans 3', system-ui, sans-serif;
+  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+
+  --shadow-card: 0 1px 2px rgb(0 33 71 / 0.04), 0 8px 24px -12px rgb(0 33 71 / 0.12);
 }
 
 @layer base {
   html {
-    font-size: 18px;
+    font-size: 17px;
   }
   body {
-    @apply bg-white font-sans text-ink antialiased;
+    @apply bg-paper font-sans text-ink antialiased;
   }
   h1,
   h2,
   h3 {
-    @apply font-serif text-navy;
+    @apply font-serif font-normal tracking-[-0.01em] text-navy;
   }
   a {
-    @apply text-pink-deep underline-offset-2;
+    @apply text-navy underline decoration-rita decoration-2 underline-offset-[3px] transition hover:decoration-pink;
+  }
+  ::selection {
+    @apply bg-rita text-navy;
   }
 }
 
+/* Buttons */
 @utility btn {
-  @apply inline-block rounded-md px-5 py-2.5 font-sans font-semibold no-underline transition;
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-sans text-[0.95rem] font-semibold no-underline transition;
 }
 @utility btn-primary {
   @apply btn bg-navy text-white hover:bg-navy-soft;
 }
 @utility btn-pink {
-  @apply btn bg-pink-deep text-white hover:bg-[#9c2f5e];
+  @apply btn bg-pink-deep text-white hover:bg-[#a22f62];
 }
 @utility btn-outline {
-  @apply btn border-2 border-navy text-navy hover:bg-blush;
+  @apply btn border border-navy/30 bg-white text-navy hover:border-navy hover:bg-white;
+}
+@utility btn-quiet {
+  @apply btn text-navy hover:bg-navy/5;
 }
 
+/* Surfaces */
+@utility card {
+  @apply rounded-2xl border border-line bg-white;
+}
+@utility card-hover {
+  @apply transition hover:-translate-y-0.5 hover:border-pink/60 hover:shadow-card;
+}
+
+/* Text */
+@utility eyebrow {
+  @apply font-sans text-[0.78rem] font-semibold tracking-[0.12em] text-pink-deep uppercase;
+}
+@utility lede {
+  @apply text-lg text-muted;
+}
+@utility label-caps {
+  @apply font-sans text-[0.72rem] font-semibold tracking-[0.1em] text-muted uppercase;
+}
+
+/* Forms */
 @utility field {
-  @apply w-full rounded-md border border-gray-300 px-3 py-2 text-ink focus:border-navy focus:ring-2 focus:ring-rita focus:outline-none;
+  @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-ink placeholder:text-muted/70 focus:border-navy focus:ring-4 focus:ring-rita/40 focus:outline-none;
 }

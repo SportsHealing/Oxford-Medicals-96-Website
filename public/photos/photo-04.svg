@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Sample photo: Osler House, 1994">
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#e9d9c0"/>
-      <stop offset="1" stop-color="#c9b28e"/>
+      <stop offset="0" stop-color="#efe3cf"/>
+      <stop offset="1" stop-color="#d6c3a3"/>
     </linearGradient>
     <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.75">
       <stop offset="0.6" stop-color="#000" stop-opacity="0"/>
-      <stop offset="1" stop-color="#000" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.22"/>
     </radialGradient>
   </defs>
   <rect width="800" height="600" fill="url(#sky)"/>
-  <rect y="372" width="800" height="228" fill="#b89b74"/>
-  <circle cx="280" cy="300" r="34" fill="#8a6f52"/><path d="M210 600 C210 360 350 360 350 600 Z" fill="#6f563d"/><circle cx="496" cy="288" r="34" fill="#8a6f52"/><path d="M426 600 C426 348 566 348 566 600 Z" fill="#6f563d"/>
+  <rect y="372" width="800" height="228" fill="#c5ac88"/>
+  <circle cx="280" cy="300" r="30" fill="#a98b6a"/><path d="M210 600 C210 360 350 360 350 600 Z" fill="#9a7d5c"/><circle cx="496" cy="288" r="30" fill="#a98b6a"/><path d="M426 600 C426 348 566 348 566 600 Z" fill="#9a7d5c"/>
   <rect width="800" height="600" fill="url(#vignette)"/>
   <text x="24" y="576" font-family="Georgia, serif" font-size="26" fill="#fff8ec" opacity="0.9">Osler House, 1994</text>
   <text x="776" y="576" text-anchor="end" font-family="sans-serif" font-size="18" fill="#fff8ec" opacity="0.8">sample</text>

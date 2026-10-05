@@ -25,8 +25,8 @@ W, H = 800, 600
 def figure(xp: float, yp: float) -> str:
     x, y = W * xp / 100, H * yp / 100
     return (
-        f'<circle cx="{x:.0f}" cy="{y:.0f}" r="34" fill="#8a6f52"/>'
-        f'<path d="M{x-70:.0f} {H} C{x-70:.0f} {y+60:.0f} {x+70:.0f} {y+60:.0f} {x+70:.0f} {H} Z" fill="#6f563d"/>'
+        f'<circle cx="{x:.0f}" cy="{y:.0f}" r="30" fill="#a98b6a"/>'
+        f'<path d="M{x-70:.0f} {H} C{x-70:.0f} {y+60:.0f} {x+70:.0f} {y+60:.0f} {x+70:.0f} {H} Z" fill="#9a7d5c"/>'
     )
 
 
@@ -35,16 +35,16 @@ for name, label, heads in PHOTOS:
     svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" role="img" aria-label="Sample photo: {label}">
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#e9d9c0"/>
-      <stop offset="1" stop-color="#c9b28e"/>
+      <stop offset="0" stop-color="#efe3cf"/>
+      <stop offset="1" stop-color="#d6c3a3"/>
     </linearGradient>
     <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.75">
       <stop offset="0.6" stop-color="#000" stop-opacity="0"/>
-      <stop offset="1" stop-color="#000" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.22"/>
     </radialGradient>
   </defs>
   <rect width="{W}" height="{H}" fill="url(#sky)"/>
-  <rect y="{H*0.62:.0f}" width="{W}" height="{H*0.38:.0f}" fill="#b89b74"/>
+  <rect y="{H*0.62:.0f}" width="{W}" height="{H*0.38:.0f}" fill="#c5ac88"/>
   {body}
   <rect width="{W}" height="{H}" fill="url(#vignette)"/>
   <text x="24" y="{H-24}" font-family="Georgia, serif" font-size="26" fill="#fff8ec" opacity="0.9">{label}</text>

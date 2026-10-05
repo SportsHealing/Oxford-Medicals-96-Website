@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import Avatar from '../components/Avatar.tsx'
 import { personById, photosFeaturing } from '../data/sample.ts'
 import NotFound from './NotFound.tsx'
 
@@ -9,17 +10,18 @@ export default function Profile() {
   const inPhotos = photosFeaturing(person.id)
 
   return (
-    <div className="space-y-8">
-      <Link to="/classmates" className="font-sans text-sm">
+    <div>
+      <Link to="/classmates" className="mb-6 inline-block font-sans text-sm text-muted no-underline hover:text-navy">
         &larr; All classmates
       </Link>
 
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+      <header className="flex flex-wrap items-center gap-6">
+        <Avatar name={person.name} size="lg" />
+        <div className="min-w-0 flex-1">
           <h1 className="text-4xl">{person.name}</h1>
-          <p className="font-sans text-gray-600">
-            {person.knownAs ? `Known as ${person.knownAs}. ` : ''}
-            {person.college}. Graduated 1996.
+          <p className="mt-1 font-sans text-muted">
+            {person.knownAs ? `Known as ${person.knownAs} · ` : ''}
+            {person.college} · Graduated 1996
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -29,44 +31,54 @@ export default function Profile() {
             </a>
           )}
           {person.acceptsContact ? (
-            <Link to={`/classmates/${person.id}/contact`} className="btn-pink">
+            <Link to={`/classmates/${person.id}/contact`} className="btn-primary">
               Get in touch
             </Link>
           ) : (
-            <span className="btn border border-gray-300 text-gray-500">Not taking contact requests</span>
+            <span className="btn cursor-default border border-line text-muted">Not taking messages</span>
           )}
         </div>
       </header>
 
-      <div className="grid gap-8 md:grid-cols-2">
-        <section className="space-y-4 rounded-xl bg-blush p-6">
-          <h2 className="text-2xl">Now</h2>
-          <Row label="Job">{person.jobTitle}</Row>
-          <Row label="Where">{person.workplace}</Row>
-          <Row label="Since Oxford">{person.careerPath}</Row>
-          <Row label="Outside medicine">{person.interests}</Row>
+      <div className="mt-10 grid gap-6 md:grid-cols-2">
+        <section className="card p-7">
+          <p className="eyebrow">Now</p>
+          <p className="mt-2 font-serif text-2xl text-navy">{person.jobTitle}</p>
+          <p className="font-sans text-muted">{person.workplace}</p>
+          <dl className="mt-6 space-y-5">
+            <Row label="Since Oxford">{person.careerPath}</Row>
+            <Row label="Outside medicine">{person.interests}</Row>
+          </dl>
         </section>
 
-        <section className="space-y-4 rounded-xl bg-mist p-6">
-          <h2 className="text-2xl">Then</h2>
-          <Row label="Clinical training">{person.clinicalTraining}</Row>
-          <Row label="A memory">{person.memory}</Row>
-          <Row label="Tingewick">{person.tingewick}</Row>
+        <section className="card p-7">
+          <p className="eyebrow">Then</p>
+          <dl className="mt-4 space-y-5">
+            <Row label="Clinical training">{person.clinicalTraining}</Row>
+            <Row label="A memory">{person.memory}</Row>
+            <Row label="Tingewick">{person.tingewick}</Row>
+          </dl>
         </section>
       </div>
 
-      <section>
-        <h2 className="text-2xl">In the photos</h2>
+      <section className="mt-12">
+        <div className="mb-4 flex items-baseline justify-between">
+          <h2 className="text-2xl">In the photos</h2>
+          <Link to="/photos" className="font-sans text-sm text-muted no-underline hover:text-navy">
+            All photos &rarr;
+          </Link>
+        </div>
         {inPhotos.length === 0 ? (
-          <p className="mt-2 text-gray-600">Not tagged in any photos yet.</p>
+          <p className="text-muted">Not tagged in any photos yet.</p>
         ) : (
-          <ul className="mt-3 grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <ul className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
             {inPhotos.map((photo) => (
               <li key={photo.id}>
-                <Link to={`/photos/${photo.id}`} className="block no-underline">
-                  <img src={photo.src} alt={photo.title} className="aspect-[4/3] w-full rounded-lg object-cover" />
-                  <span className="mt-1 block font-sans text-sm text-navy">
-                    {photo.title}, {photo.year}
+                <Link to={`/photos/${photo.id}`} className="card card-hover block overflow-hidden no-underline">
+                  <img src={photo.src} alt={photo.title} className="aspect-[4/3] w-full object-cover" />
+                  <span className="block px-4 py-3">
+                    <span className="label-caps">{photo.year}</span>
+                    <span className="block font-sans text-[0.95rem] text-navy">{photo.title}</span>
                   </span>
                 </Link>
               </li>
@@ -75,7 +87,7 @@ export default function Profile() {
         )}
       </section>
 
-      <p className="font-sans text-sm text-gray-600">
+      <p className="mt-12 font-sans text-sm text-muted">
         Written by {person.name}. Members can edit or remove their own profile at any time.
       </p>
     </div>
@@ -85,8 +97,8 @@ export default function Profile() {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="font-sans text-sm font-semibold uppercase tracking-wide text-navy/70">{label}</dt>
-      <dd className="mt-0.5 text-ink">{children}</dd>
+      <dt className="label-caps">{label}</dt>
+      <dd className="mt-1 text-ink">{children}</dd>
     </div>
   )
 }

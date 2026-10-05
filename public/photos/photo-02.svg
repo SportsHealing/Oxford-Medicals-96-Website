@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Sample photo: Anatomy lab, 1991">
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#e9d9c0"/>
-      <stop offset="1" stop-color="#c9b28e"/>
+      <stop offset="0" stop-color="#efe3cf"/>
+      <stop offset="1" stop-color="#d6c3a3"/>
     </linearGradient>
     <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.75">
       <stop offset="0.6" stop-color="#000" stop-opacity="0"/>
-      <stop offset="1" stop-color="#000" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.22"/>
     </radialGradient>
   </defs>
   <rect width="800" height="600" fill="url(#sky)"/>
-  <rect y="372" width="800" height="228" fill="#b89b74"/>
-  <circle cx="240" cy="270" r="34" fill="#8a6f52"/><path d="M170 600 C170 330 310 330 310 600 Z" fill="#6f563d"/><circle cx="544" cy="282" r="34" fill="#8a6f52"/><path d="M474 600 C474 342 614 342 614 600 Z" fill="#6f563d"/>
+  <rect y="372" width="800" height="228" fill="#c5ac88"/>
+  <circle cx="240" cy="270" r="30" fill="#a98b6a"/><path d="M170 600 C170 330 310 330 310 600 Z" fill="#9a7d5c"/><circle cx="544" cy="282" r="30" fill="#a98b6a"/><path d="M474 600 C474 342 614 342 614 600 Z" fill="#9a7d5c"/>
   <rect width="800" height="600" fill="url(#vignette)"/>
   <text x="24" y="576" font-family="Georgia, serif" font-size="26" fill="#fff8ec" opacity="0.9">Anatomy lab, 1991</text>
   <text x="776" y="576" text-anchor="end" font-family="sans-serif" font-size="18" fill="#fff8ec" opacity="0.8">sample</text>

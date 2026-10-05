@@ -4,7 +4,7 @@ Last updated: 2026-10-04 (Europe/London)
 
 ## Current phase
 
-Phase 2: Build. Phase A prototype built and pushed. Awaiting review.
+Phase 2: Build. Phase A prototype redesigned (cleaner visual pass). Awaiting review.
 
 ## Site brief
 
@@ -23,7 +23,7 @@ Phase 2: Build. Phase A prototype built and pushed. Awaiting review.
 - **User journey:** Sign in. Browse photos. Tag or confirm a classmate. Open their profile. See their current work. Send a contact request or open LinkedIn.
 - **Content:** Admins upload photos. Member information arrives as text answers to a questionnaire (see `docs/alumni-questionnaire.md`). Photos and answers will be supplied later.
 - **Data collected:** Name, college, photos, questionnaire answers, contact preferences, tag confirmations. Facial data only in the later opt-in phase.
-- **Visual style:** Clean serif headings, clean sans body. Oxford navy with a softened Tingewick pink (Rita the Pink Elephant).
+- **Visual style:** Calm and airy. Warm off-white page (#FBFAF8), white cards with hairline borders, serif headings, sans body. Navy for text, pink used sparingly as the one accent. Shared page header, initials avatars, pill buttons.
   - Navy `#002147`: text, headers. 16:1 on white.
   - Tingewick pink `#FB67AA` (from tingewick.org): accents, brand marks, backgrounds behind navy text. 5.8:1 with navy.
   - Rita pink `#F7B7D0` (sampled from the Rita logo): tag markers, soft highlights. 9.7:1 with navy.
@@ -65,10 +65,11 @@ Phase 2: Build. Phase A prototype built and pushed. Awaiting review.
 
 ## Next step
 
-User reviews the prototype (`npm run dev`). Then choose hosting and start Phase B (Supabase email sign-in).
+Preview at https://claude.ai/artifact/X9SuvgbVRs7r7K3e4GQqSA (hash URLs). User reviews the redesign. Then choose hosting and start Phase B (Supabase email sign-in).
 
 ## Handover notes
 
 - Source: one page of handwritten notes, then answers in chat.
 - Claude cannot be trained to recognise faces and does not identify people from their faces. Face matching would use a dedicated service, run only for members who opt in.
 - Real photos of identifiable people must not go on a public URL before access control exists.
+- Rita logo is a placeholder drawing. Replace with a proper illustration or the cohort's own Rita artwork if they have one.

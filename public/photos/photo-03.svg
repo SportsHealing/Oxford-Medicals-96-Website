@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Sample photo: Tingewick, 1995">
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#e9d9c0"/>
-      <stop offset="1" stop-color="#c9b28e"/>
+      <stop offset="0" stop-color="#efe3cf"/>
+      <stop offset="1" stop-color="#d6c3a3"/>
     </linearGradient>
     <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.75">
       <stop offset="0.6" stop-color="#000" stop-opacity="0"/>
-      <stop offset="1" stop-color="#000" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.22"/>
     </radialGradient>
   </defs>
   <rect width="800" height="600" fill="url(#sky)"/>
-  <rect y="372" width="800" height="228" fill="#b89b74"/>
-  <circle cx="160" cy="330" r="34" fill="#8a6f52"/><path d="M90 600 C90 390 230 390 230 600 Z" fill="#6f563d"/><circle cx="384" cy="252" r="34" fill="#8a6f52"/><path d="M314 600 C314 312 454 312 454 600 Z" fill="#6f563d"/><circle cx="624" cy="312" r="34" fill="#8a6f52"/><path d="M554 600 C554 372 694 372 694 600 Z" fill="#6f563d"/>
+  <rect y="372" width="800" height="228" fill="#c5ac88"/>
+  <circle cx="160" cy="330" r="30" fill="#a98b6a"/><path d="M90 600 C90 390 230 390 230 600 Z" fill="#9a7d5c"/><circle cx="384" cy="252" r="30" fill="#a98b6a"/><path d="M314 600 C314 312 454 312 454 600 Z" fill="#9a7d5c"/><circle cx="624" cy="312" r="30" fill="#a98b6a"/><path d="M554 600 C554 372 694 372 694 600 Z" fill="#9a7d5c"/>
   <rect width="800" height="600" fill="url(#vignette)"/>
   <text x="24" y="576" font-family="Georgia, serif" font-size="26" fill="#fff8ec" opacity="0.9">Tingewick, 1995</text>
   <text x="776" y="576" text-anchor="end" font-family="sans-serif" font-size="18" fill="#fff8ec" opacity="0.8">sample</text>
