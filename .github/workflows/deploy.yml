@@ -26,6 +26,9 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
       # GitHub Pages serves 404.html for unknown paths, which lets the
       # client-side router handle deep links like /photos/photo-01.
       - run: cp dist/index.html dist/404.html

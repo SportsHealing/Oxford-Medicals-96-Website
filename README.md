@@ -28,6 +28,10 @@ Sample photos are generated SVGs. Regenerate with `python3 scripts/make-sample-p
 
 GitHub Pages, deployed by `.github/workflows/deploy.yml` on every push to `main`. Custom domain is set by `public/CNAME`. DNS lives in AWS Route 53: an A record at the apex pointing to the GitHub Pages IPs, and a CNAME on `www` pointing to `sportshealing.github.io`.
 
+## Phase B: live data
+
+See `docs/phase-b-setup.md`. With `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` set, the site uses real email sign-in; without them it runs in prototype mode.
+
 ## Next phases
 
 - Phase B: email sign-in, private photo storage, real profiles, tag confirmation. Backend: Supabase.

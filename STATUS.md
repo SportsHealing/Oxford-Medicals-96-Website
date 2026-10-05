@@ -4,7 +4,7 @@ Last updated: 2026-10-04 (Europe/London)
 
 ## Current phase
 
-Phase 2: Build. Phase A prototype redesigned (cleaner visual pass). Awaiting review.
+Phase 3: Phase B in progress. Site live at https://oxfordmedics96.com (prototype mode). Supabase sign-in code written, awaiting project setup.
 
 ## Site brief
 
@@ -63,10 +63,13 @@ Phase 2: Build. Phase A prototype redesigned (cleaner visual pass). Awaiting rev
 - `src/`: Phase A prototype (Vite, React, Tailwind). Built, lint clean, screenshots checked.
 - `src/data/sample.ts`: fictional sample people, photos, tags.
 - `scripts/make-sample-photos.py`: generates placeholder photos.
+- `supabase/migrations/0001_init.sql`: database schema, access rules, storage bucket.
+- `src/lib/supabase.ts`, `src/auth.tsx`: live sign-in when env vars are set, prototype mode otherwise.
+- `docs/phase-b-setup.md`: step by step Supabase setup for the user.
 
 ## Next step
 
-User finishes DNS (www CNAME) and enables GitHub Pages with the custom domain. Confirm https://oxfordmedics96.com loads. Then start Phase B (Supabase email sign-in).
+User follows `docs/phase-b-setup.md` (create project, paste schema, set URLs, add GitHub variables). Then: move photos, profiles and tags from sample data to the database; profile editing; admin photo upload; tag confirmation.
 
 ## Handover notes
 

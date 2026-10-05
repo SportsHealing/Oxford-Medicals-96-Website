@@ -34,8 +34,7 @@ export default function Layout() {
                 <button
                   type="button"
                   onClick={() => {
-                    signOut()
-                    navigate('/')
+                    void signOut().then(() => navigate('/'))
                   }}
                   className="hidden rounded-full border border-line px-4 py-1.5 font-sans text-sm font-semibold text-muted transition hover:border-navy hover:text-navy sm:inline-flex"
                 >
@@ -72,8 +71,7 @@ export default function Layout() {
               <button
                 type="button"
                 onClick={() => {
-                  signOut()
-                  navigate('/')
+                  void signOut().then(() => navigate('/'))
                 }}
                 className="text-muted hover:text-navy sm:hidden"
               >
