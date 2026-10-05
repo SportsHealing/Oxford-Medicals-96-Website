@@ -24,6 +24,15 @@ Same as step 2, with `supabase/migrations/0002_privacy.sql`. It stops members re
 2. Site URL: `https://oxfordmedics96.com`
 3. Redirect URLs: add `https://oxfordmedics96.com/**` and `http://localhost:5173/**`.
 
+## 3b. Switch the sign-in email to a 6-digit code (you)
+
+Links break on iPhones (mail apps pre-open the link and use up the one-time token). The site asks for a code instead, so the email must contain the code and nothing that can be pre-opened.
+
+1. **Authentication**, **Email Templates**, **Magic Link**.
+2. Subject: `Your Oxford Medics 96 sign-in code`
+3. Body: replace everything with the HTML in `docs/email-templates/magic-link.html`.
+4. Save.
+
 ## 4. Add the first members (you)
 
 In **SQL Editor**, run something like:

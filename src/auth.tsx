@@ -14,8 +14,10 @@ type Auth = {
   /** The signed-in member's id, or null if not signed in or not a member. */
   memberId: string | null
   isAdmin: boolean
-  /** Sends a magic link. Returns an error message, or null on success. */
+  /** Emails a 6-digit code. Returns an error message, or null on success. */
   requestLink: (email: string) => Promise<string | null>
+  /** Checks the 6-digit code. Returns an error message, or null on success. */
+  verifyCode: (email: string, code: string) => Promise<string | null>
   /** Prototype only: pretend the link was clicked. */
   prototypeSignIn: (email: string) => void
   signOut: () => Promise<void>
@@ -92,6 +94,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return error.message
   }
 
+  const verifyCode = async (value: string, code: string) => {
+    if (!supabase) return null
+    const { error } = await supabase.auth.verifyOtp({ email: value, token: code.replace(/\D/g, ''), type: 'email' })
+    if (!error) return null
+    const m = error.message.toLowerCase()
+    if (m.includes('expired') || m.includes('invalid')) {
+      return 'That code is wrong or has expired. Check the latest email, or ask for a new code.'
+    }
+    return error.message
+  }
+
   const prototypeSignIn = (value: string) => {
     if (supabase) return
     setEmail(value)
@@ -121,7 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ loading, email, memberId, isAdmin, requestLink, prototypeSignIn, signOut, refresh }}
+      value={{ loading, email, memberId, isAdmin, requestLink, verifyCode, prototypeSignIn, signOut, refresh }}
     >
       {children}
     </AuthContext.Provider>

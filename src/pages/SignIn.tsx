@@ -1,13 +1,15 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth.tsx'
 import { asset } from '../asset.ts'
 import { isLive } from '../lib/supabase.ts'
 
 export default function SignIn() {
-  const { email: signedInAs, requestLink, prototypeSignIn } = useAuth()
+  const { email: signedInAs, requestLink, verifyCode, prototypeSignIn } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
+  const [code, setCode] = useState('')
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -15,7 +17,7 @@ export default function SignIn() {
   const from = (location.state as { from?: string } | null)?.from ?? '/photos'
   if (signedInAs) return <Navigate to={from} replace />
 
-  const submit = async (e: FormEvent) => {
+  const sendCode = async (e: FormEvent) => {
     e.preventDefault()
     const value = email.trim().toLowerCase()
     if (!value) return
@@ -27,6 +29,16 @@ export default function SignIn() {
     else setSent(true)
   }
 
+  const checkCode = async (e: FormEvent) => {
+    e.preventDefault()
+    setBusy(true)
+    setError(null)
+    const problem = await verifyCode(email.trim().toLowerCase(), code)
+    setBusy(false)
+    if (problem) setError(problem)
+    else navigate(from, { replace: true })
+  }
+
   return (
     <div className="mx-auto max-w-md">
       <div className="card p-8 sm:p-10">
@@ -34,9 +46,9 @@ export default function SignIn() {
         <h1 className="mt-5 text-3xl">Member sign in</h1>
 
         {!sent ? (
-          <form onSubmit={(e) => void submit(e)} className="mt-6 space-y-5">
+          <form onSubmit={(e) => void sendCode(e)} className="mt-6 space-y-5">
             <p className="text-muted">
-              Enter your email and we will send you a sign-in link. No password to remember.
+              Enter your email and we will send you a 6-digit code. No password to remember.
             </p>
             <label className="block">
               <span className="label-caps">Email</span>
@@ -52,32 +64,56 @@ export default function SignIn() {
             </label>
             {error && <p className="text-sm text-pink-deep">{error}</p>}
             <button type="submit" className="btn-primary w-full" disabled={busy}>
-              {busy ? 'Sending…' : 'Send me a sign-in link'}
+              {busy ? 'Sending…' : 'Email me a code'}
             </button>
             <p className="text-sm text-muted">
-              Use the address the organisers have for you. Check your spam folder if nothing
-              arrives within a few minutes.
+              Use the address the organisers have for you. Check your spam folder if nothing arrives
+              within a few minutes.
             </p>
           </form>
         ) : (
-          <div className="mt-6 space-y-5">
+          <form onSubmit={(e) => void checkCode(e)} className="mt-6 space-y-5">
             <h2 className="text-xl">Check your inbox</h2>
             <p className="text-muted">
-              We have sent a link to <strong className="text-ink">{email}</strong>. Open it on this
-              device to continue. The link works once and expires after an hour.
+              We have emailed a 6-digit code to <strong className="text-ink">{email}</strong>. Type it
+              below. It works for one hour.
             </p>
+            <label className="block">
+              <span className="label-caps">Code</span>
+              <input
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                pattern="[0-9 ]*"
+                required
+                className="field mt-1.5 text-center font-mono text-2xl tracking-[0.4em]"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="000000"
+                autoFocus
+              />
+            </label>
+            {error && <p className="text-sm text-pink-deep">{error}</p>}
+            <button type="submit" className="btn-primary w-full" disabled={busy || code.replace(/\D/g, '').length < 6}>
+              {busy ? 'Checking…' : 'Sign in'}
+            </button>
+            <div className="flex justify-between font-sans text-sm text-muted">
+              <button type="button" className="hover:text-navy" onClick={() => { setSent(false); setCode(''); setError(null) }}>
+                Use a different email
+              </button>
+              <button type="button" className="hover:text-navy" disabled={busy} onClick={(e) => void sendCode(e)}>
+                Send a new code
+              </button>
+            </div>
             {!isLive && (
               <div className="rounded-xl bg-blush p-5">
                 <p className="label-caps text-pink-deep">Prototype shortcut</p>
-                <p className="mt-1 text-sm text-muted">
-                  No email is sent in prototype mode. Click below to pretend you opened the link.
-                </p>
+                <p className="mt-1 text-sm text-muted">No email is sent in prototype mode.</p>
                 <button type="button" onClick={() => prototypeSignIn(email.trim())} className="btn-pink mt-4">
-                  Open the sign-in link
+                  Pretend the code was right
                 </button>
               </div>
             )}
-          </div>
+          </form>
         )}
       </div>
     </div>
