@@ -24,6 +24,10 @@ Sample photos are generated SVGs. Regenerate with `python3 scripts/make-sample-p
 - `src/auth.tsx`: pretend sign-in. Replace with Supabase Auth in Phase B.
 - `docs/alumni-questionnaire.md`: questions sent to alumni to build their profiles.
 
+## Hosting
+
+GitHub Pages, deployed by `.github/workflows/deploy.yml` on every push to `main`. Custom domain is set by `public/CNAME`. DNS lives in AWS Route 53: an A record at the apex pointing to the GitHub Pages IPs, and a CNAME on `www` pointing to `sportshealing.github.io`.
+
 ## Next phases
 
 - Phase B: email sign-in, private photo storage, real profiles, tag confirmation. Backend: Supabase.

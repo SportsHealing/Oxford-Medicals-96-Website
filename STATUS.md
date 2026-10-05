@@ -50,10 +50,11 @@ Phase 2: Build. Phase A prototype redesigned (cleaner visual pass). Awaiting rev
 - Manual tagging first. Face recognition later and opt-in only.
 - Profiles are built from questionnaire answers.
 - Palette: Oxford navy plus softened Tingewick pink.
+- Hosting: GitHub Pages via GitHub Actions. DNS in AWS Route 53.
 
 ## Open questions
 
-- None blocking. Hosting provider for oxfordmedics96.com to be chosen before Phase B.
+- None blocking.
 
 ## Files
 
@@ -65,7 +66,7 @@ Phase 2: Build. Phase A prototype redesigned (cleaner visual pass). Awaiting rev
 
 ## Next step
 
-Preview at https://claude.ai/artifact/X9SuvgbVRs7r7K3e4GQqSA (hash URLs). User reviews the redesign. Then choose hosting and start Phase B (Supabase email sign-in).
+User finishes DNS (www CNAME) and enables GitHub Pages with the custom domain. Confirm https://oxfordmedics96.com loads. Then start Phase B (Supabase email sign-in).
 
 ## Handover notes
 
