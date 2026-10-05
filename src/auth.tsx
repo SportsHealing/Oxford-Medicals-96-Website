@@ -81,7 +81,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: value,
       options: { emailRedirectTo: `${window.location.origin}/photos` },
     })
-    return error ? error.message : null
+    if (!error) return null
+    const m = error.message.toLowerCase()
+    if (m.includes('rate limit')) {
+      return 'Too many sign-in emails have been sent in the last hour. Please wait a little while and try again.'
+    }
+    if (m.includes('security purposes') || m.includes('only request this after')) {
+      return 'A link was sent a moment ago. Check your inbox, or wait a minute before asking for another.'
+    }
+    return error.message
   }
 
   const prototypeSignIn = (value: string) => {
