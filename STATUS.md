@@ -4,7 +4,7 @@ Last updated: 2026-10-04 (Europe/London)
 
 ## Current phase
 
-Phase 3: Phase B in progress. Site live at https://oxfordmedics96.com (prototype mode). Supabase sign-in code written, awaiting project setup.
+Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Email sign-in works; user is admin. All pages read and write the database. Awaiting migration 0002, members list and photos.
 
 ## Site brief
 
@@ -66,14 +66,19 @@ Phase 3: Phase B in progress. Site live at https://oxfordmedics96.com (prototype
 - `supabase/migrations/0001_init.sql`: database schema, access rules, storage bucket.
 - `src/lib/supabase.ts`, `src/auth.tsx`: live sign-in when env vars are set, prototype mode otherwise.
 - `docs/phase-b-setup.md`: step by step Supabase setup for the user.
+- `supabase/migrations/0002_privacy.sql`: column grants (emails hidden, is_admin locked), inbox and admin functions.
+- `src/data/`: `types.ts` Repo contract, `sample.ts` in-memory, `supabaseRepo.ts` live, `repo.ts` picks one.
+- `src/pages/Me.tsx`: profile form, tag confirmations, message inbox.
+- `src/pages/Admin.tsx`: photo upload, invite members, delete photos.
 
 ## Next step
 
-User follows `docs/phase-b-setup.md` (create project, paste schema, set URLs, add GitHub variables). Then: move photos, profiles and tags from sample data to the database; profile editing; admin photo upload; tag confirmation.
+User runs migration 0002, then tests: fill in profile on /me, upload a photo on /admin, invite a second email, tag and confirm. Then load the real members list and photos. Later: email notification when a message or tag arrives (needs an email provider), proper Rita artwork.
 
 ## Handover notes
 
 - Source: one page of handwritten notes, then answers in chat.
 - Claude cannot be trained to recognise faces and does not identify people from their faces. Face matching would use a dedicated service, run only for members who opt in.
 - Real photos of identifiable people must not go on a public URL before access control exists.
+- Messages and tag suggestions do not send email yet. Members see them on /me when they next sign in. Add Supabase Edge Function + Resend later if wanted.
 - Rita logo is a placeholder drawing. Replace with a proper illustration or the cohort's own Rita artwork if they have one.

@@ -4,7 +4,7 @@ import { useAuth } from '../auth.tsx'
 // Gate for member-only pages. The real protection is in the database
 // (row level security); this just keeps the UI tidy.
 export default function RequireMember() {
-  const { loading, email, isMember, signOut } = useAuth()
+  const { loading, email, memberId, signOut } = useAuth()
   const location = useLocation()
 
   if (loading) {
@@ -13,7 +13,7 @@ export default function RequireMember() {
   if (!email) {
     return <Navigate to="/sign-in" replace state={{ from: location.pathname }} />
   }
-  if (!isMember) {
+  if (!memberId) {
     return (
       <div className="mx-auto max-w-md py-10 text-center">
         <p className="eyebrow">Not on the list yet</p>

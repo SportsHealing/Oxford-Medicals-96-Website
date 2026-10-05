@@ -1,42 +1,12 @@
-// Sample data for the Phase A prototype.
-// Every person and photo here is fictional. Real content arrives in Phase B.
+// Sample data and an in-memory repo for prototype mode.
+// Every person and photo here is fictional.
 import { asset } from '../asset.ts'
+import type { InboxMessage, Member, Photo, ProfileInput, Repo, Tag } from './types.ts'
 
-export type Person = {
-  id: string
-  name: string
-  knownAs?: string
-  college: string
-  clinicalTraining: string
-  memory: string
-  tingewick: string
-  jobTitle: string
-  workplace: string
-  careerPath: string
-  interests: string
-  linkedin?: string
-  acceptsContact: boolean
-  allowsTags: boolean
-}
+/** In prototype mode you are signed in as this person. */
+export const SAMPLE_ME = 'sample-alder'
 
-export type Tag = {
-  personId: string
-  x: number // percentage from left
-  y: number // percentage from top
-  status: 'confirmed' | 'pending'
-}
-
-export type Photo = {
-  id: string
-  title: string
-  year: string
-  place: string
-  caption: string
-  src: string
-  tags: Tag[]
-}
-
-export const people: Person[] = [
+export const members: Member[] = [
   {
     id: 'sample-alder',
     name: 'Sample Alder',
@@ -52,6 +22,7 @@ export const people: Person[] = [
     linkedin: 'https://www.linkedin.com/',
     acceptsContact: true,
     allowsTags: true,
+    isAdmin: true,
   },
   {
     id: 'sample-birch',
@@ -66,6 +37,7 @@ export const people: Person[] = [
     interests: 'Allotment, running, crime novels.',
     acceptsContact: true,
     allowsTags: true,
+    isAdmin: false,
   },
   {
     id: 'sample-cedar',
@@ -82,6 +54,7 @@ export const people: Person[] = [
     linkedin: 'https://www.linkedin.com/',
     acceptsContact: true,
     allowsTags: true,
+    isAdmin: false,
   },
   {
     id: 'sample-elm',
@@ -96,6 +69,7 @@ export const people: Person[] = [
     interests: 'Surfing, baking bread.',
     acceptsContact: false,
     allowsTags: true,
+    isAdmin: false,
   },
   {
     id: 'sample-hazel',
@@ -111,6 +85,7 @@ export const people: Person[] = [
     linkedin: 'https://www.linkedin.com/',
     acceptsContact: true,
     allowsTags: true,
+    isAdmin: false,
   },
   {
     id: 'sample-linden',
@@ -125,6 +100,7 @@ export const people: Person[] = [
     interests: 'Gardening, birdwatching, family.',
     acceptsContact: true,
     allowsTags: false,
+    isAdmin: false,
   },
   {
     id: 'sample-rowan',
@@ -141,6 +117,7 @@ export const people: Person[] = [
     linkedin: 'https://www.linkedin.com/',
     acceptsContact: true,
     allowsTags: true,
+    isAdmin: false,
   },
   {
     id: 'sample-willow',
@@ -155,10 +132,13 @@ export const people: Person[] = [
     interests: 'Walking, photography, local history.',
     acceptsContact: true,
     allowsTags: true,
+    isAdmin: false,
   },
 ]
 
-export const photos: Photo[] = [
+type PhotoSeed = Omit<Photo, 'tags'> & { tags: [string, number, number, Tag['status']][] }
+
+const seeds: PhotoSeed[] = [
   {
     id: 'photo-01',
     title: 'Matriculation morning',
@@ -167,9 +147,9 @@ export const photos: Photo[] = [
     caption: 'Sub fusc, nerves, and a lot of squinting into the sun.',
     src: asset('/photos/photo-01.svg'),
     tags: [
-      { personId: 'sample-alder', x: 22, y: 48, status: 'confirmed' },
-      { personId: 'sample-birch', x: 50, y: 46, status: 'confirmed' },
-      { personId: 'sample-hazel', x: 76, y: 50, status: 'pending' },
+      ['sample-alder', 22, 48, 'confirmed'],
+      ['sample-birch', 50, 46, 'confirmed'],
+      ['sample-hazel', 76, 50, 'pending'],
     ],
   },
   {
@@ -180,8 +160,8 @@ export const photos: Photo[] = [
     caption: 'Second year. White coats, dissection manuals, and the smell of formalin.',
     src: asset('/photos/photo-02.svg'),
     tags: [
-      { personId: 'sample-cedar', x: 30, y: 45, status: 'confirmed' },
-      { personId: 'sample-willow', x: 68, y: 47, status: 'confirmed' },
+      ['sample-cedar', 30, 45, 'confirmed'],
+      ['sample-willow', 68, 47, 'confirmed'],
     ],
   },
   {
@@ -192,9 +172,9 @@ export const photos: Photo[] = [
     caption: 'Rita the Pink Elephant made her usual appearance. So did the Dame.',
     src: asset('/photos/photo-03.svg'),
     tags: [
-      { personId: 'sample-hazel', x: 48, y: 42, status: 'confirmed' },
-      { personId: 'sample-rowan', x: 20, y: 55, status: 'confirmed' },
-      { personId: 'sample-birch', x: 78, y: 52, status: 'confirmed' },
+      ['sample-hazel', 48, 42, 'confirmed'],
+      ['sample-rowan', 20, 55, 'confirmed'],
+      ['sample-birch', 78, 52, 'confirmed'],
     ],
   },
   {
@@ -205,8 +185,8 @@ export const photos: Photo[] = [
     caption: 'The garden, a borrowed sound system, and most of the year.',
     src: asset('/photos/photo-04.svg'),
     tags: [
-      { personId: 'sample-elm', x: 35, y: 50, status: 'pending' },
-      { personId: 'sample-linden', x: 62, y: 48, status: 'confirmed' },
+      ['sample-elm', 35, 50, 'pending'],
+      ['sample-linden', 62, 48, 'confirmed'],
     ],
   },
   {
@@ -216,7 +196,7 @@ export const photos: Photo[] = [
     place: 'John Radcliffe Hospital',
     caption: 'Clinical years. Stethoscopes finally earned.',
     src: asset('/photos/photo-05.svg'),
-    tags: [{ personId: 'sample-alder', x: 55, y: 44, status: 'confirmed' }],
+    tags: [['sample-alder', 55, 44, 'pending']],
   },
   {
     id: 'photo-06',
@@ -226,22 +206,128 @@ export const photos: Photo[] = [
     caption: 'Done. Six years, one degree, and a very long lunch afterwards.',
     src: asset('/photos/photo-06.svg'),
     tags: [
-      { personId: 'sample-cedar', x: 18, y: 50, status: 'confirmed' },
-      { personId: 'sample-rowan', x: 40, y: 48, status: 'confirmed' },
-      { personId: 'sample-willow', x: 62, y: 50, status: 'confirmed' },
-      { personId: 'sample-elm', x: 84, y: 49, status: 'confirmed' },
+      ['sample-cedar', 18, 50, 'confirmed'],
+      ['sample-rowan', 40, 48, 'confirmed'],
+      ['sample-willow', 62, 50, 'confirmed'],
+      ['sample-elm', 84, 49, 'confirmed'],
     ],
   },
 ]
 
-export function personById(id: string): Person | undefined {
-  return people.find((p) => p.id === id)
-}
+let tagSeq = 0
+export const photos: Photo[] = seeds.map((s) => ({
+  ...s,
+  tags: s.tags.map(([memberId, x, y, status]) => ({
+    id: `tag-${++tagSeq}`,
+    photoId: s.id,
+    memberId,
+    x,
+    y,
+    status,
+    suggestedBy: 'sample-birch',
+  })),
+}))
 
-export function photoById(id: string): Photo | undefined {
-  return photos.find((p) => p.id === id)
-}
+const allowed: { email: string; note: string | null }[] = [
+  { email: 'sam@example.com', note: 'organiser' },
+  { email: 'birch@example.com', note: 'Somerville' },
+]
+const inbox: InboxMessage[] = []
 
-export function photosFeaturing(personId: string): Photo[] {
-  return photos.filter((p) => p.tags.some((t) => t.personId === personId))
+const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v))
+
+export const sampleRepo: Repo = {
+  async listMembers() {
+    return clone(members)
+  },
+  async getMember(id) {
+    return clone(members.find((m) => m.id === id) ?? null)
+  },
+  async listPhotos() {
+    return clone(photos)
+  },
+  async getPhoto(id) {
+    return clone(photos.find((p) => p.id === id) ?? null)
+  },
+  async suggestTag(photoId, memberId, x, y) {
+    const photo = photos.find((p) => p.id === photoId)
+    if (!photo) throw new Error('Photo not found')
+    if (photo.tags.some((t) => t.memberId === memberId)) throw new Error('Already tagged')
+    photo.tags.push({ id: `tag-${++tagSeq}`, photoId, memberId, x, y, status: 'pending', suggestedBy: SAMPLE_ME })
+  },
+  async decideTag(tagId, status) {
+    for (const p of photos) {
+      const t = p.tags.find((t) => t.id === tagId)
+      if (t) t.status = status
+    }
+  },
+  async removeTag(tagId) {
+    for (const p of photos) p.tags = p.tags.filter((t) => t.id !== tagId)
+  },
+  async myPendingTags() {
+    return clone(
+      photos.flatMap((photo) =>
+        photo.tags.filter((t) => t.memberId === SAMPLE_ME && t.status === 'pending').map((tag) => ({ tag, photo })),
+      ),
+    )
+  },
+  async myEmail() {
+    return 'sam@example.com'
+  },
+  async updateProfile(input: ProfileInput) {
+    const me = members.find((m) => m.id === SAMPLE_ME)
+    if (me) Object.assign(me, input)
+  },
+  async sendContact(toMemberId, message) {
+    const to = members.find((m) => m.id === toMemberId)
+    if (!to?.acceptsContact) throw new Error('Not accepting messages')
+    if (toMemberId === SAMPLE_ME) {
+      inbox.unshift({
+        id: `msg-${Date.now()}`,
+        message,
+        createdAt: new Date().toISOString(),
+        fromId: SAMPLE_ME,
+        fromName: 'Sample Alder',
+        fromEmail: 'sam@example.com',
+      })
+    }
+  },
+  async inbox() {
+    return clone(inbox)
+  },
+  async addPhoto(input) {
+    const id = `photo-${Date.now()}`
+    photos.push({
+      id,
+      title: input.title,
+      year: input.year ?? null,
+      place: input.place ?? null,
+      caption: input.caption ?? null,
+      src: URL.createObjectURL(input.file),
+      tags: [],
+    })
+  },
+  async deletePhoto(photoId) {
+    const i = photos.findIndex((p) => p.id === photoId)
+    if (i >= 0) photos.splice(i, 1)
+  },
+  async listAllowedEmails() {
+    return clone(allowed)
+  },
+  async addAllowedEmails(emails, note) {
+    for (const e of emails) if (!allowed.some((a) => a.email === e)) allowed.push({ email: e, note: note ?? null })
+  },
+  async removeAllowedEmail(email) {
+    const i = allowed.findIndex((a) => a.email === email)
+    if (i >= 0) allowed.splice(i, 1)
+  },
+  async adminMembers() {
+    return members.map((m) => ({
+      id: m.id,
+      email: `${m.id.replace('sample-', '')}@example.com`,
+      name: m.name,
+      isAdmin: m.isAdmin,
+      createdAt: '2026-10-01T00:00:00Z',
+    }))
+  },
 }

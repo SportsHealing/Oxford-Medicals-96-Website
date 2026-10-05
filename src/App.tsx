@@ -8,6 +8,8 @@ import PhotoView from './pages/PhotoView.tsx'
 import Classmates from './pages/Classmates.tsx'
 import Profile from './pages/Profile.tsx'
 import Contact from './pages/Contact.tsx'
+import Me from './pages/Me.tsx'
+import Admin from './pages/Admin.tsx'
 import Privacy from './pages/Privacy.tsx'
 import NotFound from './pages/NotFound.tsx'
 
@@ -24,6 +26,8 @@ export default function App() {
           <Route path="classmates" element={<Classmates />} />
           <Route path="classmates/:id" element={<Profile />} />
           <Route path="classmates/:id/contact" element={<Contact />} />
+          <Route path="me" element={<Me />} />
+          <Route path="admin" element={<Admin />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Route>

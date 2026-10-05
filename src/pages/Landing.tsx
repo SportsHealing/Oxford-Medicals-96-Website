@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth.tsx'
 import { asset } from '../asset.ts'
-import { people, photos } from '../data/sample.ts'
 
 export default function Landing() {
-  const { email } = useAuth()
+  const { memberId } = useAuth()
 
   return (
     <div className="space-y-20">
@@ -21,7 +20,7 @@ export default function Landing() {
             went on to do.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            {email ? (
+            {memberId ? (
               <Link to="/photos" className="btn-primary">
                 Browse the photos
               </Link>
@@ -34,20 +33,13 @@ export default function Landing() {
               How your data is handled
             </Link>
           </div>
-          <dl className="mt-10 flex gap-10 border-t border-line pt-6">
-            <Stat value={photos.length} label="photos" />
-            <Stat value={people.length} label="classmates" />
-            <Stat value="1990" label="to 1996" />
-          </dl>
         </div>
 
         <div className="relative">
           <div className="card flex aspect-[4/5] items-center justify-center overflow-hidden bg-gradient-to-br from-blush via-white to-white sm:aspect-square">
             <img src={asset('/rita.svg')} alt="Rita the Pink Elephant" className="w-3/5" />
           </div>
-          <p className="mt-3 text-center font-serif text-muted italic">
-            Rita, as ever, presiding.
-          </p>
+          <p className="mt-3 text-center font-serif text-muted italic">Rita, as ever, presiding.</p>
         </div>
       </section>
 
@@ -72,15 +64,6 @@ export default function Landing() {
           Read the privacy notice &rarr;
         </Link>
       </section>
-    </div>
-  )
-}
-
-function Stat({ value, label }: { value: string | number; label: string }) {
-  return (
-    <div>
-      <dt className="label-caps">{label}</dt>
-      <dd className="font-serif text-3xl text-navy">{value}</dd>
     </div>
   )
 }

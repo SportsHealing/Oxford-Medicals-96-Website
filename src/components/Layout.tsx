@@ -8,7 +8,7 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
   }`
 
 export default function Layout() {
-  const { email, signOut } = useAuth()
+  const { email, memberId, isAdmin, signOut } = useAuth()
   const navigate = useNavigate()
 
   return (
@@ -25,12 +25,24 @@ export default function Layout() {
           <nav className="ml-auto flex items-center gap-4 sm:gap-5">
             {email ? (
               <>
-                <NavLink to="/photos" className={navClass}>
-                  Photos
-                </NavLink>
-                <NavLink to="/classmates" className={navClass}>
-                  Classmates
-                </NavLink>
+                {memberId && (
+                  <>
+                    <NavLink to="/photos" className={navClass}>
+                      Photos
+                    </NavLink>
+                    <NavLink to="/classmates" className={navClass}>
+                      Classmates
+                    </NavLink>
+                    <NavLink to="/me" className={navClass}>
+                      Me
+                    </NavLink>
+                    {isAdmin && (
+                      <NavLink to="/admin" className={navClass}>
+                        Admin
+                      </NavLink>
+                    )}
+                  </>
+                )}
                 <button
                   type="button"
                   onClick={() => {

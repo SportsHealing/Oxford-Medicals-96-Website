@@ -14,6 +14,10 @@ Supabase gives the site real email sign-in, a private database and private photo
 2. Paste the whole of `supabase/migrations/0001_init.sql` and click **Run**.
 3. You should see "Success. No rows returned".
 
+## 2b. Apply the privacy migration (you, one more paste)
+
+Same as step 2, with `supabase/migrations/0002_privacy.sql`. It stops members reading each other's email addresses or promoting themselves to admin, and adds the message inbox.
+
 ## 3. Set the site address for sign-in links (you)
 
 1. **Authentication** then **URL Configuration**.
@@ -56,6 +60,12 @@ VITE_SUPABASE_ANON_KEY=eyJ...
 ```
 
 Then `npm run dev`.
+
+## Day to day
+
+- **Admin page** (`/admin`, admins only): upload photos, paste email addresses to invite members, see who has signed in, delete photos.
+- **Me page** (`/me`): each member fills in their own profile, confirms or declines tags of themselves, and reads messages sent to them.
+- To make someone else an admin: `update public.members set is_admin = true where email = 'them@example.com';` after they have signed in once.
 
 ## How access control works
 

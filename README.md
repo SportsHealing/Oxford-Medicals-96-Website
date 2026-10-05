@@ -20,8 +20,8 @@ Sample photos are generated SVGs. Regenerate with `python3 scripts/make-sample-p
 ## Structure
 
 - `src/pages/`: one file per page (landing, sign-in, gallery, photo, classmates, profile, contact, privacy).
-- `src/data/sample.ts`: sample people, photos and tags. Replace with a database in Phase B.
-- `src/auth.tsx`: pretend sign-in. Replace with Supabase Auth in Phase B.
+- `src/data/types.ts`: the data contract (`Repo`). `sample.ts` implements it in memory; `supabaseRepo.ts` against the database. `repo.ts` picks one.
+- `src/auth.tsx`: magic-link sign-in in live mode, pretend sign-in in prototype mode.
 - `docs/alumni-questionnaire.md`: questions sent to alumni to build their profiles.
 
 ## Hosting
