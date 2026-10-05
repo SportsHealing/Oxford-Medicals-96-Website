@@ -56,7 +56,9 @@ export default function Me() {
 }
 
 function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; reload: () => void }) {
-  const { refresh } = useAuth()
+  const { refresh, setPassword } = useAuth()
+  const [pw, setPw] = useState('')
+  const [pwMsg, setPwMsg] = useState<string | null>(null)
   const [form, setForm] = useState<ProfileInput>(() => toInput(data.me))
   const [saved, setSaved] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -188,7 +190,40 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
           </div>
         </form>
 
-        <aside>
+        <aside className="space-y-8">
+          <section className="card p-5">
+            <h2 className="text-lg">Sign in faster</h2>
+            <p className="mt-1 font-sans text-sm text-muted">
+              Set a password and you can skip the emailed code next time. At least 8 characters.
+            </p>
+            <form
+              className="mt-3 flex gap-2"
+              onSubmit={(e) => {
+                e.preventDefault()
+                setPwMsg(null)
+                void setPassword(pw).then((problem) => {
+                  setPwMsg(problem ?? 'Password saved.')
+                  if (!problem) setPw('')
+                })
+              }}
+            >
+              <input
+                type="password"
+                autoComplete="new-password"
+                minLength={8}
+                className="field"
+                value={pw}
+                onChange={(e) => setPw(e.target.value)}
+                placeholder="New password"
+              />
+              <button type="submit" className="btn-outline shrink-0" disabled={pw.length < 8}>
+                Save
+              </button>
+            </form>
+            {pwMsg && <p className="mt-2 font-sans text-sm text-muted">{pwMsg}</p>}
+          </section>
+
+          <div>
           <h2 className="label-caps mb-3 text-navy">Messages to you</h2>
           {data.inbox.length === 0 ? (
             <p className="card p-5 text-muted">No messages yet.</p>
@@ -211,6 +246,7 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
               ))}
             </ul>
           )}
+          </div>
         </aside>
       </div>
     </div>

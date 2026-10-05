@@ -5,11 +5,12 @@ import { asset } from '../asset.ts'
 import { isLive } from '../lib/supabase.ts'
 
 export default function SignIn() {
-  const { email: signedInAs, requestLink, verifyCode, prototypeSignIn } = useAuth()
+  const { email: signedInAs, requestLink, verifyCode, signInWithPassword, prototypeSignIn } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
+  const [password, setPassword] = useState('')
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -29,6 +30,18 @@ export default function SignIn() {
     else setSent(true)
   }
 
+  const withPassword = async (e: FormEvent) => {
+    e.preventDefault()
+    const value = email.trim().toLowerCase()
+    if (!value || !password) return
+    setBusy(true)
+    setError(null)
+    const problem = await signInWithPassword(value, password)
+    setBusy(false)
+    if (problem) setError(problem)
+    else navigate(from, { replace: true })
+  }
+
   const checkCode = async (e: FormEvent) => {
     e.preventDefault()
     setBusy(true)
@@ -46,9 +59,9 @@ export default function SignIn() {
         <h1 className="mt-5 text-3xl">Member sign in</h1>
 
         {!sent ? (
-          <form onSubmit={(e) => void sendCode(e)} className="mt-6 space-y-5">
+          <form onSubmit={(e) => void (password ? withPassword(e) : sendCode(e))} className="mt-6 space-y-5">
             <p className="text-muted">
-              Enter your email and we will send you a 6-digit code. No password to remember.
+              Sign in with your password, or leave it blank and we will email you a 6-digit code.
             </p>
             <label className="block">
               <span className="label-caps">Email</span>
@@ -62,13 +75,24 @@ export default function SignIn() {
                 placeholder="you@example.com"
               />
             </label>
+            <label className="block">
+              <span className="label-caps">Password (if you have set one)</span>
+              <input
+                type="password"
+                autoComplete="current-password"
+                className="field mt-1.5"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Leave blank to get a code by email"
+              />
+            </label>
             {error && <p className="text-sm text-pink-deep">{error}</p>}
             <button type="submit" className="btn-primary w-full" disabled={busy}>
-              {busy ? 'Sending…' : 'Email me a code'}
+              {busy ? 'One moment…' : password ? 'Sign in' : 'Email me a code'}
             </button>
             <p className="text-sm text-muted">
-              Use the address the organisers have for you. Check your spam folder if nothing arrives
-              within a few minutes.
+              Use the address the organisers have for you. Forgotten your password? Leave it blank,
+              sign in with a code, then set a new one on your Me page.
             </p>
           </form>
         ) : (

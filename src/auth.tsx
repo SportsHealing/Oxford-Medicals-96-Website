@@ -18,6 +18,10 @@ type Auth = {
   requestLink: (email: string) => Promise<string | null>
   /** Checks the 6-digit code. Returns an error message, or null on success. */
   verifyCode: (email: string, code: string) => Promise<string | null>
+  /** Email + password sign-in. Returns an error message, or null on success. */
+  signInWithPassword: (email: string, password: string) => Promise<string | null>
+  /** Sets or changes the signed-in member's password. */
+  setPassword: (password: string) => Promise<string | null>
   /** Prototype only: pretend the link was clicked. */
   prototypeSignIn: (email: string) => void
   signOut: () => Promise<void>
@@ -105,6 +109,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return error.message
   }
 
+  const signInWithPassword = async (value: string, password: string) => {
+    if (!supabase) return null
+    const { error } = await supabase.auth.signInWithPassword({ email: value, password })
+    if (!error) return null
+    const m = error.message.toLowerCase()
+    if (m.includes('invalid login')) {
+      return 'Email or password not recognised. If you have not set a password yet, use "Email me a code" instead.'
+    }
+    return error.message
+  }
+
+  const setPassword = async (password: string) => {
+    if (!supabase) return null
+    const { error } = await supabase.auth.updateUser({ password })
+    return error ? error.message : null
+  }
+
   const prototypeSignIn = (value: string) => {
     if (supabase) return
     setEmail(value)
@@ -134,7 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ loading, email, memberId, isAdmin, requestLink, verifyCode, prototypeSignIn, signOut, refresh }}
+      value={{ loading, email, memberId, isAdmin, requestLink, verifyCode, signInWithPassword, setPassword, prototypeSignIn, signOut, refresh }}
     >
       {children}
     </AuthContext.Provider>

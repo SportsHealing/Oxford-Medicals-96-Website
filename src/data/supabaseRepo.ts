@@ -72,7 +72,7 @@ const toTag = (t: TagRow): Tag => ({
   suggestedBy: t.suggested_by,
 })
 
-const SIGNED_URL_SECONDS = 60 * 60
+const SIGNED_URL_SECONDS = 15 * 60
 
 export function createSupabaseRepo(client: SupabaseClient): Repo {
   const fail = (error: { message: string } | null) => {
