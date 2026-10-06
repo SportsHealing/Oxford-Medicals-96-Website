@@ -81,30 +81,38 @@ export default function Layout() {
       </main>
 
       <footer className="bg-navy text-white/75">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-8 font-sans text-sm">
-          <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
-              <img src={asset('/rita.svg')} alt="" className="h-6 w-6" />
-            </span>
-            <span>
-              <span className="font-serif text-base text-white">Oxford Medics 96</span>
-              <span className="ml-2 hidden sm:inline">A private site for the class of 1996.</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-5">
-            {isAdmin && (
-              <Link to="/admin" className="text-white/75 no-underline hover:text-white sm:hidden">
-                Admin
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-8 font-sans text-sm">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+                <img src={asset('/rita.svg')} alt="" className="h-6 w-6" />
+              </span>
+              <span>
+                <span className="font-serif text-base text-white">Oxford Medics 96</span>
+                <span className="ml-2 hidden sm:inline">A private site for the class of 1996.</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-5">
+              {isAdmin && (
+                <Link to="/admin" className="text-white/75 no-underline hover:text-white sm:hidden">
+                  Admin
+                </Link>
+              )}
+              <Link to="/privacy" className="text-white/75 no-underline hover:text-white">
+                Privacy
               </Link>
-            )}
-            <Link to="/privacy" className="text-white/75 no-underline hover:text-white">
-              Privacy
-            </Link>
-            {email && (
-              <button type="button" onClick={doSignOut} className="text-white/75 hover:text-white sm:hidden">
-                Sign out
-              </button>
-            )}
+              {email && (
+                <button type="button" onClick={doSignOut} className="text-white/75 hover:text-white sm:hidden">
+                  Sign out
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="border-t border-white/10 pt-4 text-xs">
+            Website by Indi Gupte, powered by{' '}
+            <a href="https://www.sportshealing.com/" target="_blank" rel="noreferrer" className="text-white no-underline hover:text-white hover:underline">
+              SportsHealing Technologies
+            </a>
           </div>
         </div>
       </footer>
