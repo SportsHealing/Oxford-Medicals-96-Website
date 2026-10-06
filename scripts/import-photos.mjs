@@ -16,7 +16,7 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { createHash } from 'node:crypto'
-import { readdir, readFile, stat } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import { basename, extname, join } from 'node:path'
 
 const url = process.env.SUPABASE_URL
@@ -88,7 +88,9 @@ for (const file of files) {
   if (have.has(path)) { skipped++; continue }
 
   const meta = captions.get(name.toLowerCase()) ?? {}
-  const title = meta.title || name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ')
+  // Downloaded Kululu files are named like "0412-preview_<code>.jpg": title them "Photo 412".
+  const numbered = name.match(/^(\d{3,5})-(preview|thumbnail|original)/i)
+  const title = meta.title || (numbered ? `Photo ${Number(numbered[1])}` : name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' '))
 
   const up = await supabase.storage.from('photos').upload(path, bytes, { contentType: types[ext] ?? 'image/jpeg', upsert: false })
   if (up.error && !/already exists/i.test(up.error.message)) {
@@ -101,6 +103,4 @@ for (const file of files) {
   done++
   if (done % 25 === 0) console.log(`  ${done} uploaded…`)
 }
-const { size } = await stat(folder)
-void size
 console.log(`Done. ${done} uploaded, ${skipped} already there, ${failed} failed.`)
