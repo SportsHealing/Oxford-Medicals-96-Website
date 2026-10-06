@@ -24,7 +24,15 @@ export default function Admin() {
   if (error) return <LoadError message={error} />
   if (!data) return null
 
-  const joined = new Set(data.members.map((m) => m.email))
+  // One row per person: everyone invited, plus anyone signed in whose address
+  // is no longer on the invite list.
+  const memberByEmail = new Map(data.members.map((m) => [m.email.toLowerCase(), m]))
+  const people = [
+    ...data.allowed.map((a) => ({ email: a.email, note: a.note, member: memberByEmail.get(a.email.toLowerCase()) })),
+    ...data.members
+      .filter((m) => !data.allowed.some((a) => a.email.toLowerCase() === m.email.toLowerCase()))
+      .map((m) => ({ email: m.email, note: null as string | null, member: m })),
+  ]
 
   return (
     <div>
@@ -36,23 +44,47 @@ export default function Admin() {
       </div>
 
       <section className="mt-12">
-        <h2 className="text-2xl">Members list</h2>
+        <h2 className="text-2xl">Members</h2>
         <p className="mt-1 font-sans text-sm text-muted">
-          {data.allowed.length} invited, {data.members.length} signed in so far.
+          {people.length} on the list, {data.members.length} signed in so far. Admins can upload and delete
+          any photo and manage this list.
         </p>
         <ul className="card mt-4 divide-y divide-line">
-          {data.allowed.map((a) => (
-            <li key={a.email} className="flex items-center gap-3 px-4 py-2.5 font-sans text-sm">
-              <span className={`h-2 w-2 shrink-0 rounded-full ${joined.has(a.email) ? 'bg-pink' : 'bg-line'}`} />
-              <span className="min-w-0 flex-1 truncate text-ink">{a.email}</span>
-              <span className="hidden text-muted sm:block">{a.note}</span>
-              <span className="text-xs text-muted">{joined.has(a.email) ? 'Signed in' : 'Invited'}</span>
-              {!joined.has(a.email) && (
+          {people.map((p) => (
+            <li key={p.email} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 font-sans text-sm">
+              <span className={`h-2 w-2 shrink-0 rounded-full ${p.member ? 'bg-pink' : 'bg-line'}`} />
+              <span className="min-w-0 flex-1">
+                {p.member?.name && <span className="block truncate font-semibold text-navy">{p.member.name}</span>}
+                <span className="block truncate text-ink">{p.email}</span>
+              </span>
+              {p.note && <span className="hidden text-muted sm:block">{p.note}</span>}
+              {p.member?.isAdmin && (
+                <span className="rounded-full bg-rita px-2 py-0.5 text-xs font-semibold text-navy">Admin</span>
+              )}
+              <span className="text-xs text-muted">{p.member ? 'Signed in' : 'Invited'}</span>
+              {p.member && p.member.id !== memberId && (
+                <button
+                  type="button"
+                  className="rounded-full border border-line px-3 py-1 text-xs font-semibold text-navy hover:border-navy"
+                  onClick={() => {
+                    const m = p.member!
+                    const q = m.isAdmin ? `Remove admin access from ${m.name || m.email}?` : `Make ${m.name || m.email} an admin?`
+                    if (confirm(q)) {
+                      void repo
+                        .setAdmin(m.id, !m.isAdmin)
+                        .then(reload, (e: unknown) => alert(e instanceof Error ? e.message : 'Could not change'))
+                    }
+                  }}
+                >
+                  {p.member.isAdmin ? 'Remove admin' : 'Make admin'}
+                </button>
+              )}
+              {!p.member && (
                 <button
                   type="button"
                   className="text-xs text-muted hover:text-pink-deep"
                   onClick={() => {
-                    if (confirm(`Remove ${a.email} from the list?`)) void repo.removeAllowedEmail(a.email).then(reload)
+                    if (confirm(`Remove ${p.email} from the list?`)) void repo.removeAllowedEmail(p.email).then(reload)
                   }}
                 >
                   Remove
@@ -60,40 +92,7 @@ export default function Admin() {
               )}
             </li>
           ))}
-          {data.allowed.length === 0 && <li className="px-4 py-3 text-muted">Nobody invited yet.</li>}
-        </ul>
-      </section>
-
-      <section className="mt-12">
-        <h2 className="text-2xl">Who has signed in</h2>
-        <p className="mt-1 font-sans text-sm text-muted">
-          Admins can upload and delete any photo and manage this list.
-        </p>
-        <ul className="card mt-4 divide-y divide-line">
-          {data.members.map((m) => (
-            <li key={m.id} className="flex items-center gap-3 px-4 py-2.5 font-sans text-sm">
-              <span className="min-w-0 flex-1">
-                <span className="block truncate font-semibold text-navy">{m.name || 'Name not set yet'}</span>
-                <span className="block truncate text-muted">{m.email}</span>
-              </span>
-              {m.isAdmin && <span className="rounded-full bg-rita px-2 py-0.5 text-xs font-semibold text-navy">Admin</span>}
-              {m.id !== memberId && (
-                <button
-                  type="button"
-                  className="text-xs text-muted hover:text-pink-deep"
-                  onClick={() => {
-                    const verb = m.isAdmin ? 'Remove admin access from' : 'Make admin:'
-                    if (confirm(`${verb} ${m.name || m.email}?`)) {
-                      void repo.setAdmin(m.id, !m.isAdmin).then(reload, (e: unknown) => alert(e instanceof Error ? e.message : 'Could not change'))
-                    }
-                  }}
-                >
-                  {m.isAdmin ? 'Remove admin' : 'Make admin'}
-                </button>
-              )}
-            </li>
-          ))}
-          {data.members.length === 0 && <li className="px-4 py-3 text-muted">Nobody yet.</li>}
+          {people.length === 0 && <li className="px-4 py-3 text-muted">Nobody invited yet.</li>}
         </ul>
       </section>
 
