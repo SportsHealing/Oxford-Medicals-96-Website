@@ -72,6 +72,7 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
 - `src/pages/Admin.tsx`: photo upload, invite members, delete photos, promote or demote admins.
 - `supabase/migrations/0004_set_admin.sql`: admin-only `set_admin` function.
 - `supabase/migrations/0005_profile_pictures.sql`: private `avatars` bucket, `members.avatar_path`, re-runnable member-upload rules.
+- `supabase/migrations/0007_invite_emails.sql`, `supabase/functions/send-invites/index.ts`, `docs/invites-setup.md`: Admin invite form emails each person via Resend (Edge Function acting as the signed-in admin, no service key). Email links to /sign-in?email=… (no token). Rows show Email sent date and Resend.
 - `supabase/migrations/0006_social_links.sql`: website, Instagram, X columns. LinkedIn already existed.
 - First sign-in shows a one-time "Set a password?" dialog (`src/components/PasswordPrompt.tsx`); seen-flag stored in the auth user's metadata so it appears once per person, not per device.
 - Profile pictures: set on the Me page, square-cropped to 512px in the browser, shown in Classmates, profiles, photo tags and messages.

@@ -1,7 +1,7 @@
 // Sample data and an in-memory repo for prototype mode.
 // Every person and photo here is fictional.
 import { asset } from '../asset.ts'
-import type { InboxMessage, Member, Photo, ProfileInput, Repo, Tag } from './types.ts'
+import type { AllowedEmail, InboxMessage, Member, Photo, ProfileInput, Repo, Tag } from './types.ts'
 
 /** In prototype mode you are signed in as this person. */
 export const SAMPLE_ME = 'sample-alder'
@@ -230,9 +230,9 @@ export const photos: Photo[] = seeds.map((s) => ({
   })),
 }))
 
-const allowed: { email: string; note: string | null }[] = [
-  { email: 'sam@example.com', note: 'organiser' },
-  { email: 'birch@example.com', note: 'Somerville' },
+const allowed: AllowedEmail[] = [
+  { email: 'sam@example.com', note: 'organiser', inviteSentAt: null },
+  { email: 'birch@example.com', note: 'Somerville', inviteSentAt: '2026-10-01T09:00:00Z' },
 ]
 const inbox: InboxMessage[] = []
 
@@ -320,7 +320,16 @@ export const sampleRepo: Repo = {
     return clone(allowed)
   },
   async addAllowedEmails(emails, note) {
-    for (const e of emails) if (!allowed.some((a) => a.email === e)) allowed.push({ email: e, note: note ?? null })
+    for (const e of emails) if (!allowed.some((a) => a.email === e)) allowed.push({ email: e, note: note ?? null, inviteSentAt: null })
+  },
+  async sendInvites({ emails, note }) {
+    const now = new Date().toISOString()
+    for (const e of emails) {
+      const row = allowed.find((a) => a.email === e)
+      if (row) row.inviteSentAt = now
+      else allowed.push({ email: e, note: note ?? null, inviteSentAt: now })
+    }
+    return { added: emails.length, sent: emails.length, failed: [] }
   },
   async removeAllowedEmail(email) {
     const i = allowed.findIndex((a) => a.email === email)

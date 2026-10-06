@@ -28,17 +28,22 @@ export default function Admin() {
   // is no longer on the invite list.
   const memberByEmail = new Map(data.members.map((m) => [m.email.toLowerCase(), m]))
   const people = [
-    ...data.allowed.map((a) => ({ email: a.email, note: a.note, member: memberByEmail.get(a.email.toLowerCase()) })),
+    ...data.allowed.map((a) => ({
+      email: a.email,
+      note: a.note,
+      inviteSentAt: a.inviteSentAt,
+      member: memberByEmail.get(a.email.toLowerCase()),
+    })),
     ...data.members
       .filter((m) => !data.allowed.some((a) => a.email.toLowerCase() === m.email.toLowerCase()))
-      .map((m) => ({ email: m.email, note: null as string | null, member: m })),
+      .map((m) => ({ email: m.email, note: null as string | null, inviteSentAt: null as string | null, member: m })),
   ]
 
   return (
     <div>
       <PageHeader eyebrow="Organisers only" title="Admin" lede="Upload photos and manage who can sign in." />
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid items-start gap-8 lg:grid-cols-2">
         <div className="card flex flex-col justify-between gap-5 p-6">
           <div>
             <h2 className="text-xl">Add photos</h2>
@@ -72,7 +77,26 @@ export default function Admin() {
               {p.member?.isAdmin && (
                 <span className="rounded-full bg-rose px-2 py-0.5 text-xs font-semibold text-navy">Admin</span>
               )}
-              <span className="text-xs text-muted">{p.member ? 'Signed in' : 'Invited'}</span>
+              <span className="text-xs text-muted">
+                {p.member
+                  ? 'Signed in'
+                  : p.inviteSentAt
+                    ? `Email sent ${new Date(p.inviteSentAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
+                    : 'On list, not emailed'}
+              </span>
+              {!p.member && (
+                <button
+                  type="button"
+                  className="rounded-full border border-line px-3 py-1 text-xs font-semibold text-navy hover:border-navy"
+                  onClick={() => {
+                    void repo
+                      .sendInvites({ emails: [p.email] })
+                      .then(reload, (e: unknown) => alert(e instanceof Error ? e.message : 'Could not send'))
+                  }}
+                >
+                  {p.inviteSentAt ? 'Resend' : 'Send invite'}
+                </button>
+              )}
               {p.member && p.member.id !== memberId && (
                 <button
                   type="button"
@@ -139,19 +163,21 @@ export default function Admin() {
 function InviteForm({ onDone }: { onDone: () => void }) {
   const [text, setText] = useState('')
   const [note, setNote] = useState('')
+  const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
 
+  const emails = Array.from(
+    new Set(
+      text
+        .split(/[\s,;]+/)
+        .map((s) => s.trim().toLowerCase())
+        .filter((s) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s)),
+    ),
+  )
+
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    const emails = Array.from(
-      new Set(
-        text
-          .split(/[\s,;]+/)
-          .map((s) => s.trim().toLowerCase())
-          .filter((s) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s)),
-      ),
-    )
     if (emails.length === 0) {
       setMsg('No valid email addresses found.')
       return
@@ -159,12 +185,16 @@ function InviteForm({ onDone }: { onDone: () => void }) {
     setBusy(true)
     setMsg(null)
     try {
-      await repo.addAllowedEmails(emails, note.trim() || undefined)
+      const r = await repo.sendInvites({ emails, note: note.trim() || undefined, message: message.trim() || undefined })
       setText('')
-      setMsg(`Added ${emails.length} address${emails.length === 1 ? '' : 'es'}.`)
+      setMsg(
+        r.failed.length
+          ? `Added ${r.added}. Sent ${r.sent}. Could not email ${r.failed.length}: ${r.failed[0].reason}`
+          : `Done. ${r.sent} invitation${r.sent === 1 ? '' : 's'} sent.`,
+      )
       onDone()
     } catch (err) {
-      setMsg(err instanceof Error ? err.message : 'Could not add')
+      setMsg(err instanceof Error ? err.message : 'Could not send')
     } finally {
       setBusy(false)
     }
@@ -174,20 +204,31 @@ function InviteForm({ onDone }: { onDone: () => void }) {
     <form onSubmit={(e) => void submit(e)} className="card space-y-4 p-6">
       <h2 className="text-xl">Invite members</h2>
       <p className="font-sans text-sm text-muted">
-        Paste email addresses, one per line or separated by commas. They can then sign in with an emailed code.
-        No email is sent by this form; let them know yourself.
+        Paste email addresses, one per line or separated by commas. Each person gets their own email with a
+        button to join. Replies come back to you.
       </p>
       <label className="block">
         <span className="label-caps">Email addresses</span>
-        <textarea className="field mt-1.5 font-mono text-sm" rows={6} value={text} onChange={(e) => setText(e.target.value)} />
+        <textarea className="field mt-1.5 font-mono text-sm" rows={5} value={text} onChange={(e) => setText(e.target.value)} />
       </label>
       <label className="block">
-        <span className="label-caps">Note (optional, e.g. college)</span>
+        <span className="label-caps">Personal message (optional, goes in the email)</span>
+        <textarea
+          className="field mt-1.5"
+          rows={3}
+          maxLength={1500}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Hope you're well. We've put all the old photos in one place..."
+        />
+      </label>
+      <label className="block">
+        <span className="label-caps">Note for admins (optional, e.g. college)</span>
         <input className="field mt-1.5" value={note} onChange={(e) => setNote(e.target.value)} />
       </label>
       {msg && <p className="font-sans text-sm text-muted">{msg}</p>}
-      <button type="submit" className="btn-primary" disabled={busy || !text.trim()}>
-        {busy ? 'Adding…' : 'Add to members list'}
+      <button type="submit" className="btn-primary" disabled={busy || emails.length === 0}>
+        {busy ? 'Sending…' : emails.length ? `Send ${emails.length} invitation${emails.length === 1 ? '' : 's'}` : 'Send invitations'}
       </button>
     </form>
   )

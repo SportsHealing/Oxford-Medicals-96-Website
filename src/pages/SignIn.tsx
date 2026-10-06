@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth.tsx'
 import { asset } from '../asset.ts'
 import { isLive } from '../lib/supabase.ts'
@@ -8,7 +8,9 @@ export default function SignIn() {
   const { email: signedInAs, requestLink, verifyCode, signInWithPassword, prototypeSignIn } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const [params] = useSearchParams()
+  // Invitation emails link here with the address filled in.
+  const [email, setEmail] = useState(() => params.get('email') ?? '')
   const [code, setCode] = useState('')
   const [password, setPassword] = useState('')
   const [sent, setSent] = useState(false)

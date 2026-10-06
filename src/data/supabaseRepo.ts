@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { AdminMember, InboxMessage, Member, Photo, ProfileInput, Repo, Tag } from './types.ts'
+import type { AdminMember, InboxMessage, InviteResult, Member, Photo, ProfileInput, Repo, Tag } from './types.ts'
 
 // Column list for members. Never select '*': email is deliberately not
 // readable by other members (see migration 0002).
@@ -302,14 +302,31 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       if (data?.storage_path) await client.storage.from('photos').remove([data.storage_path])
     },
     async listAllowedEmails() {
-      const { data, error } = await client.from('allowed_emails').select('email, note').order('email')
+      const { data, error } = await client.from('allowed_emails').select('email, note, invite_sent_at').order('email')
       fail(error)
-      return (data ?? []) as { email: string; note: string | null }[]
+      type Row = { email: string; note: string | null; invite_sent_at: string | null }
+      return ((data ?? []) as Row[]).map((r) => ({ email: r.email, note: r.note, inviteSentAt: r.invite_sent_at }))
     },
     async addAllowedEmails(emails, note) {
       const rows = emails.map((email) => ({ email: email.trim().toLowerCase(), note: note ?? null }))
       const { error } = await client.from('allowed_emails').upsert(rows, { onConflict: 'email' })
       fail(error)
+    },
+    async sendInvites(input) {
+      const { data, error } = await client.functions.invoke('send-invites', { body: input })
+      if (error) {
+        // Surface the function's own message where there is one.
+        let detail = error.message
+        try {
+          const ctx = (error as { context?: Response }).context
+          const j = ctx ? await ctx.json() : null
+          if (j?.error) detail = j.error
+        } catch {
+          /* keep the generic message */
+        }
+        throw new Error(detail)
+      }
+      return data as InviteResult
     },
     async removeAllowedEmail(email) {
       const { error } = await client.from('allowed_emails').delete().eq('email', email)

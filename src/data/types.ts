@@ -62,6 +62,10 @@ export type InboxMessage = {
   fromEmail: string
 }
 
+export type AllowedEmail = { email: string; note: string | null; inviteSentAt: string | null }
+
+export type InviteResult = { added: number; sent: number; failed: { email: string; reason: string }[] }
+
 export type AdminMember = {
   id: string
   email: string
@@ -88,9 +92,11 @@ export type Repo = {
   /** Uploads a photo and returns its new id. */
   addPhoto(input: PhotoInput): Promise<string>
   deletePhoto(photoId: string): Promise<void>
-  listAllowedEmails(): Promise<{ email: string; note: string | null }[]>
+  listAllowedEmails(): Promise<AllowedEmail[]>
   addAllowedEmails(emails: string[], note?: string): Promise<void>
   removeAllowedEmail(email: string): Promise<void>
+  /** Adds addresses to the members list and emails each person an invitation. */
+  sendInvites(input: { emails: string[]; note?: string; message?: string }): Promise<InviteResult>
   adminMembers(): Promise<AdminMember[]>
   setAdmin(memberId: string, makeAdmin: boolean): Promise<void>
   /** Sets the signed-in member's profile picture (already cropped). */
