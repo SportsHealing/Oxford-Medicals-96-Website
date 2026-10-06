@@ -2,6 +2,7 @@ import { useState, type MouseEvent } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth.tsx'
 import Avatar from '../components/Avatar.tsx'
+import PhotoLightbox from '../components/PhotoLightbox.tsx'
 import { repo } from '../data/repo.ts'
 import { LoadError, Loading, useLoad } from '../lib/useLoad.tsx'
 import NotFound from './NotFound.tsx'
@@ -23,6 +24,7 @@ export default function PhotoView() {
   const [draft, setDraft] = useState<{ x: number; y: number } | null>(null)
   const [choice, setChoice] = useState('')
   const [showLabels, setShowLabels] = useState(true)
+  const [full, setFull] = useState(false)
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
 
@@ -122,34 +124,50 @@ export default function PhotoView() {
 
       <div className="grid gap-10 lg:grid-cols-[1.6fr_1fr]">
         <div>
-          <div
-            className="card relative cursor-crosshair overflow-hidden bg-paper"
-            onClick={placeTag}
-            title="Click on a face to add a name"
-          >
-            <img src={photo.src} alt={photo.title} className="block w-full" />
-            {showLabels &&
-              visibleTags.map((tag) => {
-                const person = memberById.get(tag.memberId)
-                return (
-                  <span
-                    key={tag.id}
-                    className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full bg-white/95 py-1 pr-2.5 pl-1.5 font-sans text-xs font-semibold text-navy shadow-card ${
-                      tag.status === 'pending' ? 'ring-1 ring-navy/30 ring-inset' : ''
-                    }`}
-                    style={{ left: `${tag.x}%`, top: `${tag.y}%` }}
-                  >
-                    <span className={`h-2 w-2 rounded-full ${tag.status === 'confirmed' ? 'bg-rose' : 'bg-navy/30'}`} />
-                    {person?.knownAs ?? person?.name ?? 'Unknown'}
-                  </span>
-                )
-              })}
-            {draft && (
-              <span
-                className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-rose shadow-card"
-                style={{ left: `${draft.x}%`, top: `${draft.y}%` }}
-              />
-            )}
+          <div className="card flex justify-center overflow-hidden bg-paper">
+            <div
+              className="relative inline-block max-w-full cursor-crosshair"
+              onClick={placeTag}
+              title="Click on a face to add a name"
+            >
+              <img src={photo.src} alt={photo.title} className="block max-h-[60vh] w-auto max-w-full" />
+              {showLabels &&
+                visibleTags.map((tag) => {
+                  const person = memberById.get(tag.memberId)
+                  return (
+                    <span
+                      key={tag.id}
+                      className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full bg-white/95 py-1 pr-2.5 pl-1.5 font-sans text-xs font-semibold text-navy shadow-card ${
+                        tag.status === 'pending' ? 'ring-1 ring-navy/30 ring-inset' : ''
+                      }`}
+                      style={{ left: `${tag.x}%`, top: `${tag.y}%` }}
+                    >
+                      <span className={`h-2 w-2 rounded-full ${tag.status === 'confirmed' ? 'bg-rose' : 'bg-navy/30'}`} />
+                      {person?.knownAs ?? person?.name ?? 'Unknown'}
+                    </span>
+                  )
+                })}
+              {draft && (
+                <span
+                  className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-rose shadow-card"
+                  style={{ left: `${draft.x}%`, top: `${draft.y}%` }}
+                />
+              )}
+          
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setFull(true)
+                }}
+                className="absolute top-3 right-3 inline-flex cursor-pointer items-center gap-2 rounded-full bg-navy/85 px-4 py-2 font-sans text-sm font-semibold text-white shadow-card backdrop-blur transition hover:bg-navy"
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+                </svg>
+                Full screen
+              </button>
+            </div>
           </div>
           <div className="mt-3 flex items-center justify-between font-sans text-sm text-muted">
             <span>Click on a face to add a name.</span>
@@ -249,6 +267,16 @@ export default function PhotoView() {
           </div>
         </aside>
       </div>
+      {full && (
+        <PhotoLightbox
+          photos={all}
+          startIndex={Math.max(index, 0)}
+          onClose={(currentId) => {
+            setFull(false)
+            if (currentId !== photo.id) navigate(`/photos/${currentId}`)
+          }}
+        />
+      )}
     </div>
   )
 }
