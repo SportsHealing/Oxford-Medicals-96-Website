@@ -18,7 +18,6 @@ export default function Gallery() {
     <div>
       <PageHeader
         eyebrow="The archive"
-        tone="sky"
         title="Photos"
         lede="Open a photo to see who is in it, or to put a name to a face."
         actions={
@@ -71,7 +70,7 @@ export default function Gallery() {
                       </p>
                       <h2 className="mt-1 text-xl">{photo.title}</h2>
                       <p className="mt-3 flex items-center gap-2 font-sans text-sm text-muted">
-                        <span className="inline-block h-2 w-2 rounded-full bg-pink" />
+                        <span className="inline-block h-2 w-2 rounded-full bg-rose" />
                         {confirmed} named
                         {pending > 0 && <span className="text-muted/80">&middot; {pending} to confirm</span>}
                       </p>
@@ -93,7 +92,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       type="button"
       onClick={onClick}
       className={`rounded-full border px-4 py-1.5 font-sans text-sm font-semibold transition ${
-        active ? 'border-pink bg-pink text-navy shadow-pop' : 'border-line bg-white text-muted hover:border-navy hover:text-navy'
+        active ? 'border-navy bg-navy text-white' : 'border-line bg-white text-muted hover:border-navy hover:text-navy'
       }`}
     >
       {children}

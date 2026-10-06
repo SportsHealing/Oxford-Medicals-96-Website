@@ -96,7 +96,7 @@ export default function PhotoView() {
   return (
     <div>
       {isNew && (
-        <div className="card mb-6 flex flex-wrap items-center gap-4 border-pink/50 bg-blush/60 p-5">
+        <div className="card mb-6 flex flex-wrap items-center gap-4 border-rose/60 bg-rose-soft/70 p-5">
           <div className="min-w-0 flex-1">
             <p className="eyebrow">Uploaded</p>
             <p className="mt-1 text-ink">
@@ -139,14 +139,14 @@ export default function PhotoView() {
                     }`}
                     style={{ left: `${tag.x}%`, top: `${tag.y}%` }}
                   >
-                    <span className={`h-2 w-2 rounded-full ${tag.status === 'confirmed' ? 'bg-pink' : 'bg-navy/30'}`} />
+                    <span className={`h-2 w-2 rounded-full ${tag.status === 'confirmed' ? 'bg-rose' : 'bg-navy/30'}`} />
                     {person?.knownAs ?? person?.name ?? 'Unknown'}
                   </span>
                 )
               })}
             {draft && (
               <span
-                className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-pink shadow-card"
+                className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-rose shadow-card"
                 style={{ left: `${draft.x}%`, top: `${draft.y}%` }}
               />
             )}
@@ -165,14 +165,14 @@ export default function PhotoView() {
             <h1 className="mt-1 text-3xl">{photo.title}</h1>
             {photo.caption && <p className="mt-3 text-muted">{photo.caption}</p>}
             {canDelete && (
-              <button type="button" className="mt-3 font-sans text-xs text-muted hover:text-pink-deep" onClick={() => void deletePhoto()}>
+              <button type="button" className="mt-3 font-sans text-xs text-muted hover:text-rose-deep" onClick={() => void deletePhoto()}>
                 Delete this photo
               </button>
             )}
           </div>
 
           {draft && (
-            <div className="card space-y-4 border-pink/50 p-5">
+            <div className="card space-y-4 border-rose/60 p-5">
               <h2 className="text-lg">Who is this?</h2>
               <select className="field" value={choice} onChange={(e) => setChoice(e.target.value)}>
                 <option value="">Choose a classmate</option>
@@ -189,7 +189,7 @@ export default function PhotoView() {
                   ? 'Tagging yourself shows straight away.'
                   : 'They will be asked to confirm before the tag is shown to anyone else.'}
               </p>
-              {problem && <p className="font-sans text-sm text-pink-deep">{problem}</p>}
+              {problem && <p className="font-sans text-sm text-rose-deep">{problem}</p>}
               <div className="flex gap-2">
                 <button type="button" className="btn-primary" onClick={() => void saveTag()} disabled={!choice || busy}>
                   Suggest tag

@@ -55,7 +55,7 @@ export default function SignIn() {
   return (
     <div className="mx-auto max-w-md">
       <div className="card overflow-hidden">
-        <div className="ribbon h-1.5" />
+        <div className="h-1 bg-rose" />
         <div className="p-8 sm:p-10">
         <img src={asset('/rita.svg')} alt="" className="h-12 w-12" />
         <h1 className="mt-5 text-3xl">Member sign in</h1>
@@ -88,7 +88,7 @@ export default function SignIn() {
                 placeholder="Leave blank to get a code by email"
               />
             </label>
-            {error && <p className="text-sm text-pink-deep">{error}</p>}
+            {error && <p className="text-sm text-rose-deep">{error}</p>}
             <button type="submit" className="btn-primary w-full" disabled={busy}>
               {busy ? 'One moment…' : password ? 'Sign in' : 'Email me a code'}
             </button>
@@ -118,7 +118,7 @@ export default function SignIn() {
                 autoFocus
               />
             </label>
-            {error && <p className="text-sm text-pink-deep">{error}</p>}
+            {error && <p className="text-sm text-rose-deep">{error}</p>}
             <button type="submit" className="btn-primary w-full" disabled={busy || code.replace(/\D/g, '').length < 6}>
               {busy ? 'Checking…' : 'Sign in'}
             </button>
@@ -131,8 +131,8 @@ export default function SignIn() {
               </button>
             </div>
             {!isLive && (
-              <div className="rounded-xl bg-blush p-5">
-                <p className="label-caps text-pink-deep">Prototype shortcut</p>
+              <div className="rounded-xl bg-rose-soft p-5">
+                <p className="label-caps text-rose-deep">Prototype shortcut</p>
                 <p className="mt-1 text-sm text-muted">No email is sent in prototype mode.</p>
                 <button type="button" onClick={() => prototypeSignIn(email.trim())} className="btn-pink mt-4">
                   Pretend the code was right

@@ -24,12 +24,12 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
 - **User journey:** Sign in. Browse photos. Tag or confirm a classmate. Open their profile. See their current work. Send a contact request or open LinkedIn.
 - **Content:** Admins upload photos. Member information arrives as text answers to a questionnaire (see `docs/alumni-questionnaire.md`). Photos and answers will be supplied later.
 - **Data collected:** Name, college, photos, questionnaire answers, contact preferences, tag confirmations. Facial data only in the later opt-in phase.
-- **Visual style:** "Tingewick" design system (tokens in `src/index.css`). Warm paper background, white cards, serif headings, sans body. Navy hero on the front page, navy footer, three-colour ribbon (pink, gold, sky) on header, footer, page titles and dialogs. Every text pairing 4.5:1 or better.
-  - Navy `#002147`: text, dark surfaces, secondary buttons.
-  - Rita pink `#FB67AA`: primary buttons (navy text, 5.8:1), active states. Deep pink `#B8396F` for small accent text. Blush `#FDEAF2`.
-  - Tingewick sky `#7BA8EE` (from the logo lettering): "Now", photos. Deep `#2A5DB0` text, soft `#E8F1FD`.
-  - Radcliffe gold `#F5B942`: "Then", memories, warmth. Deep `#8A5800` text, soft `#FDF3DC`.
-  - Initials avatars take one of the three soft tints, chosen from the name.
+- **Visual style:** Calm, two-colour system (tokens in `src/index.css`). Pop comes from contrast (navy hero, navy footer) and one accent, not from more hues. Warm paper background, white cards, serif headings, sans body. No ribbons or gradients. Every text pairing 4.5:1 or better.
+  - Navy `#002147`: text, dark surfaces, secondary buttons, selected filters.
+  - Rose `#E8A6BD` (Rita, softened from #FB67AA, saturation 95% to 59%): primary buttons with navy text (8.1:1), active tab underline, highlights. Deep rose `#A6476F` for small accent text. Soft rose `#F8ECF1`.
+  - Stone `#F1EBE2` with `#6B5D4C` text: "Then" panels, members-only panel.
+  - Mist `#E7ECF3`: cool neutral for some initials circles.
+  - Rita drawing recoloured to the rose family.
 - **Tone:** Warm, plain, a little nostalgic. Short sentences.
 - **Legal and safety:** UK GDPR. Consent before a tag is published. Any member can remove a tag of themselves. Privacy notice. Facial recognition needs explicit opt-in and a DPIA. Avoid official University of Oxford crests or logos without permission.
 
@@ -49,7 +49,7 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
 - Tingewick pink taken from tingewick.org (#FB67AA) and the Rita logo.
 - Manual tagging first. Face recognition later and opt-in only.
 - Profiles are built from questionnaire answers.
-- Palette: Oxford navy, Rita pink, Tingewick sky, Radcliffe gold.
+- Palette: navy plus one softened rose accent, with stone and mist neutrals. Earlier four-hue version rejected as too saturated and "rainbow-y"; top ribbon removed.
 - Hosting: GitHub Pages via GitHub Actions. DNS in AWS Route 53.
 
 ## Open questions

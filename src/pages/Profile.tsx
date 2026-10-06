@@ -36,9 +36,7 @@ export default function Profile() {
 
       <header className="card overflow-hidden">
         <div className="relative h-28 overflow-hidden bg-navy sm:h-32">
-          <div aria-hidden className="absolute -top-10 left-10 h-40 w-40 rounded-full bg-pink/40 blur-2xl" />
-          <div aria-hidden className="absolute -bottom-16 left-1/2 h-40 w-56 rounded-full bg-gold/30 blur-2xl" />
-          <div aria-hidden className="absolute -top-8 right-6 h-36 w-36 rounded-full bg-sky/40 blur-2xl" />
+          <div aria-hidden className="absolute -top-24 right-[-4rem] h-64 w-64 rounded-full bg-rose/20 blur-3xl" />
         </div>
         <div className="flex flex-wrap items-start gap-x-6 gap-y-4 px-6 pb-6 sm:items-end sm:px-8">
           <div className="relative z-10 -mt-14">
@@ -84,9 +82,8 @@ export default function Profile() {
         </div>
       ) : (
         <div className="mt-10 grid gap-6 md:grid-cols-2">
-          <section className="card relative overflow-hidden p-7">
-            <span className="absolute inset-x-0 top-0 h-1.5 bg-sky" />
-            <p className="eyebrow-sky">Now</p>
+          <section className="card p-7">
+            <p className="eyebrow">Now</p>
             {person.jobTitle && <p className="mt-2 font-serif text-2xl text-navy">{person.jobTitle}</p>}
             {person.workplace && <p className="font-sans text-muted">{person.workplace}</p>}
             <dl className="mt-6 space-y-5">
@@ -95,9 +92,8 @@ export default function Profile() {
             </dl>
           </section>
 
-          <section className="relative overflow-hidden rounded-2xl border border-gold/40 bg-gold-soft p-7">
-            <span className="absolute inset-x-0 top-0 h-1.5 bg-gold" />
-            <p className="eyebrow-gold">Then</p>
+          <section className="rounded-2xl bg-stone p-7">
+            <p className="eyebrow-stone">Then</p>
             <dl className="mt-4 space-y-5">
               {person.clinicalTraining && <Row label="Clinical training">{person.clinicalTraining}</Row>}
               {person.memory && <Row label="A memory">{person.memory}</Row>}

@@ -139,7 +139,7 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
       />
 
       {data.pending.length > 0 && (
-        <section className="card mb-8 border-pink/50 p-6">
+        <section className="card mb-8 border-rose/60 p-6">
           <p className="eyebrow">Is this you?</p>
           <p className="mt-1 text-muted">
             A classmate thinks you are in {data.pending.length === 1 ? 'this photo' : 'these photos'}. Nobody
@@ -181,7 +181,7 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
           </section>
 
           <section className="space-y-4">
-            <p className="eyebrow-sky">Now</p>
+            <p className="eyebrow">Now</p>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Job title and specialty" value={form.jobTitle ?? ''} onChange={set('jobTitle')} />
               <Field label="Where you work" value={form.workplace ?? ''} onChange={set('workplace')} />
@@ -202,7 +202,7 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
           </section>
 
           <section className="space-y-4">
-            <p className="eyebrow-gold">Then</p>
+            <p className="eyebrow-stone">Then</p>
             <Field label="Where you did your clinical training" value={form.clinicalTraining ?? ''} onChange={set('clinicalTraining')} />
             <Area label="A favourite memory from Oxford" value={form.memory ?? ''} onChange={set('memory')} />
             <Field label="Tingewick: were you involved, and how?" value={form.tingewick ?? ''} onChange={set('tingewick')} />
@@ -224,7 +224,7 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
             />
           </section>
 
-          {problem && <p className="font-sans text-sm text-pink-deep">{problem}</p>}
+          {problem && <p className="font-sans text-sm text-rose-deep">{problem}</p>}
           <div className="flex items-center gap-4">
             <button type="submit" className="btn-primary" disabled={busy || !form.name.trim()}>
               {busy ? 'Saving…' : 'Save profile'}
@@ -252,7 +252,7 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
                   />
                 </label>
                 {data.me.avatarUrl && (
-                  <button type="button" className="block font-sans text-xs text-muted hover:text-pink-deep" onClick={() => void removePicture()} disabled={picBusy}>
+                  <button type="button" className="block font-sans text-xs text-muted hover:text-rose-deep" onClick={() => void removePicture()} disabled={picBusy}>
                     Remove picture
                   </button>
                 )}
@@ -261,7 +261,7 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
             <p className="mt-3 font-sans text-sm text-muted">
               A recent one helps classmates recognise you. It is cropped to a square and seen only by members.
             </p>
-            {picMsg && <p className="mt-2 font-sans text-sm text-pink-deep">{picMsg}</p>}
+            {picMsg && <p className="mt-2 font-sans text-sm text-rose-deep">{picMsg}</p>}
           </section>
 
           <section className="card p-5">

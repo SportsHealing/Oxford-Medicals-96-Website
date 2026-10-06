@@ -51,7 +51,7 @@ export default function SocialLinks({ person }: { person: Member }) {
   const links = [
     { kind: 'linkedin' as const, label: 'LinkedIn', href: linkedinUrl(person.linkedin), tone: 'hover:bg-[#0a66c2] hover:text-white hover:border-[#0a66c2]' },
     { kind: 'website' as const, label: 'Website', href: websiteUrl(person.website), tone: 'hover:bg-navy hover:text-white hover:border-navy' },
-    { kind: 'instagram' as const, label: 'Instagram', href: instagramUrl(person.instagram), tone: 'hover:bg-pink hover:text-navy hover:border-pink' },
+    { kind: 'instagram' as const, label: 'Instagram', href: instagramUrl(person.instagram), tone: 'hover:bg-rose hover:text-navy hover:border-rose' },
     { kind: 'twitter' as const, label: 'X', href: twitterUrl(person.twitter), tone: 'hover:bg-ink hover:text-white hover:border-ink' },
   ].filter((l) => l.href)
   if (links.length === 0) return null

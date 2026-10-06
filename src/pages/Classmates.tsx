@@ -25,7 +25,6 @@ export default function Classmates() {
     <div>
       <PageHeader
         eyebrow="The directory"
-        tone="gold"
         title="Classmates"
         lede="Who they were, and what they do now."
         actions={

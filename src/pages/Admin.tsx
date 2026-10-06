@@ -52,14 +52,14 @@ export default function Admin() {
         <ul className="card mt-4 divide-y divide-line">
           {people.map((p) => (
             <li key={p.email} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 font-sans text-sm">
-              <span className={`h-2 w-2 shrink-0 rounded-full ${p.member ? 'bg-pink' : 'bg-line'}`} />
+              <span className={`h-2 w-2 shrink-0 rounded-full ${p.member ? 'bg-rose' : 'bg-line'}`} />
               <span className="min-w-0 flex-1">
                 {p.member?.name && <span className="block truncate font-semibold text-navy">{p.member.name}</span>}
                 <span className="block truncate text-ink">{p.email}</span>
               </span>
               {p.note && <span className="hidden text-muted sm:block">{p.note}</span>}
               {p.member?.isAdmin && (
-                <span className="rounded-full bg-rita px-2 py-0.5 text-xs font-semibold text-navy">Admin</span>
+                <span className="rounded-full bg-rose px-2 py-0.5 text-xs font-semibold text-navy">Admin</span>
               )}
               <span className="text-xs text-muted">{p.member ? 'Signed in' : 'Invited'}</span>
               {p.member && p.member.id !== memberId && (
@@ -82,7 +82,7 @@ export default function Admin() {
               {!p.member && (
                 <button
                   type="button"
-                  className="text-xs text-muted hover:text-pink-deep"
+                  className="text-xs text-muted hover:text-rose-deep"
                   onClick={() => {
                     if (confirm(`Remove ${p.email} from the list?`)) void repo.removeAllowedEmail(p.email).then(reload)
                   }}
@@ -108,7 +108,7 @@ export default function Admin() {
                 <span className="truncate font-sans text-sm text-navy">{p.title}</span>
                 <button
                   type="button"
-                  className="shrink-0 font-sans text-xs text-muted hover:text-pink-deep"
+                  className="shrink-0 font-sans text-xs text-muted hover:text-rose-deep"
                   onClick={() => {
                     if (confirm(`Delete "${p.title}"? This removes its tags too.`)) void repo.deletePhoto(p.id).then(reload)
                   }}

@@ -8,7 +8,7 @@ import PasswordPrompt from './PasswordPrompt.tsx'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   `relative flex items-center gap-2 px-1 py-2 font-sans text-sm font-semibold sm:text-[0.95rem] no-underline transition after:absolute after:inset-x-0 after:-bottom-px after:h-[3px] after:rounded-full after:transition ${
-    isActive ? 'text-navy after:bg-pink' : 'text-muted after:bg-transparent hover:text-navy hover:after:bg-rita'
+    isActive ? 'text-navy after:bg-rose' : 'text-muted after:bg-transparent hover:text-navy hover:after:bg-rose/50'
   }`
 
 export default function Layout() {
@@ -23,15 +23,14 @@ export default function Layout() {
   return (
     <div className="flex min-h-screen flex-col overflow-x-clip">
       <header className="sticky top-0 z-20 bg-white/90 backdrop-blur">
-        <div className="ribbon h-1" />
         <div className="border-b border-line">
           <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:gap-6 sm:px-5">
             <Link to="/" className="flex items-center gap-3 no-underline" aria-label="Oxford Medics 96, home">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blush">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-soft">
                 <img src={asset('/rita.svg')} alt="" className="h-8 w-8" />
               </span>
               <span className="hidden font-serif text-[1.35rem] leading-none whitespace-nowrap text-navy sm:inline">
-                Oxford Medics <span className="text-pink-deep">96</span>
+                Oxford Medics <span className="text-rose-deep">96</span>
               </span>
             </Link>
 
@@ -82,7 +81,6 @@ export default function Layout() {
       </main>
 
       <footer className="bg-navy text-white/75">
-        <div className="ribbon h-1" />
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-8 font-sans text-sm">
           <div className="flex items-center gap-3">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">

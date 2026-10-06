@@ -1,43 +1,38 @@
 @import 'tailwindcss';
 
 /*
-  Oxford Medics 96 design system ("Tingewick")
-  Navy   Oxford blue, the anchor. Text, dark surfaces.
-  Pink   Rita the elephant. Primary actions, highlights.
-  Sky    The blue lettering on the Tingewick logo. "Now", photos, links.
-  Gold   Radcliffe Camera stone. "Then", memories, warmth.
+  Oxford Medics 96 design system
+  Two colours and two neutrals. Pop comes from contrast, not from more hues.
+  Navy   Oxford blue. Text, dark surfaces, secondary actions.
+  Rose   Rita, softened. The one accent: primary buttons, active states, highlights.
+  Stone  Warm neutral for "then", memories and quiet panels.
+  Mist   Cool navy tint for avatars and subtle surfaces.
   Every text/background pairing used is 4.5:1 or better.
 */
 @theme {
   --color-navy: #002147;
   --color-navy-900: #001530;
-  --color-navy-soft: #1c3a66;
+  --color-navy-soft: #3d5a80;
 
-  --color-pink: #fb67aa;
-  --color-pink-hover: #ff86bb;
-  --color-pink-deep: #b8396f;
-  --color-rita: #f7b7d0;
-  --color-blush: #fdeaf2;
+  --color-rose: #e8a6bd;
+  --color-rose-hover: #efb8cb;
+  --color-rose-deep: #a6476f;
+  --color-rose-soft: #f8ecf1;
 
-  --color-sky: #7ba8ee;
-  --color-sky-light: #9fc3f7;
-  --color-sky-deep: #2a5db0;
-  --color-sky-soft: #e8f1fd;
-
-  --color-gold: #f5b942;
-  --color-gold-deep: #8a5800;
-  --color-gold-soft: #fdf3dc;
+  --color-stone: #f1ebe2;
+  --color-stone-deep: #6b5d4c;
+  --color-mist: #e7ecf3;
 
   --color-ink: #26303b;
   --color-muted: #6b7280;
-  --color-paper: #fbf8f4;
-  --color-line: #e8e2da;
+  --color-paper: #faf7f2;
+  --color-line: #e7e1d8;
 
   --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   --font-sans: 'Source Sans 3', system-ui, -apple-system, sans-serif;
 
   --shadow-card: 0 1px 2px rgb(0 33 71 / 0.04), 0 10px 28px -14px rgb(0 33 71 / 0.18);
-  --shadow-pop: 0 10px 30px -10px rgb(251 103 170 / 0.55);
+  --shadow-pop: 0 8px 22px -10px rgb(166 71 111 / 0.45);
 }
 
 @layer base {
@@ -53,16 +48,11 @@
     @apply font-serif font-normal tracking-[-0.01em] text-navy;
   }
   a {
-    @apply text-navy underline decoration-rita decoration-2 underline-offset-[3px] transition hover:decoration-pink;
+    @apply text-navy underline decoration-rose decoration-2 underline-offset-[3px] transition hover:decoration-rose-deep;
   }
   ::selection {
-    @apply bg-rita text-navy;
+    @apply bg-rose text-navy;
   }
-}
-
-/* The three-colour brand ribbon: pink, gold, sky. */
-@utility ribbon {
-  background-image: linear-gradient(90deg, var(--color-pink) 0%, var(--color-gold) 50%, var(--color-sky) 100%);
 }
 
 /* Buttons */
@@ -70,13 +60,13 @@
   @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-sans text-[0.95rem] font-semibold no-underline transition disabled:cursor-not-allowed disabled:opacity-50;
 }
 @utility btn-primary {
-  @apply btn bg-pink text-navy hover:-translate-y-px hover:bg-pink-hover hover:shadow-pop;
+  @apply btn bg-rose text-navy hover:-translate-y-px hover:bg-rose-hover hover:shadow-pop;
 }
 @utility btn-dark {
   @apply btn bg-navy text-white hover:bg-navy-soft;
 }
 @utility btn-pink {
-  @apply btn bg-pink-deep text-white hover:bg-[#a22f62];
+  @apply btn bg-rose-deep text-white hover:bg-[#8f3b5f];
 }
 @utility btn-outline {
   @apply btn border border-navy/25 bg-white text-navy hover:border-navy;
@@ -90,18 +80,15 @@
   @apply rounded-2xl border border-line bg-white;
 }
 @utility card-hover {
-  @apply transition hover:-translate-y-0.5 hover:border-sky hover:shadow-card;
+  @apply transition hover:-translate-y-0.5 hover:border-rose hover:shadow-card;
 }
 
 /* Text */
 @utility eyebrow {
-  @apply font-sans text-[0.78rem] font-semibold tracking-[0.12em] text-pink-deep uppercase;
+  @apply font-sans text-[0.78rem] font-semibold tracking-[0.12em] text-rose-deep uppercase;
 }
-@utility eyebrow-sky {
-  @apply eyebrow text-sky-deep;
-}
-@utility eyebrow-gold {
-  @apply eyebrow text-gold-deep;
+@utility eyebrow-stone {
+  @apply eyebrow text-stone-deep;
 }
 @utility lede {
   @apply text-lg text-muted;
@@ -112,5 +99,5 @@
 
 /* Forms */
 @utility field {
-  @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-ink placeholder:text-muted/70 focus:border-navy focus:ring-4 focus:ring-rita/40 focus:outline-none;
+  @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-ink placeholder:text-muted/70 focus:border-navy focus:ring-4 focus:ring-rose/40 focus:outline-none;
 }

@@ -39,7 +39,7 @@ export function Loading({ what = 'Loading' }: { what?: string }) {
 
 export function LoadError({ message }: { message: string }) {
   return (
-    <div className="card mx-auto max-w-md border-pink/50 p-6 text-center">
+    <div className="card mx-auto max-w-md border-rose/60 p-6 text-center">
       <p className="eyebrow">Something went wrong</p>
       <p className="mt-2 text-muted">{message}</p>
     </div>

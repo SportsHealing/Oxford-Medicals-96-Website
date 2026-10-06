@@ -3,9 +3,9 @@
 // name so each person keeps the same colour everywhere.
 
 const tints = [
-  'bg-blush text-pink-deep',
-  'bg-sky-soft text-sky-deep',
-  'bg-gold-soft text-gold-deep',
+  'bg-rose-soft text-rose-deep',
+  'bg-mist text-navy-soft',
+  'bg-stone text-stone-deep',
 ]
 
 function tintFor(name: string) {
@@ -40,7 +40,7 @@ export default function Avatar({
   }
   const ringCls = ring ? 'ring-4 ring-white shadow-card' : ''
   if (src) {
-    return <img src={src} alt="" className={`shrink-0 rounded-full bg-blush object-cover ${sizes[size]} ${ringCls}`} />
+    return <img src={src} alt="" className={`shrink-0 rounded-full bg-rose-soft object-cover ${sizes[size]} ${ringCls}`} />
   }
   return (
     <span

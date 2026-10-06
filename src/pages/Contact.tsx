@@ -79,7 +79,7 @@ export default function Contact() {
               {person.name} will see your message and your email address. Their address stays private
               unless they reply.
             </p>
-            {problem && <p className="font-sans text-sm text-pink-deep">{problem}</p>}
+            {problem && <p className="font-sans text-sm text-rose-deep">{problem}</p>}
             <button type="submit" className="btn-primary w-full" disabled={busy || !message.trim()}>
               {busy ? 'Sending…' : 'Send message'}
             </button>

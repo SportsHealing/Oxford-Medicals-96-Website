@@ -78,7 +78,7 @@ export default function AddPhotos() {
       />
 
       <form onSubmit={(e) => void submit(e)} className="space-y-8">
-        <label className="card flex cursor-pointer flex-col items-center justify-center gap-2 border-dashed p-10 text-center transition hover:border-pink">
+        <label className="card flex cursor-pointer flex-col items-center justify-center gap-2 border-dashed p-10 text-center transition hover:border-rose">
           <span className="font-serif text-xl text-navy">Choose photos</span>
           <span className="font-sans text-sm text-muted">From your phone, computer or a scanned print</span>
           <input
@@ -104,7 +104,7 @@ export default function AddPhotos() {
                       <span className="label-caps">Title</span>
                       <input className="field mt-1 !py-2" value={it.title} onChange={(e) => rename(i, e.target.value)} />
                     </label>
-                    <button type="button" className="mt-1 font-sans text-xs text-muted hover:text-pink-deep" onClick={() => remove(i)}>
+                    <button type="button" className="mt-1 font-sans text-xs text-muted hover:text-rose-deep" onClick={() => remove(i)}>
                       Remove
                     </button>
                   </div>
@@ -133,7 +133,7 @@ export default function AddPhotos() {
           </>
         )}
 
-        {problem && <p className="font-sans text-sm text-pink-deep">{problem}</p>}
+        {problem && <p className="font-sans text-sm text-rose-deep">{problem}</p>}
         <div className="flex items-center gap-4">
           <button type="submit" className="btn-primary" disabled={busy || items.length === 0}>
             {busy

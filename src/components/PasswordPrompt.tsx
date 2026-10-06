@@ -31,10 +31,10 @@ export default function PasswordPrompt() {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-navy-900/60 p-4 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-labelledby="pw-title">
       <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
-        <div className="ribbon h-1.5" />
+        <div className="h-1 bg-rose" />
         <form onSubmit={(e) => void save(e)} className="space-y-5 p-7 sm:p-8">
           <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blush">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-soft">
               <img src={asset('/rita.svg')} alt="" className="h-9 w-9" />
             </span>
             <div>
@@ -68,7 +68,7 @@ export default function PasswordPrompt() {
               onChange={(e) => setPw2(e.target.value)}
             />
           </label>
-          {problem && <p className="font-sans text-sm text-pink-deep">{problem}</p>}
+          {problem && <p className="font-sans text-sm text-rose-deep">{problem}</p>}
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <button type="submit" className="btn-primary" disabled={busy || !pw}>
               {busy ? 'Saving…' : 'Save password'}
