@@ -87,7 +87,7 @@ When the site is finished, remove everything installed on the user's PC during t
 - The project folder `Documents\Oxford-Medicals-96-Website-main` (includes `node_modules` and the downloaded `kululu-photos` once they are uploaded).
 - Playwright browsers: delete the folder `%USERPROFILE%\AppData\Local\ms-playwright`.
 - npm cache: delete `%USERPROFILE%\AppData\Local\npm-cache` and `%USERPROFILE%\AppData\Roaming\npm`.
-- Any `.env` file containing the Supabase service_role key. Also rotate that key in Supabase afterwards (Project Settings, API Keys, Legacy tab, Generate new) since it was handled on a personal machine.
+- Any `.env` file containing the Supabase service_role key. Legacy service_role keys cannot be regenerated alone. Tidy option: once the site is confirmed to use the `sb_publishable_` key (GitHub variable `VITE_SUPABASE_ANON_KEY`), press Disable JWT-based API keys on the Legacy tab. For any future bulk job, create an `sb_secret_` key, use it, then delete it.
 - Keep: the Supabase, Resend, GitHub and AWS accounts. They run the live site.
 
 ## Handover notes
