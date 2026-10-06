@@ -6,7 +6,7 @@ import { repo } from '../data/repo.ts'
 import { LoadError, Loading, useLoad } from '../lib/useLoad.tsx'
 
 export default function Admin() {
-  const { isAdmin } = useAuth()
+  const { isAdmin, memberId } = useAuth()
   const { data, loading, error, reload } = useLoad(
     async () => {
       const [photos, allowed, members] = await Promise.all([
@@ -61,6 +61,39 @@ export default function Admin() {
             </li>
           ))}
           {data.allowed.length === 0 && <li className="px-4 py-3 text-muted">Nobody invited yet.</li>}
+        </ul>
+      </section>
+
+      <section className="mt-12">
+        <h2 className="text-2xl">Who has signed in</h2>
+        <p className="mt-1 font-sans text-sm text-muted">
+          Admins can upload and delete any photo and manage this list.
+        </p>
+        <ul className="card mt-4 divide-y divide-line">
+          {data.members.map((m) => (
+            <li key={m.id} className="flex items-center gap-3 px-4 py-2.5 font-sans text-sm">
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-semibold text-navy">{m.name || 'Name not set yet'}</span>
+                <span className="block truncate text-muted">{m.email}</span>
+              </span>
+              {m.isAdmin && <span className="rounded-full bg-rita px-2 py-0.5 text-xs font-semibold text-navy">Admin</span>}
+              {m.id !== memberId && (
+                <button
+                  type="button"
+                  className="text-xs text-muted hover:text-pink-deep"
+                  onClick={() => {
+                    const verb = m.isAdmin ? 'Remove admin access from' : 'Make admin:'
+                    if (confirm(`${verb} ${m.name || m.email}?`)) {
+                      void repo.setAdmin(m.id, !m.isAdmin).then(reload, (e: unknown) => alert(e instanceof Error ? e.message : 'Could not change'))
+                    }
+                  }}
+                >
+                  {m.isAdmin ? 'Remove admin' : 'Make admin'}
+                </button>
+              )}
+            </li>
+          ))}
+          {data.members.length === 0 && <li className="px-4 py-3 text-muted">Nobody yet.</li>}
         </ul>
       </section>
 

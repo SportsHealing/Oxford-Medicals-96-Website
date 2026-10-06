@@ -22,6 +22,10 @@ Same as step 2, with `supabase/migrations/0002_privacy.sql`. It stops members re
 
 Same as step 2, with `supabase/migrations/0003_member_uploads.sql`. Members can then add photos from the Photos page, tag people straight after uploading, and delete their own uploads. Images only, 15 MB max.
 
+## 2d. Admin promotion from the Admin page (you, one more paste)
+
+Same as step 2, with `supabase/migrations/0004_set_admin.sql`. Then admins can promote or demote other members from the Admin page, no SQL needed.
+
 ## 3. Set the site address for sign-in links (you)
 
 1. **Authentication** then **URL Configuration**.

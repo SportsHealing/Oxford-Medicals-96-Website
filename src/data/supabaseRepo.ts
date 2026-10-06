@@ -271,6 +271,10 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       const { error } = await client.from('allowed_emails').delete().eq('email', email)
       fail(error)
     },
+    async setAdmin(memberId, makeAdmin) {
+      const { error } = await client.rpc('set_admin', { target: memberId, make_admin: makeAdmin })
+      fail(error)
+    },
     async adminMembers() {
       const { data, error } = await client.rpc('admin_members')
       fail(error)

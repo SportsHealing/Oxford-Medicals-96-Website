@@ -70,7 +70,8 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
 - `supabase/migrations/0002_privacy.sql`: column grants (emails hidden, is_admin locked), inbox and admin functions.
 - `src/data/`: `types.ts` Repo contract, `sample.ts` in-memory, `supabaseRepo.ts` live, `repo.ts` picks one.
 - `src/pages/Me.tsx`: profile form, tag confirmations, message inbox.
-- `src/pages/Admin.tsx`: photo upload, invite members, delete photos.
+- `src/pages/Admin.tsx`: photo upload, invite members, delete photos, promote or demote admins.
+- `supabase/migrations/0004_set_admin.sql`: admin-only `set_admin` function.
 - `supabase/migrations/0003_member_uploads.sql`: members upload, edit and delete their own photos; self-tags confirm instantly.
 - `src/pages/AddPhotos.tsx`: member upload (up to 20 at once, shrunk to 2400px), then a tag-as-you-go queue.
 - `scripts/download-kululu.mjs`, `scripts/import-photos.mjs`, `docs/photo-import.md`: one-off Kululu migration.

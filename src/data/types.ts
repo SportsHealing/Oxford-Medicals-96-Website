@@ -88,4 +88,5 @@ export type Repo = {
   addAllowedEmails(emails: string[], note?: string): Promise<void>
   removeAllowedEmail(email: string): Promise<void>
   adminMembers(): Promise<AdminMember[]>
+  setAdmin(memberId: string, makeAdmin: boolean): Promise<void>
 }

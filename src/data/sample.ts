@@ -324,6 +324,10 @@ export const sampleRepo: Repo = {
     const i = allowed.findIndex((a) => a.email === email)
     if (i >= 0) allowed.splice(i, 1)
   },
+  async setAdmin(memberId, makeAdmin) {
+    const m = members.find((x) => x.id === memberId)
+    if (m) m.isAdmin = makeAdmin
+  },
   async adminMembers() {
     return members.map((m) => ({
       id: m.id,
