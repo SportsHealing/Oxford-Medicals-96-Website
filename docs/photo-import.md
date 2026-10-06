@@ -18,6 +18,17 @@ node scripts/download-kululu.mjs https://app.kululu.com/oxfordmedics30years ./ku
 
 A browser window opens. If the album asks for a name or password, type it in that window. The script then scrolls through the album, opens each photo, and saves the largest version it sees into `kululu-photos/`. It takes 10 to 20 minutes for 744 photos. If it saves nothing, it writes `kululu-page.html`; send that file to Claude and the script will be adjusted.
 
+## Step 1b: remove preview copies
+
+The download saves both Kululu's small preview and the full-size version of many photos. Run:
+
+```
+npm i -D sharp
+node scripts/dedupe-photos.mjs ./kululu-photos
+```
+
+It moves preview copies to `kululu-photos-duplicates` and any photo with no full-size version to `kululu-photos-small` for you to check. Nothing is deleted. Look at the `-small` folder: if those photos are worth keeping, move them back into `kululu-photos`.
+
 ## Step 2: upload to the site
 
 1. In Supabase: Project Settings, API Keys, **Legacy anon, service_role API keys** tab, Reveal the `service_role` key. This key bypasses every access rule. Use it only on your own computer, never put it in the website or share it.
