@@ -54,7 +54,9 @@ export default function SignIn() {
 
   return (
     <div className="mx-auto max-w-md">
-      <div className="card p-8 sm:p-10">
+      <div className="card overflow-hidden">
+        <div className="ribbon h-1.5" />
+        <div className="p-8 sm:p-10">
         <img src={asset('/rita.svg')} alt="" className="h-12 w-12" />
         <h1 className="mt-5 text-3xl">Member sign in</h1>
 
@@ -139,6 +141,7 @@ export default function SignIn() {
             )}
           </form>
         )}
+        </div>
       </div>
     </div>
   )

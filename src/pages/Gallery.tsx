@@ -18,6 +18,7 @@ export default function Gallery() {
     <div>
       <PageHeader
         eyebrow="The archive"
+        tone="sky"
         title="Photos"
         lede="Open a photo to see who is in it, or to put a name to a face."
         actions={
@@ -92,7 +93,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       type="button"
       onClick={onClick}
       className={`rounded-full border px-4 py-1.5 font-sans text-sm font-semibold transition ${
-        active ? 'border-navy bg-navy text-white' : 'border-line bg-white text-muted hover:border-navy hover:text-navy'
+        active ? 'border-pink bg-pink text-navy shadow-pop' : 'border-line bg-white text-muted hover:border-navy hover:text-navy'
       }`}
     >
       {children}

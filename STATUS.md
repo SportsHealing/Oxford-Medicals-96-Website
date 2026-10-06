@@ -24,13 +24,12 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
 - **User journey:** Sign in. Browse photos. Tag or confirm a classmate. Open their profile. See their current work. Send a contact request or open LinkedIn.
 - **Content:** Admins upload photos. Member information arrives as text answers to a questionnaire (see `docs/alumni-questionnaire.md`). Photos and answers will be supplied later.
 - **Data collected:** Name, college, photos, questionnaire answers, contact preferences, tag confirmations. Facial data only in the later opt-in phase.
-- **Visual style:** Calm and airy. Warm off-white page (#FBFAF8), white cards with hairline borders, serif headings, sans body. Navy for text, pink used sparingly as the one accent. Shared page header, initials avatars, pill buttons.
-  - Navy `#002147`: text, headers. 16:1 on white.
-  - Tingewick pink `#FB67AA` (from tingewick.org): accents, brand marks, backgrounds behind navy text. 5.8:1 with navy.
-  - Rita pink `#F7B7D0` (sampled from the Rita logo): tag markers, soft highlights. 9.7:1 with navy.
-  - Deep pink `#B8396F`: links and buttons on white. 5.5:1 on white.
-  - Blush `#FDEAF2`: section backgrounds.
-  - White `#FFFFFF`: page background.
+- **Visual style:** "Tingewick" design system (tokens in `src/index.css`). Warm paper background, white cards, serif headings, sans body. Navy hero on the front page, navy footer, three-colour ribbon (pink, gold, sky) on header, footer, page titles and dialogs. Every text pairing 4.5:1 or better.
+  - Navy `#002147`: text, dark surfaces, secondary buttons.
+  - Rita pink `#FB67AA`: primary buttons (navy text, 5.8:1), active states. Deep pink `#B8396F` for small accent text. Blush `#FDEAF2`.
+  - Tingewick sky `#7BA8EE` (from the logo lettering): "Now", photos. Deep `#2A5DB0` text, soft `#E8F1FD`.
+  - Radcliffe gold `#F5B942`: "Then", memories, warmth. Deep `#8A5800` text, soft `#FDF3DC`.
+  - Initials avatars take one of the three soft tints, chosen from the name.
 - **Tone:** Warm, plain, a little nostalgic. Short sentences.
 - **Legal and safety:** UK GDPR. Consent before a tag is published. Any member can remove a tag of themselves. Privacy notice. Facial recognition needs explicit opt-in and a DPIA. Avoid official University of Oxford crests or logos without permission.
 
@@ -50,7 +49,7 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
 - Tingewick pink taken from tingewick.org (#FB67AA) and the Rita logo.
 - Manual tagging first. Face recognition later and opt-in only.
 - Profiles are built from questionnaire answers.
-- Palette: Oxford navy plus softened Tingewick pink.
+- Palette: Oxford navy, Rita pink, Tingewick sky, Radcliffe gold.
 - Hosting: GitHub Pages via GitHub Actions. DNS in AWS Route 53.
 
 ## Open questions
@@ -73,6 +72,8 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
 - `src/pages/Admin.tsx`: photo upload, invite members, delete photos, promote or demote admins.
 - `supabase/migrations/0004_set_admin.sql`: admin-only `set_admin` function.
 - `supabase/migrations/0005_profile_pictures.sql`: private `avatars` bucket, `members.avatar_path`, re-runnable member-upload rules.
+- `supabase/migrations/0006_social_links.sql`: website, Instagram, X columns. LinkedIn already existed.
+- First sign-in shows a one-time "Set a password?" dialog (`src/components/PasswordPrompt.tsx`); seen-flag stored in the auth user's metadata so it appears once per person, not per device.
 - Profile pictures: set on the Me page, square-cropped to 512px in the browser, shown in Classmates, profiles, photo tags and messages.
 - `supabase/migrations/0003_member_uploads.sql`: members upload, edit and delete their own photos; self-tags confirm instantly.
 - `src/pages/AddPhotos.tsx`: member upload (up to 20 at once, shrunk to 2400px), then a tag-as-you-go queue.

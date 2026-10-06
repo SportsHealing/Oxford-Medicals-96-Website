@@ -1,13 +1,29 @@
 // A member's profile picture, or their initials in a soft circle if they
-// have not added one.
+// have not added one. Initials get one of the brand tints, picked from the
+// name so each person keeps the same colour everywhere.
+
+const tints = [
+  'bg-blush text-pink-deep',
+  'bg-sky-soft text-sky-deep',
+  'bg-gold-soft text-gold-deep',
+]
+
+function tintFor(name: string) {
+  let h = 0
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0
+  return tints[h % tints.length]
+}
+
 export default function Avatar({
   name,
   src,
   size = 'md',
+  ring = false,
 }: {
   name: string
   src?: string | null
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  ring?: boolean
 }) {
   const initials = name
     .split(' ')
@@ -16,18 +32,20 @@ export default function Avatar({
     .map((w) => w[0]?.toUpperCase())
     .join('')
   const sizes = {
+    xs: 'h-7 w-7 text-[0.65rem]',
     sm: 'h-10 w-10 text-sm',
     md: 'h-12 w-12 text-base',
     lg: 'h-20 w-20 text-2xl',
     xl: 'h-28 w-28 text-3xl',
   }
+  const ringCls = ring ? 'ring-4 ring-white shadow-card' : ''
   if (src) {
-    return <img src={src} alt="" className={`shrink-0 rounded-full bg-blush object-cover ${sizes[size]}`} />
+    return <img src={src} alt="" className={`shrink-0 rounded-full bg-blush object-cover ${sizes[size]} ${ringCls}`} />
   }
   return (
     <span
       aria-hidden
-      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-blush font-serif text-navy ${sizes[size]}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full font-serif font-semibold ${tintFor(name)} ${sizes[size]} ${ringCls}`}
     >
       {initials}
     </span>

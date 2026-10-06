@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { SAMPLE_ME } from './data/sample.ts'
+import type { User } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase.ts'
 
 // Two modes:
@@ -22,6 +23,10 @@ type Auth = {
   signInWithPassword: (email: string, password: string) => Promise<string | null>
   /** Sets or changes the signed-in member's password. */
   setPassword: (password: string) => Promise<string | null>
+  /** True the first time a member signs in, until they set a password or skip. */
+  needsPasswordPrompt: boolean
+  /** Closes the first-sign-in prompt for good, optionally setting a password. */
+  finishPasswordPrompt: (password?: string) => Promise<string | null>
   /** Prototype only: pretend the link was clicked. */
   prototypeSignIn: (email: string) => void
   signOut: () => Promise<void>
@@ -47,19 +52,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [email, setEmail] = useState<string | null>(storedEmail)
   const [memberId, setMemberId] = useState<string | null>(storedEmail ? SAMPLE_ME : null)
   const [isAdmin, setIsAdmin] = useState(Boolean(storedEmail))
+  const [needsPasswordPrompt, setNeedsPasswordPrompt] = useState(false)
 
-  const apply = useCallback(async (userEmail: string | null, userId: string | null) => {
+  const apply = useCallback(async (user: User | null) => {
     if (!supabase) return
-    setEmail(userEmail)
-    if (!userId) {
+    setEmail(user?.email ?? null)
+    if (!user) {
       setMemberId(null)
       setIsAdmin(false)
+      setNeedsPasswordPrompt(false)
       setLoading(false)
       return
     }
-    const { data } = await supabase.from('members').select('id, is_admin').eq('id', userId).maybeSingle()
+    const { data } = await supabase.from('members').select('id, is_admin').eq('id', user.id).maybeSingle()
     setMemberId(data?.id ?? null)
     setIsAdmin(Boolean(data?.is_admin))
+    // Stored on the account, so it is asked once, not once per device.
+    setNeedsPasswordPrompt(Boolean(data) && !user.user_metadata?.password_prompt_seen)
     setLoading(false)
   }, [])
 
@@ -67,10 +76,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!supabase) return
     const client = supabase
     client.auth.getSession().then(({ data }) => {
-      void apply(data.session?.user.email ?? null, data.session?.user.id ?? null)
+      void apply(data.session?.user ?? null)
     })
     const { data: sub } = client.auth.onAuthStateChange((_event, session) => {
-      void apply(session?.user.email ?? null, session?.user.id ?? null)
+      void apply(session?.user ?? null)
     })
     return () => sub.subscription.unsubscribe()
   }, [apply])
@@ -78,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     if (!supabase) return
     const { data } = await supabase.auth.getUser()
-    await apply(data.user?.email ?? null, data.user?.id ?? null)
+    await apply(data.user ?? null)
   }, [apply])
 
   const requestLink = async (value: string) => {
@@ -122,8 +131,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setPassword = async (password: string) => {
     if (!supabase) return null
-    const { error } = await supabase.auth.updateUser({ password })
+    const { error } = await supabase.auth.updateUser({ password, data: { password_prompt_seen: true } })
+    if (!error) setNeedsPasswordPrompt(false)
     return error ? error.message : null
+  }
+
+  const finishPasswordPrompt = async (password?: string) => {
+    if (!supabase) {
+      setNeedsPasswordPrompt(false)
+      return null
+    }
+    const { error } = await supabase.auth.updateUser(
+      password ? { password, data: { password_prompt_seen: true } } : { data: { password_prompt_seen: true } },
+    )
+    if (error) return error.message
+    setNeedsPasswordPrompt(false)
+    return null
   }
 
   const prototypeSignIn = (value: string) => {
@@ -131,6 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setEmail(value)
     setMemberId(SAMPLE_ME)
     setIsAdmin(true)
+    setNeedsPasswordPrompt(true)
     try {
       localStorage.setItem(KEY, value)
     } catch {
@@ -155,7 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ loading, email, memberId, isAdmin, requestLink, verifyCode, signInWithPassword, setPassword, prototypeSignIn, signOut, refresh }}
+      value={{ loading, email, memberId, isAdmin, requestLink, verifyCode, signInWithPassword, setPassword, needsPasswordPrompt, finishPasswordPrompt, prototypeSignIn, signOut, refresh }}
     >
       {children}
     </AuthContext.Provider>

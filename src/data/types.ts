@@ -11,6 +11,9 @@ export type Member = {
   careerPath?: string | null
   interests?: string | null
   linkedin?: string | null
+  website?: string | null
+  instagram?: string | null
+  twitter?: string | null
   acceptsContact: boolean
   allowsTags: boolean
   isAdmin: boolean

@@ -21,6 +21,9 @@ function toInput(m: Member): ProfileInput {
     memory: m.memory ?? '',
     tingewick: m.tingewick ?? '',
     linkedin: m.linkedin ?? '',
+    website: m.website ?? '',
+    instagram: m.instagram ?? '',
+    twitter: m.twitter ?? '',
     acceptsContact: m.acceptsContact,
     allowsTags: m.allowsTags,
   }
@@ -178,18 +181,28 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
           </section>
 
           <section className="space-y-4">
-            <p className="eyebrow">Now</p>
+            <p className="eyebrow-sky">Now</p>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Job title and specialty" value={form.jobTitle ?? ''} onChange={set('jobTitle')} />
               <Field label="Where you work" value={form.workplace ?? ''} onChange={set('workplace')} />
             </div>
             <Area label="Your career since Oxford, in a few lines" value={form.careerPath ?? ''} onChange={set('careerPath')} />
             <Field label="Interests outside medicine" value={form.interests ?? ''} onChange={set('interests')} />
-            <Field label="LinkedIn link (optional)" value={form.linkedin ?? ''} onChange={set('linkedin')} placeholder="https://www.linkedin.com/in/…" type="url" />
           </section>
 
           <section className="space-y-4">
-            <p className="eyebrow">Then</p>
+            <p className="eyebrow">Find me online (all optional)</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="LinkedIn" value={form.linkedin ?? ''} onChange={set('linkedin')} placeholder="linkedin.com/in/yourname" />
+              <Field label="Website" value={form.website ?? ''} onChange={set('website')} placeholder="yourwebsite.com" />
+              <Field label="Instagram" value={form.instagram ?? ''} onChange={set('instagram')} placeholder="@yourname" />
+              <Field label="X (Twitter)" value={form.twitter ?? ''} onChange={set('twitter')} placeholder="@yourname" />
+            </div>
+            <p className="font-sans text-sm text-muted">Paste a link or just your @name. Shown as buttons on your profile.</p>
+          </section>
+
+          <section className="space-y-4">
+            <p className="eyebrow-gold">Then</p>
             <Field label="Where you did your clinical training" value={form.clinicalTraining ?? ''} onChange={set('clinicalTraining')} />
             <Area label="A favourite memory from Oxford" value={form.memory ?? ''} onChange={set('memory')} />
             <Field label="Tingewick: were you involved, and how?" value={form.tingewick ?? ''} onChange={set('tingewick')} />

@@ -4,7 +4,7 @@ import type { AdminMember, InboxMessage, Member, Photo, ProfileInput, Repo, Tag 
 // Column list for members. Never select '*': email is deliberately not
 // readable by other members (see migration 0002).
 const MEMBER_COLS =
-  'id, full_name, known_as, college, job_title, workplace, career_path, interests, clinical_training, memory, tingewick, linkedin, accepts_contact, allows_tags, is_admin, avatar_path'
+  'id, full_name, known_as, college, job_title, workplace, career_path, interests, clinical_training, memory, tingewick, linkedin, website, instagram, twitter, accepts_contact, allows_tags, is_admin, avatar_path'
 
 type MemberRow = {
   id: string
@@ -19,6 +19,9 @@ type MemberRow = {
   memory: string | null
   tingewick: string | null
   linkedin: string | null
+  website: string | null
+  instagram: string | null
+  twitter: string | null
   accepts_contact: boolean
   allows_tags: boolean
   is_admin: boolean
@@ -59,6 +62,9 @@ const toMember = (r: MemberRow): Member => ({
   memory: r.memory,
   tingewick: r.tingewick,
   linkedin: r.linkedin,
+  website: r.website,
+  instagram: r.instagram,
+  twitter: r.twitter,
   acceptsContact: r.accepts_contact,
   allowsTags: r.allows_tags,
   isAdmin: r.is_admin,
@@ -234,6 +240,9 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
           memory: input.memory ?? null,
           tingewick: input.tingewick ?? null,
           linkedin: input.linkedin ?? null,
+          website: input.website ?? null,
+          instagram: input.instagram ?? null,
+          twitter: input.twitter ?? null,
           accepts_contact: input.acceptsContact,
           allows_tags: input.allowsTags,
         })

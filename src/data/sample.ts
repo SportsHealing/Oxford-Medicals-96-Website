@@ -20,6 +20,8 @@ export const members: Member[] = [
     careerPath: 'Trained in Oxford and London. Consultant since 2009. Clinical lead for heart failure.',
     interests: 'Sailing, choral singing, bad puns.',
     linkedin: 'https://www.linkedin.com/',
+    website: 'samalder.example.com',
+    instagram: '@sam_sails',
     acceptsContact: true,
     allowsTags: true,
     isAdmin: true,

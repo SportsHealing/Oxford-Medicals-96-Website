@@ -1,21 +1,43 @@
 @import 'tailwindcss';
 
+/*
+  Oxford Medics 96 design system ("Tingewick")
+  Navy   Oxford blue, the anchor. Text, dark surfaces.
+  Pink   Rita the elephant. Primary actions, highlights.
+  Sky    The blue lettering on the Tingewick logo. "Now", photos, links.
+  Gold   Radcliffe Camera stone. "Then", memories, warmth.
+  Every text/background pairing used is 4.5:1 or better.
+*/
 @theme {
   --color-navy: #002147;
+  --color-navy-900: #001530;
   --color-navy-soft: #1c3a66;
+
   --color-pink: #fb67aa;
-  --color-rita: #f7b7d0;
+  --color-pink-hover: #ff86bb;
   --color-pink-deep: #b8396f;
+  --color-rita: #f7b7d0;
   --color-blush: #fdeaf2;
+
+  --color-sky: #7ba8ee;
+  --color-sky-light: #9fc3f7;
+  --color-sky-deep: #2a5db0;
+  --color-sky-soft: #e8f1fd;
+
+  --color-gold: #f5b942;
+  --color-gold-deep: #8a5800;
+  --color-gold-soft: #fdf3dc;
+
   --color-ink: #26303b;
   --color-muted: #6b7280;
-  --color-paper: #fbfaf8;
-  --color-line: #e8e4de;
+  --color-paper: #fbf8f4;
+  --color-line: #e8e2da;
 
   --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   --font-sans: 'Source Sans 3', system-ui, -apple-system, sans-serif;
 
-  --shadow-card: 0 1px 2px rgb(0 33 71 / 0.04), 0 8px 24px -12px rgb(0 33 71 / 0.12);
+  --shadow-card: 0 1px 2px rgb(0 33 71 / 0.04), 0 10px 28px -14px rgb(0 33 71 / 0.18);
+  --shadow-pop: 0 10px 30px -10px rgb(251 103 170 / 0.55);
 }
 
 @layer base {
@@ -38,18 +60,26 @@
   }
 }
 
+/* The three-colour brand ribbon: pink, gold, sky. */
+@utility ribbon {
+  background-image: linear-gradient(90deg, var(--color-pink) 0%, var(--color-gold) 50%, var(--color-sky) 100%);
+}
+
 /* Buttons */
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-sans text-[0.95rem] font-semibold no-underline transition;
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-sans text-[0.95rem] font-semibold no-underline transition disabled:cursor-not-allowed disabled:opacity-50;
 }
 @utility btn-primary {
+  @apply btn bg-pink text-navy hover:-translate-y-px hover:bg-pink-hover hover:shadow-pop;
+}
+@utility btn-dark {
   @apply btn bg-navy text-white hover:bg-navy-soft;
 }
 @utility btn-pink {
   @apply btn bg-pink-deep text-white hover:bg-[#a22f62];
 }
 @utility btn-outline {
-  @apply btn border border-navy/30 bg-white text-navy hover:border-navy hover:bg-white;
+  @apply btn border border-navy/25 bg-white text-navy hover:border-navy;
 }
 @utility btn-quiet {
   @apply btn text-navy hover:bg-navy/5;
@@ -60,12 +90,18 @@
   @apply rounded-2xl border border-line bg-white;
 }
 @utility card-hover {
-  @apply transition hover:-translate-y-0.5 hover:border-pink/60 hover:shadow-card;
+  @apply transition hover:-translate-y-0.5 hover:border-sky hover:shadow-card;
 }
 
 /* Text */
 @utility eyebrow {
   @apply font-sans text-[0.78rem] font-semibold tracking-[0.12em] text-pink-deep uppercase;
+}
+@utility eyebrow-sky {
+  @apply eyebrow text-sky-deep;
+}
+@utility eyebrow-gold {
+  @apply eyebrow text-gold-deep;
 }
 @utility lede {
   @apply text-lg text-muted;

@@ -30,6 +30,10 @@ Same as step 2, with `supabase/migrations/0004_set_admin.sql`. Then admins can p
 
 Same as step 2, with `supabase/migrations/0005_profile_pictures.sql`. It also re-applies the member-upload rules from 0003, so it is safe whether or not 0003 was run.
 
+## 2f. Social links (you, one more paste)
+
+Same as step 2, with `supabase/migrations/0006_social_links.sql`. Adds website, Instagram and X to profiles.
+
 ## 3. Set the site address for sign-in links (you)
 
 1. **Authentication** then **URL Configuration**.
