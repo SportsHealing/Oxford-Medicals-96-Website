@@ -6,6 +6,7 @@ import PageHeader from '../components/PageHeader.tsx'
 import { repo } from '../data/repo.ts'
 import type { Member, ProfileInput } from '../data/types.ts'
 import { LoadError, Loading, useLoad } from '../lib/useLoad.tsx'
+import { makeAvatar } from '../lib/prepareImage.ts'
 
 function toInput(m: Member): ProfileInput {
   return {
@@ -59,6 +60,35 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
   const { refresh, setPassword } = useAuth()
   const [pw, setPw] = useState('')
   const [pwMsg, setPwMsg] = useState<string | null>(null)
+  const [picBusy, setPicBusy] = useState(false)
+  const [picMsg, setPicMsg] = useState<string | null>(null)
+
+  const changePicture = async (file: File | undefined) => {
+    if (!file) return
+    setPicBusy(true)
+    setPicMsg(null)
+    try {
+      await repo.setAvatar(await makeAvatar(file))
+      reload()
+    } catch (e) {
+      setPicMsg(e instanceof Error ? e.message : 'Could not save the picture')
+    } finally {
+      setPicBusy(false)
+    }
+  }
+
+  const removePicture = async () => {
+    setPicBusy(true)
+    setPicMsg(null)
+    try {
+      await repo.removeAvatar()
+      reload()
+    } catch (e) {
+      setPicMsg(e instanceof Error ? e.message : 'Could not remove the picture')
+    } finally {
+      setPicBusy(false)
+    }
+  }
   const [form, setForm] = useState<ProfileInput>(() => toInput(data.me))
   const [saved, setSaved] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -191,6 +221,36 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
         </form>
 
         <aside className="space-y-8">
+          <section className="card p-5">
+            <h2 className="text-lg">Profile picture</h2>
+            <div className="mt-3 flex items-center gap-4">
+              <Avatar name={form.name || data.me.name} src={data.me.avatarUrl} size="lg" />
+              <div className="space-y-2">
+                <label className={`btn-outline cursor-pointer !py-1.5 text-sm ${picBusy ? 'pointer-events-none opacity-60' : ''}`}>
+                  {picBusy ? 'Saving…' : data.me.avatarUrl ? 'Change picture' : 'Add a picture'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={(e) => {
+                      void changePicture(e.target.files?.[0])
+                      e.target.value = ''
+                    }}
+                  />
+                </label>
+                {data.me.avatarUrl && (
+                  <button type="button" className="block font-sans text-xs text-muted hover:text-pink-deep" onClick={() => void removePicture()} disabled={picBusy}>
+                    Remove picture
+                  </button>
+                )}
+              </div>
+            </div>
+            <p className="mt-3 font-sans text-sm text-muted">
+              A recent one helps classmates recognise you. It is cropped to a square and seen only by members.
+            </p>
+            {picMsg && <p className="mt-2 font-sans text-sm text-pink-deep">{picMsg}</p>}
+          </section>
+
           <section className="card p-5">
             <h2 className="text-lg">Sign in faster</h2>
             <p className="mt-1 font-sans text-sm text-muted">

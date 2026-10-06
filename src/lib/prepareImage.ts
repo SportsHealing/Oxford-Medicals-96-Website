@@ -22,3 +22,20 @@ export async function prepareImage(file: File): Promise<File> {
     return file
   }
 }
+
+// Square-crops and shrinks a picture for use as a profile photo.
+export async function makeAvatar(file: File, size = 512): Promise<File> {
+  try {
+    const bitmap = await createImageBitmap(file)
+    const side = Math.min(bitmap.width, bitmap.height)
+    const sx = (bitmap.width - side) / 2
+    const sy = (bitmap.height - side) / 2
+    const canvas = document.createElement('canvas')
+    canvas.width = canvas.height = Math.min(size, side)
+    canvas.getContext('2d')?.drawImage(bitmap, sx, sy, side, side, 0, 0, canvas.width, canvas.height)
+    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/jpeg', 0.88))
+    return blob ? new File([blob], 'avatar.jpg', { type: 'image/jpeg' }) : file
+  } catch {
+    return file
+  }
+}

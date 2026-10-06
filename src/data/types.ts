@@ -14,9 +14,10 @@ export type Member = {
   acceptsContact: boolean
   allowsTags: boolean
   isAdmin: boolean
+  avatarUrl?: string | null
 }
 
-export type ProfileInput = Omit<Member, 'id' | 'isAdmin'>
+export type ProfileInput = Omit<Member, 'id' | 'isAdmin' | 'avatarUrl'>
 
 export type TagStatus = 'pending' | 'confirmed' | 'rejected'
 
@@ -89,4 +90,7 @@ export type Repo = {
   removeAllowedEmail(email: string): Promise<void>
   adminMembers(): Promise<AdminMember[]>
   setAdmin(memberId: string, makeAdmin: boolean): Promise<void>
+  /** Sets the signed-in member's profile picture (already cropped). */
+  setAvatar(file: File): Promise<void>
+  removeAvatar(): Promise<void>
 }

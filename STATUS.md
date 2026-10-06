@@ -72,6 +72,8 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
 - `src/pages/Me.tsx`: profile form, tag confirmations, message inbox.
 - `src/pages/Admin.tsx`: photo upload, invite members, delete photos, promote or demote admins.
 - `supabase/migrations/0004_set_admin.sql`: admin-only `set_admin` function.
+- `supabase/migrations/0005_profile_pictures.sql`: private `avatars` bucket, `members.avatar_path`, re-runnable member-upload rules.
+- Profile pictures: set on the Me page, square-cropped to 512px in the browser, shown in Classmates, profiles, photo tags and messages.
 - `supabase/migrations/0003_member_uploads.sql`: members upload, edit and delete their own photos; self-tags confirm instantly.
 - `src/pages/AddPhotos.tsx`: member upload (up to 20 at once, shrunk to 2400px), then a tag-as-you-go queue.
 - `scripts/download-kululu.mjs`, `scripts/import-photos.mjs`, `docs/photo-import.md`: one-off Kululu migration.

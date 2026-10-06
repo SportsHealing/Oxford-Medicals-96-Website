@@ -34,7 +34,7 @@ export default function Profile() {
       </Link>
 
       <header className="flex flex-wrap items-center gap-6">
-        <Avatar name={person.name} size="lg" />
+        <Avatar name={person.name} src={person.avatarUrl} size="xl" />
         <div className="min-w-0 flex-1">
           <h1 className="text-4xl">{person.name}</h1>
           <p className="mt-1 font-sans text-muted">

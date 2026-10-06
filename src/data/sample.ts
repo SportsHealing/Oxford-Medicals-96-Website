@@ -324,6 +324,14 @@ export const sampleRepo: Repo = {
     const i = allowed.findIndex((a) => a.email === email)
     if (i >= 0) allowed.splice(i, 1)
   },
+  async setAvatar(file) {
+    const me = members.find((m) => m.id === SAMPLE_ME)
+    if (me) me.avatarUrl = URL.createObjectURL(file)
+  },
+  async removeAvatar() {
+    const me = members.find((m) => m.id === SAMPLE_ME)
+    if (me) me.avatarUrl = null
+  },
   async setAdmin(memberId, makeAdmin) {
     const m = members.find((x) => x.id === memberId)
     if (m) m.isAdmin = makeAdmin

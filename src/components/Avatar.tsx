@@ -1,5 +1,14 @@
-// Initials in a soft circle. Stands in for a portrait until members add one.
-export default function Avatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg' }) {
+// A member's profile picture, or their initials in a soft circle if they
+// have not added one.
+export default function Avatar({
+  name,
+  src,
+  size = 'md',
+}: {
+  name: string
+  src?: string | null
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+}) {
   const initials = name
     .split(' ')
     .filter(Boolean)
@@ -10,6 +19,10 @@ export default function Avatar({ name, size = 'md' }: { name: string; size?: 'sm
     sm: 'h-10 w-10 text-sm',
     md: 'h-12 w-12 text-base',
     lg: 'h-20 w-20 text-2xl',
+    xl: 'h-28 w-28 text-3xl',
+  }
+  if (src) {
+    return <img src={src} alt="" className={`shrink-0 rounded-full bg-blush object-cover ${sizes[size]}`} />
   }
   return (
     <span

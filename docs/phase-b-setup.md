@@ -26,6 +26,10 @@ Same as step 2, with `supabase/migrations/0003_member_uploads.sql`. Members can 
 
 Same as step 2, with `supabase/migrations/0004_set_admin.sql`. Then admins can promote or demote other members from the Admin page, no SQL needed.
 
+## 2e. Profile pictures (you, one more paste)
+
+Same as step 2, with `supabase/migrations/0005_profile_pictures.sql`. It also re-applies the member-upload rules from 0003, so it is safe whether or not 0003 was run.
+
 ## 3. Set the site address for sign-in links (you)
 
 1. **Authentication** then **URL Configuration**.

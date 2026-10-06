@@ -42,7 +42,7 @@ export default function Classmates() {
         {shown.map((p) => (
           <li key={p.id}>
             <Link to={`/classmates/${p.id}`} className="card card-hover flex h-full items-start gap-4 p-5 no-underline">
-              <Avatar name={p.name} />
+              <Avatar name={p.name} src={p.avatarUrl} />
               <span className="min-w-0">
                 <span className="block font-serif text-xl text-navy">{p.name}</span>
                 <span className="block font-sans text-sm text-muted">{p.college ?? 'College not given'}</span>

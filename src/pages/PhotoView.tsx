@@ -211,7 +211,7 @@ export default function PhotoView() {
                 return (
                   <li key={tag.id} className="flex items-center gap-3 px-4 py-3">
                     <Link to={`/classmates/${person.id}`} className="flex min-w-0 flex-1 items-center gap-3 no-underline">
-                      <Avatar name={person.name} size="sm" />
+                      <Avatar name={person.name} src={person.avatarUrl} size="sm" />
                       <span className="min-w-0 flex-1">
                         <span className="block font-sans font-semibold text-navy">{person.name}</span>
                         <span className="block truncate font-sans text-sm text-muted">{person.jobTitle}</span>

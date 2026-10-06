@@ -41,7 +41,7 @@ export default function Contact() {
 
       <div className="card p-8 sm:p-10">
         <div className="flex items-center gap-4">
-          <Avatar name={person.name} />
+          <Avatar name={person.name} src={person.avatarUrl} />
           <div>
             <p className="label-caps">Message to</p>
             <p className="font-serif text-xl text-navy">{person.name}</p>

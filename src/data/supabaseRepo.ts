@@ -4,7 +4,7 @@ import type { AdminMember, InboxMessage, Member, Photo, ProfileInput, Repo, Tag 
 // Column list for members. Never select '*': email is deliberately not
 // readable by other members (see migration 0002).
 const MEMBER_COLS =
-  'id, full_name, known_as, college, job_title, workplace, career_path, interests, clinical_training, memory, tingewick, linkedin, accepts_contact, allows_tags, is_admin'
+  'id, full_name, known_as, college, job_title, workplace, career_path, interests, clinical_training, memory, tingewick, linkedin, accepts_contact, allows_tags, is_admin, avatar_path'
 
 type MemberRow = {
   id: string
@@ -22,6 +22,7 @@ type MemberRow = {
   accepts_contact: boolean
   allows_tags: boolean
   is_admin: boolean
+  avatar_path: string | null
 }
 
 type TagRow = {
@@ -63,6 +64,8 @@ const toMember = (r: MemberRow): Member => ({
   isAdmin: r.is_admin,
 })
 
+const AVATAR_URL_SECONDS = 60 * 60
+
 const toTag = (t: TagRow): Tag => ({
   id: t.id,
   photoId: t.photo_id,
@@ -102,6 +105,16 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
     }))
   }
 
+  const withAvatars = async (rows: MemberRow[]): Promise<Member[]> => {
+    const paths = rows.map((r) => r.avatar_path).filter((p): p is string => Boolean(p))
+    let urlByPath = new Map<string, string>()
+    if (paths.length) {
+      const { data } = await client.storage.from('avatars').createSignedUrls(paths, AVATAR_URL_SECONDS)
+      urlByPath = new Map((data ?? []).flatMap((d) => (d.path && d.signedUrl ? [[d.path, d.signedUrl]] : [])))
+    }
+    return rows.map((r) => ({ ...toMember(r), avatarUrl: r.avatar_path ? urlByPath.get(r.avatar_path) ?? null : null }))
+  }
+
   const me = async () => {
     const { data } = await client.auth.getUser()
     const id = data.user?.id
@@ -113,12 +126,34 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
     async listMembers() {
       const { data, error } = await client.from('members').select(MEMBER_COLS).order('full_name')
       fail(error)
-      return ((data ?? []) as unknown as MemberRow[]).map(toMember)
+      return withAvatars((data ?? []) as unknown as MemberRow[])
     },
     async getMember(id) {
       const { data, error } = await client.from('members').select(MEMBER_COLS).eq('id', id).maybeSingle()
       fail(error)
-      return data ? toMember(data as unknown as MemberRow) : null
+      if (!data) return null
+      const [m] = await withAvatars([data as unknown as MemberRow])
+      return m
+    },
+    async setAvatar(file) {
+      const uid = await me()
+      const { data: cur } = await client.from('members').select('avatar_path').eq('id', uid).maybeSingle()
+      const path = `${uid}/${Date.now()}.jpg`
+      const up = await client.storage.from('avatars').upload(path, file, { contentType: file.type || 'image/jpeg' })
+      fail(up.error)
+      const { error } = await client.from('members').update({ avatar_path: path }).eq('id', uid)
+      if (error) {
+        await client.storage.from('avatars').remove([path])
+        fail(error)
+      }
+      if (cur?.avatar_path) await client.storage.from('avatars').remove([cur.avatar_path])
+    },
+    async removeAvatar() {
+      const uid = await me()
+      const { data: cur } = await client.from('members').select('avatar_path').eq('id', uid).maybeSingle()
+      const { error } = await client.from('members').update({ avatar_path: null }).eq('id', uid)
+      fail(error)
+      if (cur?.avatar_path) await client.storage.from('avatars').remove([cur.avatar_path])
     },
     async listPhotos() {
       const { data, error } = await client
