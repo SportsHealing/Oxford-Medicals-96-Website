@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { SAMPLE_ME } from './data/sample.ts'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase.ts'
@@ -54,17 +54,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(Boolean(storedEmail))
   const [needsPasswordPrompt, setNeedsPasswordPrompt] = useState(false)
 
+  // Which account the membership check is for, so a token refresh for the
+  // same person does not blank the page, and a slow, outdated check cannot
+  // overwrite a newer one.
+  const checkedFor = useRef<string | null>(null)
+  const latest = useRef(0)
+
   const apply = useCallback(async (user: User | null) => {
     if (!supabase) return
-    setEmail(user?.email ?? null)
+    const run = ++latest.current
     if (!user) {
+      checkedFor.current = null
+      setEmail(null)
       setMemberId(null)
       setIsAdmin(false)
       setNeedsPasswordPrompt(false)
       setLoading(false)
       return
     }
+    // New person: show "checking" until we know whether they are a member,
+    // instead of briefly showing the "not on the list" page.
+    if (checkedFor.current !== user.id) setLoading(true)
     const { data } = await supabase.from('members').select('id, is_admin').eq('id', user.id).maybeSingle()
+    if (run !== latest.current) return
+    checkedFor.current = user.id
+    // Set everything together so pages never see the email without the membership.
+    setEmail(user.email ?? null)
     setMemberId(data?.id ?? null)
     setIsAdmin(Boolean(data?.is_admin))
     // Stored on the account, so it is asked once, not once per device.
@@ -78,8 +93,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     client.auth.getSession().then(({ data }) => {
       void apply(data.session?.user ?? null)
     })
+    // Supabase advises not to call the database inside this callback directly;
+    // defer it to the next tick.
     const { data: sub } = client.auth.onAuthStateChange((_event, session) => {
-      void apply(session?.user ?? null)
+      setTimeout(() => void apply(session?.user ?? null), 0)
     })
     return () => sub.subscription.unsubscribe()
   }, [apply])
@@ -109,8 +126,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const verifyCode = async (value: string, code: string) => {
     if (!supabase) return null
-    const { error } = await supabase.auth.verifyOtp({ email: value, token: code.replace(/\D/g, ''), type: 'email' })
-    if (!error) return null
+    const { data, error } = await supabase.auth.verifyOtp({ email: value, token: code.replace(/\D/g, ''), type: 'email' })
+    if (!error) {
+      // Settle membership before the page moves on, so nothing flashes.
+      await apply(data.user ?? null)
+      return null
+    }
     const m = error.message.toLowerCase()
     if (m.includes('expired') || m.includes('invalid')) {
       return 'That code is wrong or has expired. Check the latest email, or ask for a new code.'
@@ -120,8 +141,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithPassword = async (value: string, password: string) => {
     if (!supabase) return null
-    const { error } = await supabase.auth.signInWithPassword({ email: value, password })
-    if (!error) return null
+    const { data, error } = await supabase.auth.signInWithPassword({ email: value, password })
+    if (!error) {
+      await apply(data.user ?? null)
+      return null
+    }
     const m = error.message.toLowerCase()
     if (m.includes('invalid login')) {
       return 'Email or password not recognised. If you have not set a password yet, use "Email me a code" instead.'

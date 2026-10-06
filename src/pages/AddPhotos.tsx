@@ -15,6 +15,7 @@ export default function AddPhotos() {
   const [busy, setBusy] = useState(false)
   const [progress, setProgress] = useState(0)
   const [problem, setProblem] = useState<string | null>(null)
+  const [dragging, setDragging] = useState(false)
 
   const pick = (files: FileList | null) => {
     if (!files) return
@@ -78,20 +79,38 @@ export default function AddPhotos() {
       />
 
       <form onSubmit={(e) => void submit(e)} className="space-y-8">
-        <label className="card flex cursor-pointer flex-col items-center justify-center gap-2 border-dashed p-10 text-center transition hover:border-rose">
-          <span className="font-serif text-xl text-navy">Choose photos</span>
-          <span className="font-sans text-sm text-muted">From your phone, computer or a scanned print</span>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            className="sr-only"
-            onChange={(e) => {
-              pick(e.target.files)
-              e.target.value = ''
-            }}
-          />
-        </label>
+        <div
+          className={`card flex flex-col items-center justify-center gap-4 border-2 border-dashed p-10 text-center transition ${
+            dragging ? 'border-rose bg-rose-soft' : 'border-line'
+          }`}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setDragging(true)
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault()
+            setDragging(false)
+            pick(e.dataTransfer.files)
+          }}
+        >
+          <label className="btn-primary cursor-pointer">
+            {items.length ? 'Choose more photos' : 'Choose photos'}
+            <input
+              type="file"
+              accept="image/*,.heic,.heif"
+              multiple
+              className="sr-only"
+              onChange={(e) => {
+                pick(e.target.files)
+                e.target.value = ''
+              }}
+            />
+          </label>
+          <span className="font-sans text-sm text-muted">
+            or drag them here from your computer. Phone photos, scans of prints, anything.
+          </span>
+        </div>
 
         {items.length > 0 && (
           <>
@@ -134,14 +153,16 @@ export default function AddPhotos() {
         )}
 
         {problem && <p className="font-sans text-sm text-rose-deep">{problem}</p>}
-        <div className="flex items-center gap-4">
-          <button type="submit" className="btn-primary" disabled={busy || items.length === 0}>
+        {items.length > 0 && (
+        <div className="flex flex-wrap items-center gap-4">
+          <button type="submit" className="btn-primary" disabled={busy}>
             {busy
               ? `Uploading ${progress + 1} of ${items.length}…`
               : `Upload ${items.length || ''} photo${items.length === 1 ? '' : 's'} and tag people`}
           </button>
           <span className="font-sans text-sm text-muted">Only signed-in classmates will see them.</span>
         </div>
+        )}
       </form>
     </div>
   )

@@ -39,7 +39,18 @@ export default function Admin() {
       <PageHeader eyebrow="Organisers only" title="Admin" lede="Upload photos and manage who can sign in." />
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <UploadForm onDone={reload} />
+        <div className="card flex flex-col justify-between gap-5 p-6">
+          <div>
+            <h2 className="text-xl">Add photos</h2>
+            <p className="mt-2 font-sans text-sm text-muted">
+              Upload up to 20 at a time, then tag the people you know in each one. Members can do this too,
+              from the Photos page.
+            </p>
+          </div>
+          <Link to="/photos/new" className="btn-primary self-start">
+            + Add photos
+          </Link>
+        </div>
         <InviteForm onDone={reload} />
       </div>
 
@@ -125,75 +136,6 @@ export default function Admin() {
   )
 }
 
-function UploadForm({ onDone }: { onDone: () => void }) {
-  const [file, setFile] = useState<File | null>(null)
-  const [title, setTitle] = useState('')
-  const [year, setYear] = useState('')
-  const [place, setPlace] = useState('')
-  const [caption, setCaption] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [msg, setMsg] = useState<string | null>(null)
-
-  const submit = async (e: FormEvent) => {
-    e.preventDefault()
-    if (!file) return
-    setBusy(true)
-    setMsg(null)
-    try {
-      await repo.addPhoto({ file, title: title.trim(), year: year.trim(), place: place.trim(), caption: caption.trim() })
-      setFile(null)
-      setTitle('')
-      setYear('')
-      setPlace('')
-      setCaption('')
-      setMsg('Uploaded.')
-      onDone()
-    } catch (err) {
-      setMsg(err instanceof Error ? err.message : 'Upload failed')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  return (
-    <form onSubmit={(e) => void submit(e)} className="card space-y-4 p-6">
-      <h2 className="text-xl">Upload a photo</h2>
-      <label className="block">
-        <span className="label-caps">Image file</span>
-        <input
-          type="file"
-          accept="image/*"
-          required
-          className="mt-1.5 block w-full font-sans text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-navy file:px-4 file:py-2 file:font-semibold file:text-white"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        />
-      </label>
-      <label className="block">
-        <span className="label-caps">Title</span>
-        <input className="field mt-1.5" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Tingewick 1995" />
-      </label>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block">
-          <span className="label-caps">Year</span>
-          <input className="field mt-1.5" value={year} onChange={(e) => setYear(e.target.value)} placeholder="1995" />
-        </label>
-        <label className="block">
-          <span className="label-caps">Place</span>
-          <input className="field mt-1.5" value={place} onChange={(e) => setPlace(e.target.value)} placeholder="Osler House" />
-        </label>
-      </div>
-      <label className="block">
-        <span className="label-caps">Caption (optional)</span>
-        <textarea className="field mt-1.5" rows={2} value={caption} onChange={(e) => setCaption(e.target.value)} />
-      </label>
-      {msg && <p className="font-sans text-sm text-muted">{msg}</p>}
-      <button type="submit" className="btn-primary" disabled={busy || !file || !title.trim()}>
-        {busy ? 'Uploading…' : 'Upload'}
-      </button>
-    </form>
-  )
-}
-
 function InviteForm({ onDone }: { onDone: () => void }) {
   const [text, setText] = useState('')
   const [note, setNote] = useState('')
@@ -232,7 +174,7 @@ function InviteForm({ onDone }: { onDone: () => void }) {
     <form onSubmit={(e) => void submit(e)} className="card space-y-4 p-6">
       <h2 className="text-xl">Invite members</h2>
       <p className="font-sans text-sm text-muted">
-        Paste email addresses, one per line or separated by commas. They can then sign in with a link.
+        Paste email addresses, one per line or separated by commas. They can then sign in with an emailed code.
         No email is sent by this form; let them know yourself.
       </p>
       <label className="block">
