@@ -316,6 +316,11 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       const { data, error } = await client.functions.invoke('send-invites', { body: input })
       if (error) {
         // Surface the function's own message where there is one.
+        if (error.name === 'FunctionsFetchError') {
+          throw new Error(
+            'Could not reach the send-invites function. Check it is deployed in Supabase (Edge Functions) with exactly that name.',
+          )
+        }
         let detail = error.message
         try {
           const ctx = (error as { context?: Response }).context

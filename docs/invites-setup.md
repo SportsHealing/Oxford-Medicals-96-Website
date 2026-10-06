@@ -28,6 +28,7 @@ Admin page, Invite members, enter your own second address, Send 1 invitation. Th
 
 ## If something fails
 
+- "Failed to send a request to the Edge Function" or "Could not reach the send-invites function": step 3 is missing, the name is not exactly `send-invites`, or the deploy failed. Check Edge Functions lists `send-invites` and open its Logs.
 - "Only admins can send invitations": you are not signed in as an admin.
 - "RESEND_API_KEY is not set": step 2 missing or misspelt.
 - "Invalid JWT" or 401: in the function's settings turn off **Enforce JWT verification** (or "Verify JWT"). Safe, because the function checks admin rights itself using the caller's sign-in.
