@@ -253,7 +253,8 @@ export const sampleRepo: Repo = {
     const photo = photos.find((p) => p.id === photoId)
     if (!photo) throw new Error('Photo not found')
     if (photo.tags.some((t) => t.memberId === memberId)) throw new Error('Already tagged')
-    photo.tags.push({ id: `tag-${++tagSeq}`, photoId, memberId, x, y, status: 'pending', suggestedBy: SAMPLE_ME })
+    const status = memberId === SAMPLE_ME ? 'confirmed' : 'pending'
+    photo.tags.push({ id: `tag-${++tagSeq}`, photoId, memberId, x, y, status, suggestedBy: SAMPLE_ME })
   },
   async decideTag(tagId, status) {
     for (const p of photos) {
@@ -304,8 +305,10 @@ export const sampleRepo: Repo = {
       place: input.place ?? null,
       caption: input.caption ?? null,
       src: URL.createObjectURL(input.file),
+      uploadedBy: SAMPLE_ME,
       tags: [],
     })
+    return id
   },
   async deletePhoto(photoId) {
     const i = photos.findIndex((p) => p.id === photoId)

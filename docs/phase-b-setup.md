@@ -18,6 +18,10 @@ Supabase gives the site real email sign-in, a private database and private photo
 
 Same as step 2, with `supabase/migrations/0002_privacy.sql`. It stops members reading each other's email addresses or promoting themselves to admin, and adds the message inbox.
 
+## 2c. Let members upload photos (you, one more paste)
+
+Same as step 2, with `supabase/migrations/0003_member_uploads.sql`. Members can then add photos from the Photos page, tag people straight after uploading, and delete their own uploads. Images only, 15 MB max.
+
 ## 3. Set the site address for sign-in links (you)
 
 1. **Authentication** then **URL Configuration**.

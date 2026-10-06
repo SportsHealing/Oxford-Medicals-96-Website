@@ -1,5 +1,5 @@
 import { useState, type MouseEvent } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth.tsx'
 import Avatar from '../components/Avatar.tsx'
 import { repo } from '../data/repo.ts'
@@ -8,7 +8,11 @@ import NotFound from './NotFound.tsx'
 
 export default function PhotoView() {
   const { id = '' } = useParams()
-  const { memberId } = useAuth()
+  const { memberId, isAdmin } = useAuth()
+  const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const isNew = params.get('new') === '1'
+  const queue = (params.get('queue') ?? '').split(',').filter(Boolean)
   const { data, loading, error, reload } = useLoad(
     async () => {
       const [photo, members, all] = await Promise.all([repo.getPhoto(id), repo.listMembers(), repo.listPhotos()])
@@ -68,10 +72,44 @@ export default function PhotoView() {
     }
   }
 
+  const canDelete = isAdmin || (memberId !== null && photo.uploadedBy === memberId)
+  const deletePhoto = async () => {
+    if (!confirm(`Delete "${photo.title}"? This removes its tags too.`)) return
+    await repo.deletePhoto(photo.id)
+    navigate('/photos')
+  }
+
+  const nextInQueue = () => {
+    const [nextId, ...rest] = queue
+    if (!nextId) {
+      navigate(`/photos/${photo.id}`)
+      return
+    }
+    const q = new URLSearchParams({ new: '1' })
+    if (rest.length) q.set('queue', rest.join(','))
+    setDraft(null)
+    navigate(`/photos/${nextId}?${q.toString()}`)
+  }
+
   const untagged = members.filter((m) => m.allowsTags && !visibleTags.some((t) => t.memberId === m.id))
 
   return (
     <div>
+      {isNew && (
+        <div className="card mb-6 flex flex-wrap items-center gap-4 border-pink/50 bg-blush/60 p-5">
+          <div className="min-w-0 flex-1">
+            <p className="eyebrow">Uploaded</p>
+            <p className="mt-1 text-ink">
+              Now tag the people you know: click on a face, then choose who it is.
+              {queue.length > 0 && ` ${queue.length} more photo${queue.length === 1 ? '' : 's'} to go.`}
+            </p>
+          </div>
+          <button type="button" className="btn-primary" onClick={nextInQueue}>
+            {queue.length > 0 ? 'Next photo →' : 'Done'}
+          </button>
+        </div>
+      )}
+
       <div className="mb-6 flex items-center justify-between gap-4">
         <Link to="/photos" className="font-sans text-sm text-muted no-underline hover:text-navy">
           &larr; All photos
@@ -126,6 +164,11 @@ export default function PhotoView() {
             <p className="label-caps">{[photo.year, photo.place].filter(Boolean).join(' · ') || 'Undated'}</p>
             <h1 className="mt-1 text-3xl">{photo.title}</h1>
             {photo.caption && <p className="mt-3 text-muted">{photo.caption}</p>}
+            {canDelete && (
+              <button type="button" className="mt-3 font-sans text-xs text-muted hover:text-pink-deep" onClick={() => void deletePhoto()}>
+                Delete this photo
+              </button>
+            )}
           </div>
 
           {draft && (
@@ -135,13 +178,16 @@ export default function PhotoView() {
                 <option value="">Choose a classmate</option>
                 {untagged.map((m) => (
                   <option key={m.id} value={m.id}>
+                    {m.id === memberId ? 'Me: ' : ''}
                     {m.name}
                     {m.college ? ` (${m.college})` : ''}
                   </option>
                 ))}
               </select>
               <p className="font-sans text-sm text-muted">
-                They will be asked to confirm before the tag is shown to anyone else.
+                {choice === memberId
+                  ? 'Tagging yourself shows straight away.'
+                  : 'They will be asked to confirm before the tag is shown to anyone else.'}
               </p>
               {problem && <p className="font-sans text-sm text-pink-deep">{problem}</p>}
               <div className="flex gap-2">

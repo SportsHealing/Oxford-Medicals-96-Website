@@ -18,7 +18,8 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
   - Tag people in photos manually. The tagged person confirms the tag.
   - Profile per person, built from their questionnaire answers.
   - Connect: link to the person's LinkedIn plus a contact request form.
-  - Face recognition: deferred to a later, opt-in phase.
+  - Members upload their own photos and tag people straight after upload.
+  - Face recognition: options set out to user (detection-assisted tagging now; opt-in recognition later). Awaiting decision.
 - **Pages:** Landing (public), sign in, photo gallery, photo view with tags, classmates directory, profile, contact request, privacy notice.
 - **User journey:** Sign in. Browse photos. Tag or confirm a classmate. Open their profile. See their current work. Send a contact request or open LinkedIn.
 - **Content:** Admins upload photos. Member information arrives as text answers to a questionnaire (see `docs/alumni-questionnaire.md`). Photos and answers will be supplied later.
@@ -70,6 +71,9 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
 - `src/data/`: `types.ts` Repo contract, `sample.ts` in-memory, `supabaseRepo.ts` live, `repo.ts` picks one.
 - `src/pages/Me.tsx`: profile form, tag confirmations, message inbox.
 - `src/pages/Admin.tsx`: photo upload, invite members, delete photos.
+- `supabase/migrations/0003_member_uploads.sql`: members upload, edit and delete their own photos; self-tags confirm instantly.
+- `src/pages/AddPhotos.tsx`: member upload (up to 20 at once, shrunk to 2400px), then a tag-as-you-go queue.
+- `scripts/download-kululu.mjs`, `scripts/import-photos.mjs`, `docs/photo-import.md`: one-off Kululu migration.
 
 ## Next step
 

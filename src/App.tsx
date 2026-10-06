@@ -4,6 +4,7 @@ import RequireMember from './components/RequireMember.tsx'
 import Landing from './pages/Landing.tsx'
 import SignIn from './pages/SignIn.tsx'
 import Gallery from './pages/Gallery.tsx'
+import AddPhotos from './pages/AddPhotos.tsx'
 import PhotoView from './pages/PhotoView.tsx'
 import Classmates from './pages/Classmates.tsx'
 import Profile from './pages/Profile.tsx'
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="privacy" element={<Privacy />} />
         <Route element={<RequireMember />}>
           <Route path="photos" element={<Gallery />} />
+          <Route path="photos/new" element={<AddPhotos />} />
           <Route path="photos/:id" element={<PhotoView />} />
           <Route path="classmates" element={<Classmates />} />
           <Route path="classmates/:id" element={<Profile />} />

@@ -41,6 +41,7 @@ type PhotoRow = {
   place: string | null
   caption: string | null
   storage_path: string
+  uploaded_by: string | null
   photo_tags: TagRow[]
 }
 
@@ -96,6 +97,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       place: r.place,
       caption: r.caption,
       src: urlByPath.get(r.storage_path) ?? '',
+      uploadedBy: r.uploaded_by,
       tags: (r.photo_tags ?? []).map(toTag),
     }))
   }
@@ -121,7 +123,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
     async listPhotos() {
       const { data, error } = await client
         .from('photos')
-        .select('id, title, year, place, caption, storage_path, photo_tags(*)')
+        .select('id, title, year, place, caption, storage_path, uploaded_by, photo_tags(*)')
         .order('year', { ascending: true, nullsFirst: false })
         .order('created_at')
       fail(error)
@@ -130,7 +132,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
     async getPhoto(id) {
       const { data, error } = await client
         .from('photos')
-        .select('id, title, year, place, caption, storage_path, photo_tags(*)')
+        .select('id, title, year, place, caption, storage_path, uploaded_by, photo_tags(*)')
         .eq('id', id)
         .maybeSingle()
       fail(error)
@@ -139,13 +141,15 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       return photo
     },
     async suggestTag(photoId, memberId, x, y) {
+      const uid = await me()
       const { error } = await client.from('photo_tags').insert({
         photo_id: photoId,
         member_id: memberId,
         x,
         y,
-        status: 'pending',
-        suggested_by: await me(),
+        // Tagging yourself needs no confirmation.
+        status: memberId === uid ? 'confirmed' : 'pending',
+        suggested_by: uid,
       })
       fail(error)
     },
@@ -161,7 +165,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       const id = await me()
       const { data, error } = await client
         .from('photo_tags')
-        .select('*, photos(id, title, year, place, caption, storage_path)')
+        .select('*, photos(id, title, year, place, caption, storage_path, uploaded_by)')
         .eq('member_id', id)
         .eq('status', 'pending')
       fail(error)
@@ -223,22 +227,28 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       )
     },
     async addPhoto(input) {
+      const uid = await me()
       const ext = (input.file.name.split('.').pop() || 'jpg').toLowerCase()
-      const path = `${crypto.randomUUID()}.${ext}`
+      const path = `${uid}/${crypto.randomUUID()}.${ext}`
       const up = await client.storage.from('photos').upload(path, input.file, { contentType: input.file.type })
       fail(up.error)
-      const { error } = await client.from('photos').insert({
-        title: input.title,
-        year: input.year || null,
-        place: input.place || null,
-        caption: input.caption || null,
-        storage_path: path,
-        uploaded_by: await me(),
-      })
+      const { data, error } = await client
+        .from('photos')
+        .insert({
+          title: input.title,
+          year: input.year || null,
+          place: input.place || null,
+          caption: input.caption || null,
+          storage_path: path,
+          uploaded_by: uid,
+        })
+        .select('id')
+        .single()
       if (error) {
         await client.storage.from('photos').remove([path])
         fail(error)
       }
+      return (data as { id: string }).id
     },
     async deletePhoto(photoId) {
       const { data, error } = await client.from('photos').select('storage_path').eq('id', photoId).maybeSingle()

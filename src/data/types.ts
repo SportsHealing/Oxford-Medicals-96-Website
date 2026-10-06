@@ -37,6 +37,7 @@ export type Photo = {
   place?: string | null
   caption?: string | null
   src: string
+  uploadedBy?: string | null
   tags: Tag[]
 }
 
@@ -79,8 +80,9 @@ export type Repo = {
   updateProfile(input: ProfileInput): Promise<void>
   sendContact(toMemberId: string, message: string): Promise<void>
   inbox(): Promise<InboxMessage[]>
-  // Admin
-  addPhoto(input: PhotoInput): Promise<void>
+  // Admin (addPhoto and deletePhoto are also open to members for their own photos)
+  /** Uploads a photo and returns its new id. */
+  addPhoto(input: PhotoInput): Promise<string>
   deletePhoto(photoId: string): Promise<void>
   listAllowedEmails(): Promise<{ email: string; note: string | null }[]>
   addAllowedEmails(emails: string[], note?: string): Promise<void>

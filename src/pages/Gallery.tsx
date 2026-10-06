@@ -20,12 +20,20 @@ export default function Gallery() {
         eyebrow="The archive"
         title="Photos"
         lede="Open a photo to see who is in it, or to put a name to a face."
+        actions={
+          <Link to="/photos/new" className="btn-primary">
+            + Add photos
+          </Link>
+        }
       />
 
       {all.length === 0 ? (
         <div className="card p-10 text-center">
           <h2 className="text-2xl">No photos yet</h2>
-          <p className="mt-2 text-muted">The organisers are gathering them. Check back soon.</p>
+          <p className="mt-2 text-muted">Be the first to share one.</p>
+          <Link to="/photos/new" className="btn-primary mt-5">
+            + Add photos
+          </Link>
         </div>
       ) : (
         <>
