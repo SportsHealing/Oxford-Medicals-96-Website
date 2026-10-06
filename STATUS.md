@@ -1,10 +1,10 @@
 # Project status: Oxford Medics 96
 
-Last updated: 2026-10-04 (Europe/London)
+Last updated: 2026-10-06 (Europe/London)
 
 ## Current phase
 
-Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Email sign-in works; user is admin. All pages read and write the database. Awaiting migration 0002, members list and photos.
+Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in by emailed 6-digit code or password; Resend sends the emails. All pages read and write the database. User is admin. In progress: downloading 744 photos from Kululu, members list, email alerts.
 
 ## Site brief
 
@@ -73,7 +73,18 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Email si
 
 ## Next step
 
-User runs migration 0002, then tests: fill in profile on /me, upload a photo on /admin, invite a second email, tag and confirm. Then load the real members list and photos. Later: email notification when a message or tag arrives (needs an email provider), proper Rita artwork.
+User runs `scripts/download-kululu.mjs` on their Windows PC (see `docs/photo-import.md`), then `scripts/import-photos.mjs`. Then: members list, Cynthia Gupte as co-admin, email alerts for tags and messages, admin toggle on the Admin page, proper Rita artwork.
+
+## Clean-up at the end (user request)
+
+When the site is finished, remove everything installed on the user's PC during this project. Nothing on the PC is needed to keep the site running; it all lives on GitHub, Supabase and Resend.
+
+- Node.js: Windows Settings, Apps, Installed apps, Node.js, Uninstall.
+- The project folder `Documents\Oxford-Medicals-96-Website-main` (includes `node_modules` and the downloaded `kululu-photos` once they are uploaded).
+- Playwright browsers: delete the folder `%USERPROFILE%\AppData\Local\ms-playwright`.
+- npm cache: delete `%USERPROFILE%\AppData\Local\npm-cache` and `%USERPROFILE%\AppData\Roaming\npm`.
+- Any `.env` file containing the Supabase service_role key. Also rotate that key in Supabase afterwards (Project Settings, API Keys, Legacy tab, Generate new) since it was handled on a personal machine.
+- Keep: the Supabase, Resend, GitHub and AWS accounts. They run the live site.
 
 ## Handover notes
 
