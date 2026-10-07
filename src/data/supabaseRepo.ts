@@ -84,6 +84,27 @@ const toTag = (t: TagRow): Tag => ({
 
 const SIGNED_URL_SECONDS = 15 * 60
 
+// Keeps a list for a few minutes so moving between pages does not refetch
+// everything (and re-sign every photo link) each time.
+const CACHE_MS = 3 * 60 * 1000
+function memo<T>(load: () => Promise<T>) {
+  let hit: { at: number; value: Promise<T> } | null = null
+  return {
+    get() {
+      if (hit && Date.now() - hit.at < CACHE_MS) return hit.value
+      const value = load()
+      hit = { at: Date.now(), value }
+      value.catch(() => {
+        if (hit?.value === value) hit = null
+      })
+      return value
+    },
+    clear() {
+      hit = null
+    },
+  }
+}
+
 export function createSupabaseRepo(client: SupabaseClient): Repo {
   const fail = (error: { message: string } | null) => {
     if (error) throw new Error(error.message)
@@ -128,12 +149,29 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
     return id
   }
 
+  const photosCache = memo(async () => {
+    const { data, error } = await client
+      .from('photos')
+      .select('id, title, year, place, caption, storage_path, uploaded_by, photo_tags(*)')
+      .order('year', { ascending: true, nullsFirst: false })
+      .order('created_at')
+    fail(error)
+    return withUrls((data ?? []) as unknown as PhotoRow[])
+  })
+  const membersCache = memo(async () => {
+    const { data, error } = await client.from('members').select(MEMBER_COLS).order('full_name')
+    fail(error)
+    return withAvatars((data ?? []) as unknown as MemberRow[])
+  })
+  client.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+      photosCache.clear()
+      membersCache.clear()
+    }
+  })
+
   return {
-    async listMembers() {
-      const { data, error } = await client.from('members').select(MEMBER_COLS).order('full_name')
-      fail(error)
-      return withAvatars((data ?? []) as unknown as MemberRow[])
-    },
+    listMembers: () => membersCache.get(),
     async getMember(id) {
       const { data, error } = await client.from('members').select(MEMBER_COLS).eq('id', id).maybeSingle()
       fail(error)
@@ -142,6 +180,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       return m
     },
     async setAvatar(file) {
+      membersCache.clear()
       const uid = await me()
       const { data: cur } = await client.from('members').select('avatar_path').eq('id', uid).maybeSingle()
       const path = `${uid}/${Date.now()}.jpg`
@@ -161,15 +200,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       fail(error)
       if (cur?.avatar_path) await client.storage.from('avatars').remove([cur.avatar_path])
     },
-    async listPhotos() {
-      const { data, error } = await client
-        .from('photos')
-        .select('id, title, year, place, caption, storage_path, uploaded_by, photo_tags(*)')
-        .order('year', { ascending: true, nullsFirst: false })
-        .order('created_at')
-      fail(error)
-      return withUrls((data ?? []) as unknown as PhotoRow[])
-    },
+    listPhotos: () => photosCache.get(),
     async getPhoto(id) {
       const { data, error } = await client
         .from('photos')
@@ -182,6 +213,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       return photo
     },
     async suggestTag(photoId, memberId, x, y) {
+      photosCache.clear()
       const uid = await me()
       const { error } = await client.from('photo_tags').insert({
         photo_id: photoId,
@@ -195,10 +227,12 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       fail(error)
     },
     async decideTag(tagId, status) {
+      photosCache.clear()
       const { error } = await client.from('photo_tags').update({ status }).eq('id', tagId)
       fail(error)
     },
     async removeTag(tagId) {
+      photosCache.clear()
       const { error } = await client.from('photo_tags').delete().eq('id', tagId)
       fail(error)
     },
@@ -226,6 +260,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       return (data as string | null) ?? null
     },
     async updateProfile(input: ProfileInput) {
+      membersCache.clear()
       const { error } = await client
         .from('members')
         .update({
@@ -271,6 +306,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       )
     },
     async addPhoto(input) {
+      photosCache.clear()
       const uid = await me()
       const ext = (input.file.name.split('.').pop() || 'jpg').toLowerCase()
       const path = `${uid}/${crypto.randomUUID()}.${ext}`
@@ -295,6 +331,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       return (data as { id: string }).id
     },
     async deletePhoto(photoId) {
+      photosCache.clear()
       const { data, error } = await client.from('photos').select('storage_path').eq('id', photoId).maybeSingle()
       fail(error)
       const del = await client.from('photos').delete().eq('id', photoId)
@@ -338,6 +375,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       fail(error)
     },
     async setAdmin(memberId, makeAdmin) {
+      membersCache.clear()
       const { error } = await client.rpc('set_admin', { target: memberId, make_admin: makeAdmin })
       fail(error)
     },

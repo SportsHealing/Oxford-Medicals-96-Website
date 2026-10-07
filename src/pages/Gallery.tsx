@@ -61,6 +61,8 @@ export default function Gallery() {
                       <img
                         src={photo.src}
                         alt={photo.title}
+                        loading="lazy"
+                        decoding="async"
                         className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                       />
                     </div>

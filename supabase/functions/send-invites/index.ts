@@ -67,22 +67,24 @@ Deno.serve(async (req) => {
     auth: { persistSession: false, autoRefreshToken: false },
   })
 
-  const { data: isAdmin, error: adminErr } = await supabase.rpc('is_admin')
-  if (adminErr || !isAdmin) return json({ error: 'Only admins can send invitations' }, 403)
-
-  const { data: userData } = await supabase.auth.getUser(authHeader.replace(/^Bearer\s+/i, ''))
-  const me = userData.user
-  let inviter = 'A classmate'
-  if (me) {
-    const { data: m } = await supabase.from('members').select('full_name').eq('id', me.id).maybeSingle()
-    if (m?.full_name) inviter = m.full_name
-  }
-
   let body: { emails?: unknown; note?: unknown; message?: unknown; send?: unknown }
   try {
     body = await req.json()
   } catch {
     return json({ error: 'Bad request' }, 400)
+  }
+
+  // The admin check and the sender's name are independent, so ask together.
+  const [adminRes, userRes] = await Promise.all([
+    supabase.rpc('is_admin'),
+    supabase.auth.getUser(authHeader.replace(/^Bearer\s+/i, '')),
+  ])
+  if (adminRes.error || !adminRes.data) return json({ error: 'Only admins can send invitations' }, 403)
+  const me = userRes.data.user
+  let inviter = 'A classmate'
+  if (me) {
+    const { data: m } = await supabase.from('members').select('full_name').eq('id', me.id).maybeSingle()
+    if (m?.full_name) inviter = m.full_name
   }
   const emails = Array.from(
     new Set(

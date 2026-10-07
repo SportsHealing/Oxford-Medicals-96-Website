@@ -15,8 +15,9 @@ export default function Layout() {
   const { email, memberId, isAdmin, signOut } = useAuth()
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  // Re-read on navigation so a new profile picture shows straight away.
-  const { data: me } = useLoad(() => (memberId ? repo.getMember(memberId) : Promise.resolve(null)), [memberId, pathname])
+  // Re-read on entering and leaving the Me page, where the picture changes.
+  const onMe = pathname === '/me'
+  const { data: me } = useLoad(() => (memberId ? repo.getMember(memberId) : Promise.resolve(null)), [memberId, onMe])
 
   const doSignOut = () => void signOut().then(() => navigate('/'))
 
