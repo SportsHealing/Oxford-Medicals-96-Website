@@ -138,7 +138,7 @@ export const members: Member[] = [
   },
 ]
 
-type PhotoSeed = Omit<Photo, 'tags'> & { tags: [string, number, number, Tag['status']][] }
+type PhotoSeed = Omit<Photo, 'tags' | 'thumb'> & { tags: [string, number, number, Tag['status']][] }
 
 const seeds: PhotoSeed[] = [
   {
@@ -219,6 +219,7 @@ const seeds: PhotoSeed[] = [
 let tagSeq = 0
 export const photos: Photo[] = seeds.map((s) => ({
   ...s,
+  thumb: s.src,
   tags: s.tags.map(([memberId, x, y, status]) => ({
     id: `tag-${++tagSeq}`,
     photoId: s.id,
@@ -300,13 +301,15 @@ export const sampleRepo: Repo = {
   },
   async addPhoto(input) {
     const id = `photo-${Date.now()}`
+    const src = URL.createObjectURL(input.file)
     photos.push({
       id,
       title: input.title,
       year: input.year ?? null,
       place: input.place ?? null,
       caption: input.caption ?? null,
-      src: URL.createObjectURL(input.file),
+      src,
+      thumb: src,
       uploadedBy: SAMPLE_ME,
       tags: [],
     })

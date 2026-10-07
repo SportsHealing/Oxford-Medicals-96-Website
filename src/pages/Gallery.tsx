@@ -59,7 +59,7 @@ export default function Gallery() {
                   <Link to={`/photos/${photo.id}`} className="card card-hover group block overflow-hidden no-underline">
                     <div className="overflow-hidden bg-paper">
                       <img
-                        src={photo.src}
+                        src={photo.thumb}
                         alt={photo.title}
                         loading="lazy"
                         decoding="async"

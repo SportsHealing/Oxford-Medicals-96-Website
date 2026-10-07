@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { makeThumbnail } from '../lib/prepareImage.ts'
 import type { AdminMember, InboxMessage, InviteResult, Member, Photo, ProfileInput, Repo, Tag } from './types.ts'
 
 // Column list for members. Never select '*': email is deliberately not
@@ -45,6 +46,7 @@ type PhotoRow = {
   place: string | null
   caption: string | null
   storage_path: string
+  thumb_path: string | null
   uploaded_by: string | null
   photo_tags: TagRow[]
 }
@@ -115,21 +117,25 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
     const { data, error } = await client.storage
       .from('photos')
       .createSignedUrls(
-        rows.map((r) => r.storage_path),
+        rows.flatMap((r) => (r.thumb_path ? [r.storage_path, r.thumb_path] : [r.storage_path])),
         SIGNED_URL_SECONDS,
       )
     fail(error)
     const urlByPath = new Map((data ?? []).map((d) => [d.path, d.signedUrl]))
-    return rows.map((r) => ({
-      id: r.id,
-      title: r.title,
-      year: r.year,
-      place: r.place,
-      caption: r.caption,
-      src: urlByPath.get(r.storage_path) ?? '',
-      uploadedBy: r.uploaded_by,
-      tags: (r.photo_tags ?? []).map(toTag),
-    }))
+    return rows.map((r) => {
+      const src = urlByPath.get(r.storage_path) ?? ''
+      return {
+        id: r.id,
+        title: r.title,
+        year: r.year,
+        place: r.place,
+        caption: r.caption,
+        src,
+        thumb: (r.thumb_path && urlByPath.get(r.thumb_path)) || src,
+        uploadedBy: r.uploaded_by,
+        tags: (r.photo_tags ?? []).map(toTag),
+      }
+    })
   }
 
   const withAvatars = async (rows: MemberRow[]): Promise<Member[]> => {
@@ -152,7 +158,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
   const photosCache = memo(async () => {
     const { data, error } = await client
       .from('photos')
-      .select('id, title, year, place, caption, storage_path, uploaded_by, photo_tags(*)')
+      .select('id, title, year, place, caption, storage_path, thumb_path, uploaded_by, photo_tags(*)')
       .order('year', { ascending: true, nullsFirst: false })
       .order('created_at')
     fail(error)
@@ -204,7 +210,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
     async getPhoto(id) {
       const { data, error } = await client
         .from('photos')
-        .select('id, title, year, place, caption, storage_path, uploaded_by, photo_tags(*)')
+        .select('id, title, year, place, caption, storage_path, thumb_path, uploaded_by, photo_tags(*)')
         .eq('id', id)
         .maybeSingle()
       fail(error)
@@ -240,7 +246,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       const id = await me()
       const { data, error } = await client
         .from('photo_tags')
-        .select('*, photos(id, title, year, place, caption, storage_path, uploaded_by)')
+        .select('*, photos(id, title, year, place, caption, storage_path, thumb_path, uploaded_by)')
         .eq('member_id', id)
         .eq('status', 'pending')
       fail(error)
@@ -310,8 +316,15 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       const uid = await me()
       const ext = (input.file.name.split('.').pop() || 'jpg').toLowerCase()
       const path = `${uid}/${crypto.randomUUID()}.${ext}`
-      const up = await client.storage.from('photos').upload(path, input.file, { contentType: input.file.type })
+      const thumb = await makeThumbnail(input.file)
+      const thumbPath = thumb ? `${uid}/${crypto.randomUUID()}-thumb.jpg` : null
+      const [up, thumbUp] = await Promise.all([
+        client.storage.from('photos').upload(path, input.file, { contentType: input.file.type }),
+        thumb && thumbPath ? client.storage.from('photos').upload(thumbPath, thumb, { contentType: 'image/jpeg' }) : null,
+      ])
       fail(up.error)
+      // A missing thumbnail is not worth failing the upload over.
+      const savedThumb = thumbUp && !thumbUp.error ? thumbPath : null
       const { data, error } = await client
         .from('photos')
         .insert({
@@ -320,23 +333,25 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
           place: input.place || null,
           caption: input.caption || null,
           storage_path: path,
+          thumb_path: savedThumb,
           uploaded_by: uid,
         })
         .select('id')
         .single()
       if (error) {
-        await client.storage.from('photos').remove([path])
+        await client.storage.from('photos').remove(savedThumb ? [path, savedThumb] : [path])
         fail(error)
       }
       return (data as { id: string }).id
     },
     async deletePhoto(photoId) {
       photosCache.clear()
-      const { data, error } = await client.from('photos').select('storage_path').eq('id', photoId).maybeSingle()
+      const { data, error } = await client.from('photos').select('storage_path, thumb_path').eq('id', photoId).maybeSingle()
       fail(error)
       const del = await client.from('photos').delete().eq('id', photoId)
       fail(del.error)
-      if (data?.storage_path) await client.storage.from('photos').remove([data.storage_path])
+      const files = [data?.storage_path, data?.thumb_path].filter((f): f is string => Boolean(f))
+      if (files.length) await client.storage.from('photos').remove(files)
     },
     async listAllowedEmails() {
       const { data, error } = await client.from('allowed_emails').select('email, note, invite_sent_at').order('email')

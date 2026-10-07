@@ -137,7 +137,7 @@ export default function Admin() {
           {data.photos.map((p) => (
             <li key={p.id} className="card overflow-hidden">
               <Link to={`/photos/${p.id}`}>
-                <img src={p.src} alt={p.title} loading="lazy" decoding="async" className="aspect-[4/3] w-full object-cover" />
+                <img src={p.thumb} alt={p.title} loading="lazy" decoding="async" className="aspect-[4/3] w-full object-cover" />
               </Link>
               <div className="flex items-center justify-between gap-2 px-3 py-2">
                 <span className="truncate font-sans text-sm text-navy">{p.title}</span>

@@ -117,7 +117,7 @@ export default function Profile() {
             {inPhotos.map((photo) => (
               <li key={photo.id}>
                 <Link to={`/photos/${photo.id}`} className="card card-hover block overflow-hidden no-underline">
-                  <img src={photo.src} alt={photo.title} className="aspect-[4/3] w-full object-cover" />
+                  <img src={photo.thumb} alt={photo.title} loading="lazy" className="aspect-[4/3] w-full object-cover" />
                   <span className="block px-4 py-3">
                     <span className="label-caps">{photo.year ?? 'Undated'}</span>
                     <span className="block font-sans text-[0.95rem] text-navy">{photo.title}</span>

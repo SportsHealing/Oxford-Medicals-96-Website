@@ -149,7 +149,7 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
             {data.pending.map(({ tag, photo }) => (
               <li key={tag.id} className="flex gap-4 rounded-xl border border-line p-3">
                 <Link to={`/photos/${photo.id}`} className="shrink-0">
-                  <img src={photo.src} alt={photo.title} className="h-20 w-28 rounded-lg object-cover" />
+                  <img src={photo.thumb} alt={photo.title} className="h-20 w-28 rounded-lg object-cover" />
                 </Link>
                 <div className="min-w-0 flex-1">
                   <p className="font-serif text-navy">{photo.title}</p>

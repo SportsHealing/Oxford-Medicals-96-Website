@@ -41,6 +41,8 @@ export type Photo = {
   place?: string | null
   caption?: string | null
   src: string
+  /** Small copy for grids; the same as `src` when none has been made yet. */
+  thumb: string
   uploadedBy?: string | null
   tags: Tag[]
 }

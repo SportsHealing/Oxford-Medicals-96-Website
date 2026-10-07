@@ -42,3 +42,24 @@ node scripts/import-photos.mjs ./kululu-photos ./captions.csv
 ```
 
 Safe to re-run: photos already uploaded are skipped. Afterwards, the photos appear on the site for all members. Titles, years and places can be tidied later from the Admin page.
+
+## Step 3: make thumbnails (once, after the thumbnail update)
+
+Grids and strips use a small copy of each photo, so the Photos page loads quickly. New uploads get one automatically. Photos already on the site need a one-off run.
+
+1. In Supabase, SQL Editor, new query, run `supabase/migrations/0008_photo_thumbnails.sql`:
+
+```sql
+alter table public.photos add column if not exists thumb_path text;
+```
+
+2. On your computer, in the project folder (same keys as step 2 above):
+
+```sh
+npm i -D sharp
+SUPABASE_URL=https://YOURREF.supabase.co \
+SUPABASE_SERVICE_ROLE_KEY=PASTE_KEY_HERE \
+node scripts/make-thumbnails.mjs
+```
+
+It prints how many photos need a thumbnail, then works through them (a few minutes for 744). Safe to re-run: photos that already have one are skipped. Any photo it cannot read keeps working and simply shows its full-size version. Run it again after any future bulk import.

@@ -23,6 +23,24 @@ export async function prepareImage(file: File): Promise<File> {
   }
 }
 
+// A small copy of a photo for grids. Returns null if the browser cannot decode
+// the file, in which case the site just uses the full-size picture.
+export async function makeThumbnail(file: File, edge = 640): Promise<File | null> {
+  try {
+    const bitmap = await createImageBitmap(file)
+    const scale = Math.min(1, edge / Math.max(bitmap.width, bitmap.height))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale))
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale))
+    canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+    bitmap.close()
+    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/jpeg', 0.8))
+    return blob ? new File([blob], 'thumb.jpg', { type: 'image/jpeg' }) : null
+  } catch {
+    return null
+  }
+}
+
 // Square-crops and shrinks a picture for use as a profile photo.
 export async function makeAvatar(file: File, size = 512): Promise<File> {
   try {

@@ -142,7 +142,7 @@ export default function PhotoLightbox({ photos, startIndex, onClose }: Props) {
                 current ? 'opacity-100 ring-2 ring-white' : 'opacity-50 hover:opacity-90'
               }`}
             >
-              <img src={p.src} alt="" loading="lazy" draggable={false} className="h-full w-full object-cover" />
+              <img src={p.thumb} alt="" loading="lazy" draggable={false} className="h-full w-full object-cover" />
             </button>
           )
         })}
