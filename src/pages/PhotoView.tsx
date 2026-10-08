@@ -112,19 +112,15 @@ export default function PhotoView() {
         </div>
       )}
 
-      <div className="mb-6 flex items-center justify-between gap-4">
+      <div className="mb-6">
         <Link to="/photos" className="font-sans text-sm text-muted no-underline hover:text-navy">
           &larr; All photos
         </Link>
-        <div className="flex gap-2">
-          <PagerLink to={prev ? `/photos/${prev.id}` : undefined} label="Previous" />
-          <PagerLink to={next ? `/photos/${next.id}` : undefined} label="Next" />
-        </div>
       </div>
 
       <div className="grid gap-10 lg:grid-cols-[1.6fr_1fr]">
         <div>
-          <div className="card flex justify-center overflow-hidden bg-paper">
+          <div className="card flex items-center justify-center overflow-hidden bg-paper lg:h-[60vh]">
             <div
               className="relative inline-block max-w-full cursor-crosshair"
               onClick={placeTag}
@@ -169,7 +165,14 @@ export default function PhotoView() {
               </button>
             </div>
           </div>
-          <div className="mt-3 flex items-center justify-between font-sans text-sm text-muted">
+          <nav className="mt-4 flex items-center justify-center gap-4" aria-label="Photo navigation">
+            <PagerLink to={prev ? `/photos/${prev.id}` : undefined} label="Previous" dir="prev" />
+            <span className="min-w-[5.5rem] text-center font-sans text-sm text-muted">
+              {index + 1} of {all.length}
+            </span>
+            <PagerLink to={next ? `/photos/${next.id}` : undefined} label="Next" dir="next" />
+          </nav>
+          <div className="mt-4 flex items-center justify-between font-sans text-sm text-muted">
             <span>Click on a face to add a name.</span>
             <button type="button" className="hover:text-navy" onClick={() => setShowLabels((v) => !v)}>
               {showLabels ? 'Hide names' : 'Show names'}
@@ -281,12 +284,29 @@ export default function PhotoView() {
   )
 }
 
-function PagerLink({ to, label }: { to?: string; label: string }) {
-  const cls = 'rounded-full border px-4 py-1.5 font-sans text-sm font-semibold no-underline transition'
-  if (!to) return <span className={`${cls} border-line text-muted/50`}>{label}</span>
-  return (
-    <Link to={to} className={`${cls} border-line bg-white text-navy hover:border-navy`}>
+function PagerLink({ to, label, dir }: { to?: string; label: string; dir: 'prev' | 'next' }) {
+  const cls =
+    'inline-flex items-center gap-2 rounded-full border px-5 py-2.5 font-sans text-sm font-semibold no-underline transition'
+  const arrow = (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d={dir === 'prev' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'} />
+    </svg>
+  )
+  const content = dir === 'prev' ? (
+    <>
+      {arrow}
       {label}
+    </>
+  ) : (
+    <>
+      {label}
+      {arrow}
+    </>
+  )
+  if (!to) return <span className={`${cls} border-line text-muted/50`}>{content}</span>
+  return (
+    <Link to={to} className={`${cls} border-line bg-white text-navy hover:border-navy hover:bg-rose-soft`}>
+      {content}
     </Link>
   )
 }
