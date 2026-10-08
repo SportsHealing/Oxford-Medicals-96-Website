@@ -350,6 +350,9 @@ export const sampleRepo: Repo = {
     const m = members.find((x) => x.id === memberId)
     if (m) m.isAdmin = makeAdmin
   },
+  async unrecognisedSignins() {
+    return [{ email: 'birch.personal@example.com', firstTried: '2026-10-05T09:00:00Z', signedIn: true }]
+  },
   async adminMembers() {
     return members.map((m) => ({
       id: m.id,

@@ -9,12 +9,14 @@ export default function Admin() {
   const { isAdmin, memberId } = useAuth()
   const { data, loading, error, reload } = useLoad(
     async () => {
-      const [photos, allowed, members] = await Promise.all([
+      const [photos, allowed, members, unrecognised] = await Promise.all([
         repo.listPhotos(),
         repo.listAllowedEmails(),
         repo.adminMembers(),
+        // Needs migration 0009; until then the list is simply empty.
+        repo.unrecognisedSignins().catch(() => []),
       ])
-      return { photos, allowed, members }
+      return { photos, allowed, members, unrecognised }
     },
     [],
   )
@@ -58,6 +60,39 @@ export default function Admin() {
         </div>
         <InviteForm onDone={reload} />
       </div>
+
+      {data.unrecognised.length > 0 && (
+        <section className="card mt-12 border-rose/60 bg-rose-soft/50 p-5">
+          <h2 className="text-xl">Tried to sign in, not on the list ({data.unrecognised.length})</h2>
+          <p className="mt-1 font-sans text-sm text-muted">
+            Usually a classmate using a different email address from the one you invited. Add them and they can
+            get in straight away; no new email needed.
+          </p>
+          <ul className="mt-3 divide-y divide-line rounded-xl bg-white">
+            {data.unrecognised.map((u) => (
+              <li key={u.email} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 font-sans text-sm">
+                <span className="min-w-0 flex-1 truncate text-ink">{u.email}</span>
+                <span className="text-xs text-muted">
+                  {u.signedIn ? 'Entered a code' : 'Asked for a code'}{' '}
+                  {new Date(u.firstTried).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                </span>
+                <button
+                  type="button"
+                  className="rounded-full bg-navy px-3 py-1 text-xs font-semibold text-white hover:bg-navy/90"
+                  onClick={() => {
+                    if (!confirm(`Add ${u.email} to the members list? They will be able to sign in.`)) return
+                    void repo
+                      .addAllowedEmails([u.email], 'added after a sign-in attempt')
+                      .then(reload, (e: unknown) => alert(e instanceof Error ? e.message : 'Could not add'))
+                  }}
+                >
+                  Add to list
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="mt-12">
         <h2 className="text-2xl">Members</h2>

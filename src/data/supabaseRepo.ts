@@ -403,6 +403,12 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       const { error } = await client.rpc('set_admin', { target: memberId, make_admin: makeAdmin })
       fail(error)
     },
+    async unrecognisedSignins() {
+      const { data, error } = await client.rpc('admin_unrecognised_signins')
+      fail(error)
+      type Row = { email: string; first_tried: string; signed_in: boolean }
+      return ((data ?? []) as Row[]).map((r) => ({ email: r.email, firstTried: r.first_tried, signedIn: r.signed_in }))
+    },
     async adminMembers() {
       const { data, error } = await client.rpc('admin_members')
       fail(error)

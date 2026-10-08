@@ -76,6 +76,13 @@ export type AdminMember = {
   createdAt: string
 }
 
+export type UnrecognisedSignin = {
+  email: string
+  firstTried: string
+  /** True if they got as far as entering a code; false if they only asked for one. */
+  signedIn: boolean
+}
+
 export type Repo = {
   listMembers(): Promise<Member[]>
   getMember(id: string): Promise<Member | null>
@@ -100,6 +107,8 @@ export type Repo = {
   /** Adds addresses to the members list and emails each person an invitation. */
   sendInvites(input: { emails: string[]; note?: string; message?: string }): Promise<InviteResult>
   adminMembers(): Promise<AdminMember[]>
+  /** Admin only: sign-in attempts from addresses not on the list. */
+  unrecognisedSignins(): Promise<UnrecognisedSignin[]>
   setAdmin(memberId: string, makeAdmin: boolean): Promise<void>
   /** Sets the signed-in member's profile picture (already cropped). */
   setAvatar(file: File): Promise<void>

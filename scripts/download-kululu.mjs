@@ -3,7 +3,7 @@
 //
 // Usage (run on your own computer, inside the project folder):
 //   npm i -D playwright && npx playwright install chromium
-//   node scripts/download-kululu.mjs https://app.kululu.com/oxfordmedics30years ./kululu-photos
+//   node scripts/download-kululu.mjs https://app.kululu.com/<your-album> ./kululu-photos
 //
 // A browser window opens. If the album asks for a name or password, enter it
 // there; the script waits until photos are visible, scrolls to load them all,

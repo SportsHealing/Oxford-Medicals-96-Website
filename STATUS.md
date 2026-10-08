@@ -1,10 +1,10 @@
 # Project status: Oxford Medics 96
 
-Last updated: 2026-10-06 (Europe/London)
+Last updated: 2026-10-08 (Europe/London)
 
 ## Current phase
 
-Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in by emailed 6-digit code or password; Resend sends the emails. All pages read and write the database. User is admin. In progress: downloading 744 photos from Kululu, members list, email alerts.
+Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in by emailed 6-digit code or password; Resend sends the emails. All pages read and write the database. User is admin. Kululu photos imported (787) and all have thumbnails. Invites are being sent. Current focus: making sure every invited classmate can sign in.
 
 ## Site brief
 
@@ -79,10 +79,31 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
 - `supabase/migrations/0003_member_uploads.sql`: members upload, edit and delete their own photos; self-tags confirm instantly.
 - `src/pages/AddPhotos.tsx`: member upload (up to 20 at once, shrunk to 2400px), then a tag-as-you-go queue.
 - `scripts/download-kululu.mjs`, `scripts/import-photos.mjs`, `docs/photo-import.md`: one-off Kululu migration.
+- `supabase/migrations/0008_photo_thumbnails.sql`, `scripts/make-thumbnails.mjs`: 640px thumbnails for grids (run 2026-10-08: 787 made, 0 failed).
+- `supabase/migrations/0009_membership_on_invite.sql`: adding an address to the list now also grants membership to an existing account, repairs people already stuck, and lists sign-in attempts from addresses not on the list (Admin page).
+- `docs/website-brief-v2.md`: brief for the next build (home carousel, roster, person finder, map, news feed). No personal data.
 
-## Next step
+## To-do list
 
-User runs `scripts/download-kululu.mjs` on their Windows PC (see `docs/photo-import.md`), then `scripts/import-photos.mjs`. Then: members list, Cynthia Gupte as co-admin, email alerts for tags and messages, admin toggle on the Admin page, proper Rita artwork.
+**Now (sign-in reliability)**
+- [ ] Owner: run `supabase/migrations/0009_membership_on_invite.sql` in the Supabase SQL Editor.
+- [ ] Owner: check Resend (Emails log and Domains page) for failed or bounced invites; add a DMARC record in Route 53 if Resend flags it.
+- [ ] Owner: in Supabase, Authentication, Rate Limits, raise "emails sent per hour" so a batch of new invitees can all get codes.
+- [ ] Owner: decide whether the GitHub repository stays public (see Handover notes).
+- [ ] Owner: redeploy the `send-invites` Edge Function with the latest code (parallel admin checks).
+
+**Next build (later, from `docs/website-brief-v2.md`)**
+- [ ] Phase 1: home carousel of 3 group photos, gallery paging, image sizes, code splitting, repo privacy clean-up.
+- [ ] Phase 2: cohort roster, Admin roster import, person finder with previous names and contact rules.
+- [ ] Phase 3: "Where are we now" map and profile links.
+- [ ] Phase 4: news feed (weekly scan, admin approval, opt-out).
+- [ ] Owner decisions D1 to D10 in the brief; owner supplies the 3 group photos.
+
+**Earlier items still open**
+- [ ] Second organiser as co-admin (owner promotes them in Admin once they have signed in).
+- [ ] Email alerts for tags and messages.
+- [ ] Proper Rita artwork.
+- [ ] Face recognition: owner decision pending.
 
 ## Clean-up at the end (user request)
 
@@ -96,6 +117,8 @@ When the site is finished, remove everything installed on the user's PC during t
 - Keep: the Supabase, Resend, GitHub and AWS accounts. They run the live site.
 
 ## Handover notes
+
+- Hosting: the site is built and served by GitHub Pages from the `main` branch. AWS (Route 53) only provides the domain name. GitHub Pages only works for a private repository on a paid GitHub plan (Team or above). Free alternatives that build from a private repository: Cloudflare Pages, Netlify. AWS Amplify Hosting also works (small monthly cost). Any move needs the two `VITE_SUPABASE_*` values copied into the new host and the Route 53 records repointed.
 
 - Source: one page of handwritten notes, then answers in chat.
 - Claude cannot be trained to recognise faces and does not identify people from their faces. Face matching would use a dedicated service, run only for members who opt in.

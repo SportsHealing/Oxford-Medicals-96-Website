@@ -13,7 +13,7 @@ git clone https://github.com/SportsHealing/Oxford-Medicals-96-Website.git
 cd Oxford-Medicals-96-Website
 npm install
 npm i -D playwright && npx playwright install chromium
-node scripts/download-kululu.mjs https://app.kululu.com/oxfordmedics30years ./kululu-photos
+node scripts/download-kululu.mjs https://app.kululu.com/<your-album> ./kululu-photos
 ```
 
 A browser window opens. If the album asks for a name or password, type it in that window. The script then scrolls through the album, opens each photo, and saves the largest version it sees into `kululu-photos/`. It takes 10 to 20 minutes for 744 photos. If it saves nothing, it writes `kululu-page.html`; send that file to Claude and the script will be adjusted.
