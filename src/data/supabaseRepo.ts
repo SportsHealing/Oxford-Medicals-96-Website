@@ -1,6 +1,19 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { makeThumbnail } from '../lib/prepareImage.ts'
-import type { AdminMember, InboxMessage, InviteResult, Member, Photo, ProfileInput, Repo, Tag } from './types.ts'
+import type {
+  AdminMember,
+  DecisionResult,
+  ImportSummary,
+  InboxMessage,
+  InviteResult,
+  JoinRequest,
+  Member,
+  Photo,
+  ProfileInput,
+  Repo,
+  RosterPerson,
+  Tag,
+} from './types.ts'
 
 // Column list for members. Never select '*': email is deliberately not
 // readable by other members (see migration 0002).
@@ -123,6 +136,26 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       for (const d of data ?? []) if (d.path && d.signedUrl) urlByPath.set(d.path, d.signedUrl)
     }
     return urlByPath
+  }
+
+  // Calls an Edge Function, surfacing its own error message where there is one.
+  const invoke = async (name: string, body: Record<string, unknown>): Promise<unknown> => {
+    const { data, error } = await client.functions.invoke(name, { body })
+    if (!error) return data
+    if (error.name === 'FunctionsFetchError') {
+      throw new Error(
+        `Could not reach the ${name} function. Check it is deployed in Supabase (Edge Functions) with exactly that name.`,
+      )
+    }
+    let detail = error.message
+    try {
+      const ctx = (error as { context?: Response }).context
+      const j = ctx ? await ctx.json() : null
+      if (j?.error) detail = j.error
+    } catch {
+      /* keep the generic message */
+    }
+    throw new Error(detail)
   }
 
   const withUrls = async (rows: PhotoRow[]): Promise<Photo[]> => {
@@ -374,25 +407,7 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       fail(error)
     },
     async sendInvites(input) {
-      const { data, error } = await client.functions.invoke('send-invites', { body: input })
-      if (error) {
-        // Surface the function's own message where there is one.
-        if (error.name === 'FunctionsFetchError') {
-          throw new Error(
-            'Could not reach the send-invites function. Check it is deployed in Supabase (Edge Functions) with exactly that name.',
-          )
-        }
-        let detail = error.message
-        try {
-          const ctx = (error as { context?: Response }).context
-          const j = ctx ? await ctx.json() : null
-          if (j?.error) detail = j.error
-        } catch {
-          /* keep the generic message */
-        }
-        throw new Error(detail)
-      }
-      return data as InviteResult
+      return (await invoke('send-invites', { ...input })) as InviteResult
     },
     async removeAllowedEmail(email) {
       const { error } = await client.from('allowed_emails').delete().eq('email', email)
@@ -402,6 +417,49 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       membersCache.clear()
       const { error } = await client.rpc('set_admin', { target: memberId, make_admin: makeAdmin })
       fail(error)
+    },
+    async listJoinRequests() {
+      const { data, error } = await client.from('join_requests').select('*').order('created_at', { ascending: false })
+      fail(error)
+      type Row = {
+        id: string; user_id: string; email: string; full_name: string; previous_name: string | null
+        kind: JoinRequest['kind']; matched_name: string | null; status: JoinRequest['status']; created_at: string; decided_at: string | null
+      }
+      return ((data ?? []) as Row[]).map((r) => ({
+        id: r.id, userId: r.user_id, email: r.email, fullName: r.full_name, previousName: r.previous_name, kind: r.kind,
+        matchedName: r.matched_name, status: r.status, createdAt: r.created_at, decidedAt: r.decided_at,
+      }))
+    },
+    async decideJoinRequest(id, accept, message) {
+      return (await invoke('join-requests', { action: 'decide', id, accept, message })) as DecisionResult
+    },
+    async deleteJoinRequest(id) {
+      const { error } = await client.from('join_requests').delete().eq('id', id)
+      fail(error)
+    },
+    async listRoster() {
+      const { data, error } = await client.from('roster').select('*').order('full_name')
+      fail(error)
+      type Row = {
+        id: string; full_name: string; other_names: string[]; email: string | null; specialty: string | null
+        cohort: RosterPerson['cohort']; member_id: string | null; joined_by_name: boolean
+      }
+      return ((data ?? []) as Row[]).map((r) => ({
+        id: r.id, fullName: r.full_name, otherNames: r.other_names ?? [], email: r.email, specialty: r.specialty,
+        cohort: r.cohort, memberId: r.member_id, joinedByName: r.joined_by_name,
+      }))
+    },
+    async importPeople(rows) {
+      const { data, error } = await client.rpc('admin_import_people', { p_rows: rows })
+      fail(error)
+      const d = data as { added: number; linked: number; already_known: number; emails_added: number; to_check: string[] }
+      membersCache.clear()
+      return { added: d.added, linked: d.linked, alreadyKnown: d.already_known, emailsAdded: d.emails_added, toCheck: d.to_check ?? [] } satisfies ImportSummary
+    },
+    async removeAccess(memberId) {
+      const { error } = await client.rpc('admin_remove_access', { p_member: memberId })
+      fail(error)
+      membersCache.clear()
     },
     async unrecognisedSignins() {
       const { data, error } = await client.rpc('admin_unrecognised_signins')

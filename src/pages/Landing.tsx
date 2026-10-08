@@ -32,7 +32,7 @@ export default function Landing() {
                 </Link>
               ) : (
                 <Link to="/sign-in" className="btn-primary">
-                  Member sign in
+                  Sign in or join
                 </Link>
               )}
               <Link to="/privacy" className="btn border border-white/25 text-white hover:border-white/60 hover:bg-white/5">

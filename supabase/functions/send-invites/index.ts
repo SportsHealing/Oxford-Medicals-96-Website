@@ -42,7 +42,7 @@ function inviteHtml(opts: { link: string; inviter: string; message: string }) {
     <a href="${opts.link}" style="display:inline-block;background:#e8a6bd;color:#002147;text-decoration:none;font-weight:600;font-size:16px;padding:13px 26px;border-radius:999px;">Join the site</a>
   </p>
   <p style="font-size:14px;line-height:1.55;color:#6b7280;margin:0 0 6px;">
-    Press the button, then "Email me a code". We'll send a 6-digit code to this address. Type it in and you're in.
+    Press the button and enter your name. We'll email an 8-digit code to this address; type it in and choose a password, and you're in.
   </p>
   <p style="font-size:14px;line-height:1.55;color:#6b7280;margin:0;">
     Only members of the cohort can see anything on the site. If this wasn't meant for you, just ignore it.

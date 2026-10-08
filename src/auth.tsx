@@ -15,9 +15,9 @@ type Auth = {
   /** The signed-in member's id, or null if not signed in or not a member. */
   memberId: string | null
   isAdmin: boolean
-  /** Emails a 6-digit code. Returns an error message, or null on success. */
+  /** Emails a sign-in code (8 digits). Returns an error message, or null on success. */
   requestLink: (email: string) => Promise<string | null>
-  /** Checks the 6-digit code. Returns an error message, or null on success. */
+  /** Checks the emailed code. Returns an error message, or null on success. */
   verifyCode: (email: string, code: string) => Promise<string | null>
   /** Email + password sign-in. Returns an error message, or null on success. */
   signInWithPassword: (email: string, password: string) => Promise<string | null>
@@ -27,12 +27,21 @@ type Auth = {
   needsPasswordPrompt: boolean
   /** Closes the first-sign-in prompt for good, optionally setting a password. */
   finishPasswordPrompt: (password?: string) => Promise<string | null>
+  /**
+   * After the email is confirmed: lets the person in if their email or name is on
+   * the list, otherwise files a request to join. Admins are emailed either way.
+   */
+  claimAccess: (name: string, previousName?: string, prototypeEmail?: string) => Promise<{ status: ClaimStatus } | { error: string }>
+  /** For a signed-in person who is not a member: the state of their request, if any. */
+  myJoinStatus: () => Promise<'pending' | 'accepted' | 'declined' | null>
   /** Prototype only: pretend the link was clicked. */
   prototypeSignIn: (email: string) => void
   signOut: () => Promise<void>
   /** Re-read the member row (after editing a profile, for example). */
   refresh: () => Promise<void>
 }
+
+export type ClaimStatus = 'member' | 'joined_by_name' | 'pending' | 'declined'
 
 const AuthContext = createContext<Auth | null>(null)
 const KEY = 'om96.email'
@@ -173,6 +182,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return null
   }
 
+  const claimAccess = async (name: string, previousName?: string, prototypeEmail?: string) => {
+    if (!supabase) {
+      // Prototype: an address containing "pending" plays someone not on the list.
+      if ((prototypeEmail ?? '').includes('pending')) return { status: 'pending' as const }
+      prototypeSignIn(prototypeEmail || 'you@example.com')
+      return { status: 'member' as const }
+    }
+    const { data, error } = await supabase.rpc('claim_access', {
+      p_name: name.trim(),
+      p_previous_name: previousName?.trim() || null,
+    })
+    if (error) return { error: error.message }
+    const status = data as ClaimStatus
+    if (status === 'pending' || status === 'joined_by_name') {
+      // Emails the admins. If it fails the request still shows on the Admin page.
+      void supabase.functions.invoke('join-requests', { body: { action: 'notify' } }).catch(() => {})
+    }
+    if (status === 'member' || status === 'joined_by_name') await refresh()
+    return { status }
+  }
+
+  const myJoinStatus = async () => {
+    if (!supabase) return null
+    const { data: u } = await supabase.auth.getUser()
+    if (!u.user) return null
+    const { data } = await supabase.from('join_requests').select('status').eq('user_id', u.user.id).maybeSingle()
+    return (data?.status as 'pending' | 'accepted' | 'declined' | undefined) ?? null
+  }
+
   const prototypeSignIn = (value: string) => {
     if (supabase) return
     setEmail(value)
@@ -203,7 +241,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ loading, email, memberId, isAdmin, requestLink, verifyCode, signInWithPassword, setPassword, needsPasswordPrompt, finishPasswordPrompt, prototypeSignIn, signOut, refresh }}
+      value={{ loading, email, memberId, isAdmin, requestLink, verifyCode, signInWithPassword, setPassword, needsPasswordPrompt, finishPasswordPrompt, claimAccess, myJoinStatus, prototypeSignIn, signOut, refresh }}
     >
       {children}
     </AuthContext.Provider>

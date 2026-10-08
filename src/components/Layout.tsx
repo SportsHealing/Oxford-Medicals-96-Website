@@ -69,7 +69,7 @@ export default function Layout() {
                 </>
               ) : (
                 <NavLink to="/sign-in" className="btn-primary !py-2 text-sm">
-                  Member sign in
+                  Sign in or join
                 </NavLink>
               )}
             </nav>

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useAuth } from '../auth.tsx'
 import { asset } from '../asset.ts'
 
@@ -6,12 +7,14 @@ import { asset } from '../asset.ts'
 // password so next time they can skip the emailed code.
 export default function PasswordPrompt() {
   const { needsPasswordPrompt, memberId, finishPasswordPrompt } = useAuth()
+  const { pathname } = useLocation()
   const [pw, setPw] = useState('')
   const [pw2, setPw2] = useState('')
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
 
-  if (!needsPasswordPrompt || !memberId) return null
+  // The sign-in page asks for a password itself.
+  if (!needsPasswordPrompt || !memberId || pathname === '/sign-in') return null
 
   const save = async (e: FormEvent) => {
     e.preventDefault()

@@ -76,6 +76,35 @@ export type AdminMember = {
   createdAt: string
 }
 
+export type JoinRequest = {
+  id: string
+  userId: string
+  email: string
+  fullName: string
+  previousName: string | null
+  /** 'request': asked to join. 'name_match': got in by matching a name on the class list. */
+  kind: 'request' | 'name_match'
+  matchedName: string | null
+  status: 'pending' | 'accepted' | 'declined'
+  createdAt: string
+  decidedAt: string | null
+}
+
+export type RosterPerson = {
+  id: string
+  fullName: string
+  otherNames: string[]
+  email: string | null
+  specialty: string | null
+  cohort: 'clinical' | 'preclinical' | null
+  memberId: string | null
+  joinedByName: boolean
+}
+
+export type ImportRow = { name: string; email: string | null; specialty: string | null; cohort: 'clinical' | 'preclinical' | null }
+export type ImportSummary = { added: number; linked: number; alreadyKnown: number; emailsAdded: number; toCheck: string[] }
+export type DecisionResult = { status: 'accepted' | 'declined'; emailed: boolean; emailError?: string }
+
 export type UnrecognisedSignin = {
   email: string
   firstTried: string
@@ -107,6 +136,16 @@ export type Repo = {
   /** Adds addresses to the members list and emails each person an invitation. */
   sendInvites(input: { emails: string[]; note?: string; message?: string }): Promise<InviteResult>
   adminMembers(): Promise<AdminMember[]>
+  /** Admin only: requests to join, newest first. */
+  listJoinRequests(): Promise<JoinRequest[]>
+  /** Admin only: accept or decline; the person is emailed the decision. */
+  decideJoinRequest(id: string, accept: boolean, message?: string): Promise<DecisionResult>
+  deleteJoinRequest(id: string): Promise<void>
+  /** Admin only: the class list (names, and emails where known). */
+  listRoster(): Promise<RosterPerson[]>
+  importPeople(rows: ImportRow[]): Promise<ImportSummary>
+  /** Admin only: take away a member's access (for example a wrong name match). */
+  removeAccess(memberId: string): Promise<void>
   /** Admin only: sign-in attempts from addresses not on the list. */
   unrecognisedSignins(): Promise<UnrecognisedSignin[]>
   setAdmin(memberId: string, makeAdmin: boolean): Promise<void>

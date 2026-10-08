@@ -22,6 +22,12 @@ export default function Privacy() {
           <li>Photos you appear in, and tags that say you are in them.</li>
         </Section>
 
+        <Section title="Joining">
+          <li>The organisers keep a class list of names, with email addresses where known, so classmates can join.</li>
+          <li>If you ask to join and are not on the list, only the organisers see your name and email, to decide.</li>
+          <li>If a request is declined we keep only that request, so you are not asked again. Ask us to delete it at any time.</li>
+        </Section>
+
         <Section title="Tags">
           <li>Anyone can suggest that you are in a photo.</li>
           <li>The tag is shown to others only after you confirm it.</li>

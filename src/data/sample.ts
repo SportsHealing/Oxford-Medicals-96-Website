@@ -1,7 +1,7 @@
 // Sample data and an in-memory repo for prototype mode.
 // Every person and photo here is fictional.
 import { asset } from '../asset.ts'
-import type { AllowedEmail, InboxMessage, Member, Photo, ProfileInput, Repo, Tag } from './types.ts'
+import type { AllowedEmail, InboxMessage, JoinRequest, Member, Photo, ProfileInput, Repo, RosterPerson, Tag } from './types.ts'
 
 /** In prototype mode you are signed in as this person. */
 export const SAMPLE_ME = 'sample-alder'
@@ -237,6 +237,17 @@ const allowed: AllowedEmail[] = [
 ]
 const inbox: InboxMessage[] = []
 
+const joinRequests: JoinRequest[] = [
+  { id: 'jr-1', userId: 'u-1', email: 'rowan.new@example.com', fullName: 'Rowan Newcomer', previousName: 'Rowan Oldname',
+    kind: 'request', matchedName: null, status: 'pending', createdAt: '2026-10-07T18:00:00Z', decidedAt: null },
+  { id: 'jr-2', userId: 'u-2', email: 'hazel.name@example.com', fullName: 'Hazel Sample', previousName: null,
+    kind: 'name_match', matchedName: 'Sample Hazel', status: 'accepted', createdAt: '2026-10-06T10:00:00Z', decidedAt: '2026-10-06T10:00:00Z' },
+]
+const roster: RosterPerson[] = [
+  { id: 'r-1', fullName: 'Sample Cedar', otherNames: [], email: null, specialty: 'Neurology', cohort: 'clinical', memberId: null, joinedByName: false },
+  { id: 'r-2', fullName: 'Sample Willow', otherNames: [], email: 'willow@example.com', specialty: 'General practice', cohort: 'clinical', memberId: null, joinedByName: false },
+]
+
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v))
 
 export const sampleRepo: Repo = {
@@ -350,6 +361,33 @@ export const sampleRepo: Repo = {
     const m = members.find((x) => x.id === memberId)
     if (m) m.isAdmin = makeAdmin
   },
+  async listJoinRequests() {
+    return clone(joinRequests)
+  },
+  async decideJoinRequest(id, accept) {
+    const r = joinRequests.find((j) => j.id === id)
+    if (!r || r.status !== 'pending') throw new Error('This request has already been decided')
+    r.status = accept ? 'accepted' : 'declined'
+    r.decidedAt = new Date().toISOString()
+    return { status: r.status, emailed: true }
+  },
+  async deleteJoinRequest(id) {
+    const i = joinRequests.findIndex((j) => j.id === id)
+    if (i >= 0) joinRequests.splice(i, 1)
+  },
+  async listRoster() {
+    return clone(roster)
+  },
+  async importPeople(rows) {
+    let added = 0
+    for (const r of rows) {
+      if (roster.some((p) => (r.email && p.email === r.email) || p.fullName.toLowerCase() === r.name.toLowerCase())) continue
+      roster.push({ id: `r-${roster.length + 1}`, fullName: r.name, otherNames: [], email: r.email, specialty: r.specialty, cohort: r.cohort, memberId: null, joinedByName: false })
+      added++
+    }
+    return { added, linked: 0, alreadyKnown: rows.length - added, emailsAdded: rows.filter((r) => r.email).length, toCheck: [] }
+  },
+  async removeAccess() {},
   async unrecognisedSignins() {
     return [{ email: 'birch.personal@example.com', firstTried: '2026-10-05T09:00:00Z', signedIn: true }]
   },

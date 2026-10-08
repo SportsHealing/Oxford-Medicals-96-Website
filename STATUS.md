@@ -1,6 +1,6 @@
 # Project status: Oxford Medics 96
 
-Last updated: 2026-10-08 (Europe/London)
+Last updated: 2026-10-08 (Europe/London), sign-up update
 
 ## Current phase
 
@@ -81,15 +81,18 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
 - `scripts/download-kululu.mjs`, `scripts/import-photos.mjs`, `docs/photo-import.md`: one-off Kululu migration.
 - `supabase/migrations/0008_photo_thumbnails.sql`, `scripts/make-thumbnails.mjs`: 640px thumbnails for grids (run 2026-10-08: 787 made, 0 failed).
 - `supabase/migrations/0009_membership_on_invite.sql`: adding an address to the list now also grants membership to an existing account, repairs people already stuck, and lists sign-in attempts from addresses not on the list (Admin page).
+- `supabase/migrations/0010_join_requests.sql`, `supabase/functions/join-requests/index.ts`, `docs/sign-up-setup.md`: self-service sign-up (email on list, or name on the class list, or request to join with admin accept/decline and decision emails), class list (`roster`) and import, Admin redesigned into Requests, People and Add people tabs. Tested against a local Postgres copy of the schema (24 scenarios, 32 name-matching cases).
 - `docs/website-brief-v2.md`: brief for the next build (home carousel, roster, person finder, map, news feed). No personal data.
 
 ## To-do list
 
 **Now (sign-in reliability)**
-- [ ] Owner: run `supabase/migrations/0009_membership_on_invite.sql` in the Supabase SQL Editor.
+- [x] Owner: run `supabase/migrations/0009_membership_on_invite.sql` in the Supabase SQL Editor.
+- [ ] Owner: sign-up setup steps 1 to 7 in `docs/sign-up-setup.md` (SQL 0010, `join-requests` function, `ADMIN_EMAILS` secret, redeploy `send-invites`, email templates, import the two lists, test).
+- [ ] Owner: check the bounced invite addresses in Resend and correct them via the sign-up sheet import.
 - [ ] Owner: check Resend (Emails log and Domains page) for failed or bounced invites; add a DMARC record in Route 53 if Resend flags it.
 - [ ] Owner: in Supabase, Authentication, Rate Limits, raise "emails sent per hour" so a batch of new invitees can all get codes.
-- [ ] Owner: decide whether the GitHub repository stays public (see Handover notes).
+- [x] Owner: decided the GitHub repository stays public (2026-10-08).
 - [ ] Owner: redeploy the `send-invites` Edge Function with the latest code (parallel admin checks).
 
 **Next build (later, from `docs/website-brief-v2.md`)**
