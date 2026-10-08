@@ -112,16 +112,26 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
     if (error) throw new Error(error.message)
   }
 
+  // Storage signs at most 1000 paths per request, so ask in batches.
+  const signAll = async (bucket: string, paths: string[], seconds: number) => {
+    const batches: string[][] = []
+    for (let i = 0; i < paths.length; i += 500) batches.push(paths.slice(i, i + 500))
+    const results = await Promise.all(batches.map((b) => client.storage.from(bucket).createSignedUrls(b, seconds)))
+    const urlByPath = new Map<string, string>()
+    for (const { data, error } of results) {
+      fail(error)
+      for (const d of data ?? []) if (d.path && d.signedUrl) urlByPath.set(d.path, d.signedUrl)
+    }
+    return urlByPath
+  }
+
   const withUrls = async (rows: PhotoRow[]): Promise<Photo[]> => {
     if (rows.length === 0) return []
-    const { data, error } = await client.storage
-      .from('photos')
-      .createSignedUrls(
-        rows.flatMap((r) => (r.thumb_path ? [r.storage_path, r.thumb_path] : [r.storage_path])),
-        SIGNED_URL_SECONDS,
-      )
-    fail(error)
-    const urlByPath = new Map((data ?? []).map((d) => [d.path, d.signedUrl]))
+    const urlByPath = await signAll(
+      'photos',
+      rows.flatMap((r) => (r.thumb_path ? [r.storage_path, r.thumb_path] : [r.storage_path])),
+      SIGNED_URL_SECONDS,
+    )
     return rows.map((r) => {
       const src = urlByPath.get(r.storage_path) ?? ''
       return {
@@ -140,11 +150,10 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
 
   const withAvatars = async (rows: MemberRow[]): Promise<Member[]> => {
     const paths = rows.map((r) => r.avatar_path).filter((p): p is string => Boolean(p))
-    let urlByPath = new Map<string, string>()
-    if (paths.length) {
-      const { data } = await client.storage.from('avatars').createSignedUrls(paths, AVATAR_URL_SECONDS)
-      urlByPath = new Map((data ?? []).flatMap((d) => (d.path && d.signedUrl ? [[d.path, d.signedUrl]] : [])))
-    }
+    // A missing profile picture should not stop the directory loading.
+    const urlByPath = paths.length
+      ? await signAll('avatars', paths, AVATAR_URL_SECONDS).catch(() => new Map<string, string>())
+      : new Map<string, string>()
     return rows.map((r) => ({ ...toMember(r), avatarUrl: r.avatar_path ? urlByPath.get(r.avatar_path) ?? null : null }))
   }
 
