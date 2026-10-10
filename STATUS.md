@@ -93,11 +93,10 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
 - [ ] Owner: check Resend (Emails log and Domains page) for failed or bounced invites; add a DMARC record in Route 53 if Resend flags it.
 - [ ] Owner: in Supabase, Authentication, Rate Limits, raise "emails sent per hour" so a batch of new invitees can all get codes.
 - [x] Owner: decided the GitHub repository stays public (2026-10-08).
-- [ ] Owner: redeploy the `send-invites` Edge Function with the latest code (parallel admin checks).
 
 **Next build (later, from `docs/website-brief-v2.md`)**
-- [ ] Phase 1: home carousel of 3 group photos, gallery paging, image sizes, code splitting, repo privacy clean-up.
-- [ ] Phase 2: cohort roster, Admin roster import, person finder with previous names and contact rules.
+- [ ] Phase 1: home carousel of 3 group photos, gallery paging, image sizes, code splitting. (Repo privacy clean-up done 2026-10-08.)
+- [ ] Phase 2: person finder for members with previous names and contact rules. (Class list table and Admin import done 2026-10-10 with the sign-up work.)
 - [ ] Phase 3: "Where are we now" map and profile links.
 - [ ] Phase 4: news feed (weekly scan, admin approval, opt-out).
 - [ ] Owner decisions D1 to D10 in the brief; owner supplies the 3 group photos.
