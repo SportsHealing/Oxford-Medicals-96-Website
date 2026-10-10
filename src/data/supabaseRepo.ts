@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { makeThumbnail } from '../lib/prepareImage.ts'
 import type {
   AdminMember,
+  AiSortResult,
   DecisionResult,
   ImportSummary,
   InboxMessage,
@@ -76,6 +77,8 @@ type PhotoRow = {
   storage_path: string
   thumb_path: string | null
   uploaded_by: string | null
+  category?: string | null
+  category_source?: 'person' | 'ai' | null
   photo_tags: TagRow[]
 }
 
@@ -199,6 +202,8 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
         src,
         thumb: (r.thumb_path && urlByPath.get(r.thumb_path)) || src,
         uploadedBy: r.uploaded_by,
+        category: r.category ?? null,
+        categorySource: r.category_source ?? null,
         tags: (r.photo_tags ?? []).map(toTag),
       }
     })
@@ -220,12 +225,26 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
     return id
   }
 
+  // category arrives with database update 0014; until then photos load without it.
+  let hasCategories = true
+  const photoCols = () =>
+    `id, title, year, place, caption, storage_path, thumb_path, uploaded_by${hasCategories ? ', category, category_source' : ''}`
+  type Res<T> = { data: T | null; error: { code?: string; message: string } | null }
+  const readPhotos = async <T>(run: (cols: string) => PromiseLike<Res<T>>): Promise<Res<T>> => {
+    const res = await run(photoCols())
+    if (!hasCategories || !missingColumn(res.error)) return res
+    hasCategories = false
+    return run(photoCols())
+  }
+
   const photosCache = memo(async () => {
-    const { data, error } = await client
-      .from('photos')
-      .select('id, title, year, place, caption, storage_path, thumb_path, uploaded_by, photo_tags(*)')
-      .order('year', { ascending: true, nullsFirst: false })
-      .order('created_at')
+    const { data, error } = await readPhotos((cols) =>
+      client
+        .from('photos')
+        .select(`${cols}, photo_tags(*)`)
+        .order('year', { ascending: true, nullsFirst: false })
+        .order('created_at'),
+    )
     fail(error)
     return withUrls((data ?? []) as unknown as PhotoRow[])
   })
@@ -360,14 +379,46 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
     },
     listSpeechQuotes: () => quotesCache.get(),
     async listFeaturedPhotos() {
-      const { data, error } = await client
-        .from('photos')
-        .select('id, title, year, place, caption, storage_path, thumb_path, uploaded_by, photo_tags(*)')
-        .not('featured_rank', 'is', null)
-        .order('featured_rank')
+      const { data, error } = await readPhotos((cols) =>
+        client.from('photos').select(`${cols}, photo_tags(*)`).not('featured_rank', 'is', null).order('featured_rank'),
+      )
       if (missingColumn(error)) return []
       fail(error)
       return withUrls((data ?? []) as unknown as PhotoRow[])
+    },
+    hasPhotoCategories: () => hasCategories,
+    async updatePhoto(id, d) {
+      photosCache.clear()
+      const changes: Record<string, unknown> = {
+        title: d.title.trim() || 'Untitled',
+        year: d.year?.trim() || null,
+        place: d.place?.trim() || null,
+        caption: d.caption?.trim() || null,
+      }
+      if (hasCategories) {
+        changes.category = d.category || null
+        changes.category_source = d.category ? 'person' : null
+      }
+      const { data, error } = await client.from('photos').update(changes).eq('id', id).select('id')
+      fail(error)
+      if (!data?.length) throw new Error('Only admins, or the person who added this photo, can change it.')
+    },
+    async setPhotoCategory(ids, category) {
+      if (!hasCategories) throw new Error('Run database update 0014 first (Supabase, SQL Editor).')
+      photosCache.clear()
+      // Batches keep the request address short.
+      for (let i = 0; i < ids.length; i += 100) {
+        const { error } = await client
+          .from('photos')
+          .update({ category, category_source: category ? 'person' : null })
+          .in('id', ids.slice(i, i + 100))
+        fail(error)
+      }
+    },
+    async sortPhotosWithAi(skip) {
+      photosCache.clear()
+      const r = (await invoke('sort-photos', { skip })) as Partial<AiSortResult> | null
+      return { sorted: r?.sorted ?? 0, failed: r?.failed ?? [], remaining: r?.remaining ?? 0 }
     },
     async setFeatured(photoId, rank) {
       const { error } = await client.from('photos').update({ featured_rank: rank }).eq('id', photoId)
@@ -375,11 +426,9 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       fail(error)
     },
     async getPhoto(id) {
-      const { data, error } = await client
-        .from('photos')
-        .select('id, title, year, place, caption, storage_path, thumb_path, uploaded_by, photo_tags(*)')
-        .eq('id', id)
-        .maybeSingle()
+      const { data, error } = await readPhotos((cols) =>
+        client.from('photos').select(`${cols}, photo_tags(*)`).eq('id', id).maybeSingle(),
+      )
       fail(error)
       if (!data) return null
       const [photo] = await withUrls([data as unknown as PhotoRow])
@@ -411,11 +460,9 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
     },
     async myPendingTags() {
       const id = await me()
-      const { data, error } = await client
-        .from('photo_tags')
-        .select('*, photos(id, title, year, place, caption, storage_path, thumb_path, uploaded_by)')
-        .eq('member_id', id)
-        .eq('status', 'pending')
+      const { data, error } = await readPhotos((cols) =>
+        client.from('photo_tags').select(`*, photos(${cols})`).eq('member_id', id).eq('status', 'pending'),
+      )
       fail(error)
       type Row = TagRow & { photos: Omit<PhotoRow, 'photo_tags'> | null }
       const rows = (data ?? []) as unknown as Row[]

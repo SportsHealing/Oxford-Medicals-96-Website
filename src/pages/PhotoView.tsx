@@ -2,8 +2,10 @@ import { useState, type MouseEvent } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth.tsx'
 import Avatar from '../components/Avatar.tsx'
+import PhotoDetailsForm from '../components/PhotoDetailsForm.tsx'
 import PhotoLightbox from '../components/PhotoLightbox.tsx'
 import { repo } from '../data/repo.ts'
+import { categoryLabel } from '../lib/photoCategories.ts'
 import { LoadError, Loading, useLoad } from '../lib/useLoad.tsx'
 import NotFound from './NotFound.tsx'
 
@@ -14,6 +16,8 @@ export default function PhotoView() {
   const [params] = useSearchParams()
   const isNew = params.get('new') === '1'
   const queue = (params.get('queue') ?? '').split(',').filter(Boolean)
+  // Opened from a category on the Photos page: Previous and Next stay inside it.
+  const within = params.get('in') ?? ''
   const { data, loading, error, reload } = useLoad(
     async () => {
       const [photo, members, all, featured] = await Promise.all([
@@ -32,11 +36,14 @@ export default function PhotoView() {
   const [full, setFull] = useState(false)
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
+  const [editing, setEditing] = useState(false)
 
   if (loading) return <Loading what="Opening the photo" />
   if (error) return <LoadError message={error} />
   if (!data?.photo) return <NotFound />
-  const { photo, members, all, featured } = data
+  const { photo, members, featured } = data
+  const all = within ? data.all.filter((p) => (p.category || 'unsorted') === within) : data.all
+  const inQuery = within ? `?in=${encodeURIComponent(within)}` : ''
   const featuredAt = featured.indexOf(photo.id)
   const toggleFeatured = async () => {
     setProblem(null)
@@ -138,8 +145,8 @@ export default function PhotoView() {
       )}
 
       <div className="mb-6">
-        <Link to="/photos" className="font-sans text-sm text-muted no-underline hover:text-navy">
-          &larr; All photos
+        <Link to={within ? `/photos?c=${encodeURIComponent(within)}` : '/photos'} className="font-sans text-sm text-muted no-underline hover:text-navy">
+          &larr; {within ? categoryLabel(within === 'unsorted' ? null : within) : 'All photos'}
         </Link>
       </div>
 
@@ -191,11 +198,11 @@ export default function PhotoView() {
             </div>
           </div>
           <nav className="mt-4 flex items-center justify-center gap-4" aria-label="Photo navigation">
-            <PagerLink to={prev ? `/photos/${prev.id}` : undefined} label="Previous" dir="prev" />
+            <PagerLink to={prev ? `/photos/${prev.id}${inQuery}` : undefined} label="Previous" dir="prev" />
             <span className="min-w-[5.5rem] text-center font-sans text-sm text-muted">
               {index + 1} of {all.length}
             </span>
-            <PagerLink to={next ? `/photos/${next.id}` : undefined} label="Next" dir="next" />
+            <PagerLink to={next ? `/photos/${next.id}${inQuery}` : undefined} label="Next" dir="next" />
           </nav>
           <div className="mt-4 flex items-center justify-between font-sans text-sm text-muted">
             <span>Click on a face to add a name.</span>
@@ -207,6 +214,14 @@ export default function PhotoView() {
 
         <aside className="space-y-8">
           <div>
+            {photo.category && (
+              <Link
+                to={`/photos?c=${photo.category}`}
+                className="mb-2 inline-block rounded-full bg-rose-soft px-3 py-1 font-sans text-xs font-semibold text-navy no-underline hover:bg-rose"
+              >
+                {categoryLabel(photo.category)}
+              </Link>
+            )}
             <p className="label-caps">{[photo.year, photo.place].filter(Boolean).join(' · ') || 'Undated'}</p>
             <h1 className="mt-1 text-3xl">{photo.title}</h1>
             {photo.caption && <p className="mt-3 text-muted">{photo.caption}</p>}
@@ -222,6 +237,11 @@ export default function PhotoView() {
                   {featuredAt >= 0 ? `On Home (${featuredAt + 1} of ${featured.length}) · Remove from Home` : 'Feature on Home'}
                 </button>
               )}
+              {canDelete && !editing && (
+                <button type="button" className="font-sans text-xs font-semibold text-navy hover:underline" onClick={() => setEditing(true)}>
+                  Edit details
+                </button>
+              )}
               {canDelete && (
                 <button type="button" className="font-sans text-xs text-muted hover:text-rose-deep" onClick={() => void deletePhoto()}>
                   Delete this photo
@@ -230,6 +250,16 @@ export default function PhotoView() {
             </div>
             {problem && !draft && <p className="mt-2 font-sans text-sm text-rose-deep">{problem}</p>}
           </div>
+
+          {editing && (
+            <PhotoDetailsForm
+              photo={photo}
+              onDone={(saved) => {
+                setEditing(false)
+                if (saved) reload()
+              }}
+            />
+          )}
 
           {draft && (
             <div className="card space-y-4 border-rose/60 p-5">
@@ -315,7 +345,7 @@ export default function PhotoView() {
           startIndex={Math.max(index, 0)}
           onClose={(currentId) => {
             setFull(false)
-            if (currentId !== photo.id) navigate(`/photos/${currentId}`)
+            if (currentId !== photo.id) navigate(`/photos/${currentId}${inQuery}`)
           }}
         />
       )}

@@ -39,6 +39,7 @@ export default function Privacy() {
 
         <Section title="Face matching">
           <li>We do not use face recognition at present.</li>
+          <li>Organisers may use an AI service (Anthropic) to suggest a category and title for each photo. It sees a small copy of the photo and does not identify anyone.</li>
           <li>If we ever do, it will only suggest tags, never publish them, and only for members who opt in.</li>
           <li>Facial data is special category data under UK GDPR. We will ask for explicit consent first.</li>
         </Section>

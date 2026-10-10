@@ -229,10 +229,26 @@ const seeds: PhotoSeed[] = [
   },
 ]
 
+const sampleCategories: Record<string, string> = {
+  'photo-01': 'everyday',
+  'photo-02': 'medicine',
+  'photo-03': 'tingewick',
+  'photo-04': 'social',
+  'photo-05': 'medicine',
+  'photo-06': 'graduation',
+}
+// Extra unsorted copies, so the demo has a full-looking archive to sort.
+const extras: PhotoSeed[] = Array.from({ length: 36 }, (_, i) => {
+  const base = seeds[i % seeds.length]
+  return { ...base, id: `photo-x${i + 1}`, title: `IMG_${1040 + i}.jpg`, year: null, place: null, caption: null, tags: [] }
+})
+
 let tagSeq = 0
-export const photos: Photo[] = seeds.map((s) => ({
+export const photos: Photo[] = [...seeds, ...extras].map((s) => ({
   ...s,
   thumb: s.src,
+  category: sampleCategories[s.id] ?? null,
+  categorySource: sampleCategories[s.id] ? 'person' : null,
   tags: s.tags.map(([memberId, x, y, status]) => ({
     id: `tag-${++tagSeq}`,
     photoId: s.id,
@@ -347,6 +363,32 @@ export const sampleRepo: Repo = {
   },
   async getPhoto(id) {
     return clone(photos.find((p) => p.id === id) ?? null)
+  },
+  hasPhotoCategories: () => true,
+  async updatePhoto(id, d) {
+    const p = photos.find((x) => x.id === id)
+    if (!p) throw new Error('Photo not found')
+    Object.assign(p, {
+      title: d.title.trim() || 'Untitled',
+      year: d.year || null,
+      place: d.place || null,
+      caption: d.caption || null,
+      category: d.category || null,
+      categorySource: d.category ? 'person' : null,
+    })
+  },
+  async setPhotoCategory(ids, category) {
+    for (const p of photos) {
+      if (ids.includes(p.id)) Object.assign(p, { category, categorySource: category ? 'person' : null })
+    }
+  },
+  async sortPhotosWithAi(skip) {
+    // Pretend to think for a moment, then file the next few by a fixed pattern.
+    await new Promise((r) => setTimeout(r, 400))
+    const cycle = ['everyday', 'social', 'sport', 'formal', 'travel', 'medicine']
+    const todo = photos.filter((p) => !p.category && !skip.includes(p.id)).slice(0, 8)
+    todo.forEach((p, i) => Object.assign(p, { category: cycle[(i + p.title.length) % cycle.length], categorySource: 'ai' }))
+    return { sorted: todo.length, failed: [], remaining: photos.filter((p) => !p.category && !skip.includes(p.id)).length }
   },
   async listFeaturedPhotos() {
     return clone(featured.map((id) => photos.find((p) => p.id === id)).filter((p): p is Photo => Boolean(p)))

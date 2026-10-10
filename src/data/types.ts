@@ -59,8 +59,16 @@ export type Photo = {
   /** Small copy for grids; the same as `src` when none has been made yet. */
   thumb: string
   uploadedBy?: string | null
+  /** One of PHOTO_CATEGORIES, or null when not sorted yet. */
+  category?: string | null
+  /** 'ai' when the category is only a suggestion from the AI sorter. */
+  categorySource?: 'person' | 'ai' | null
   tags: Tag[]
 }
+
+export type PhotoDetails = { title: string; year: string | null; place: string | null; caption: string | null; category: string | null }
+
+export type AiSortResult = { sorted: number; failed: string[]; remaining: number }
 
 export type PhotoInput = {
   file: File
@@ -160,6 +168,14 @@ export type Repo = {
   getPhoto(id: string): Promise<Photo | null>
   /** Photos chosen for the members' Home page, in order (empty before update 0011). */
   listFeaturedPhotos(): Promise<Photo[]>
+  /** False until database update 0014 has run (photo categories). */
+  hasPhotoCategories(): boolean
+  /** Admins, or the person who uploaded it: change a photo's title, year, place, caption or category. */
+  updatePhoto(id: string, details: PhotoDetails): Promise<void>
+  /** Admin only: put many photos into one category (null takes them out). */
+  setPhotoCategory(ids: string[], category: string | null): Promise<void>
+  /** Admin only: ask the AI sorter to suggest categories for the next few unsorted photos. */
+  sortPhotosWithAi(skip: string[]): Promise<AiSortResult>
   /** Admin only: put a photo on Home (rank 1 shows first) or take it off (null). */
   setFeatured(photoId: string, rank: number | null): Promise<void>
   suggestTag(photoId: string, memberId: string, x: number, y: number): Promise<void>
