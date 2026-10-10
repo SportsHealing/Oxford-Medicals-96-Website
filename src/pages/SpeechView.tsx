@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import SpeechBody from '../components/SpeechBody.tsx'
+import SpeechPdfButton from '../components/SpeechPdfButton.tsx'
 import { repo } from '../data/repo.ts'
 import { LoadError, Loading, useLoad } from '../lib/useLoad.tsx'
 import NotFound from './NotFound.tsx'
@@ -29,9 +30,11 @@ export default function SpeechView() {
         <h1 className="text-4xl leading-tight sm:text-5xl">{speech.title}</h1>
         <span className="mt-3 block h-[3px] w-12 rounded-full bg-rose" />
         {speech.speaker && <p className="mt-4 font-sans text-lg text-muted">{speech.speaker}</p>}
+        {speech.pdfName && <SpeechPdfButton slug={speech.slug} className="mt-5" />}
       </header>
 
       <SpeechBody body={speech.body} />
+      {speech.pdfName && <SpeechPdfButton slug={speech.slug} className="mt-10" />}
 
       {others.length > 0 && (
         <aside className="mt-14 border-t border-line pt-6">

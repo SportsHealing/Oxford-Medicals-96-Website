@@ -271,6 +271,7 @@ const speeches: Speech[] = [
     title: 'A sample welcome',
     speaker: 'Sample Alder',
     occasion: 'Demo reunion dinner',
+    pdfName: 'A sample welcome.pdf',
     body: [
       'This is placeholder text for the demo site. The real speeches are added by the organisers.',
       '## Then',
@@ -295,6 +296,29 @@ const quotes: SpeechQuote[] = [
   { id: 'q-3', text: 'Thirty years on, the faces are familiar and the stories are new.', attribution: 'Sample Alder', speechSlug: 'sample-welcome', speechTitle: 'A sample welcome' },
 ]
 
+// A one-page PDF with just the title, so the demo download opens.
+function samplePdf(title: string) {
+  const text = title.replace(/[()\\]/g, '')
+  const stream = `BT /F1 24 Tf 72 720 Td (${text}) Tj ET`
+  const objs = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>',
+    `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`,
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+  ]
+  let out = '%PDF-1.4\n'
+  const offsets = objs.map((o, i) => {
+    const at = out.length
+    out += `${i + 1} 0 obj\n${o}\nendobj\n`
+    return at
+  })
+  const xref = out.length
+  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n${offsets.map((o) => `${String(o).padStart(10, '0')} 00000 n \n`).join('')}`
+  out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`
+  return out
+}
+
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v))
 
 export const sampleRepo: Repo = {
@@ -312,6 +336,11 @@ export const sampleRepo: Repo = {
   },
   async getSpeech(slug) {
     return clone(speeches.find((s) => s.slug === slug) ?? null)
+  },
+  async getSpeechPdf(slug) {
+    const s = speeches.find((x) => x.slug === slug)
+    if (!s?.pdfName) return null
+    return { name: s.pdfName, blob: new Blob([samplePdf(s.title)], { type: 'application/pdf' }) }
   },
   async listSpeechQuotes() {
     return clone(quotes)

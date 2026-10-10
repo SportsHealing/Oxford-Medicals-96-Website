@@ -133,6 +133,8 @@ export type SpeechSummary = {
   title: string
   speaker: string | null
   occasion: string | null
+  /** File name of the downloadable PDF, if there is one. */
+  pdfName?: string | null
 }
 
 export type Speech = SpeechSummary & {
@@ -170,6 +172,8 @@ export type Repo = {
   /** Speeches from reunions (empty before database update 0012). */
   listSpeeches(): Promise<SpeechSummary[]>
   getSpeech(slug: string): Promise<Speech | null>
+  /** The speech's PDF, fetched only when someone asks to download it. */
+  getSpeechPdf(slug: string): Promise<{ name: string; blob: Blob } | null>
   /** Quotes for the Home page banner, in order. */
   listSpeechQuotes(): Promise<SpeechQuote[]>
   myEmail(): Promise<string | null>

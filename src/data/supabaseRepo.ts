@@ -232,11 +232,24 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
   // Before database update 0012 runs there are simply no speeches.
   const missingTable = (e: { code?: string; message: string } | null) =>
     Boolean(e) && (e!.code === '42P01' || e!.code === 'PGRST205' || /relation .* does not exist|could not find the table/i.test(e!.message))
+  // pdf_name arrives with database update 0013; until then there are no PDFs.
+  let hasPdfs = true
+  const SPEECH_COLS = 'id, slug, title, speaker, occasion'
+  const readSpeeches = async <T>(cols: string, run: (cols: string) => PromiseLike<{ data: T | null; error: { code?: string; message: string } | null }>) => {
+    if (hasPdfs) {
+      const res = await run(`${cols}, pdfName:pdf_name`)
+      if (!missingColumn(res.error)) return res
+      hasPdfs = false
+    }
+    return run(cols)
+  }
   const speechesCache = memo(async (): Promise<SpeechSummary[]> => {
-    const { data, error } = await client.from('speeches').select('id, slug, title, speaker, occasion').order('sort').order('created_at')
+    const { data, error } = await readSpeeches(SPEECH_COLS, (cols) =>
+      client.from('speeches').select(cols).order('sort').order('created_at'),
+    )
     if (missingTable(error)) return []
     fail(error)
-    return (data ?? []) as SpeechSummary[]
+    return (data ?? []) as unknown as SpeechSummary[]
   })
   const quotesCache = memo(async (): Promise<SpeechQuote[]> => {
     const { data, error } = await client
@@ -330,14 +343,20 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
     listPhotos: () => photosCache.get(),
     listSpeeches: () => speechesCache.get(),
     async getSpeech(slug) {
-      const { data, error } = await client
-        .from('speeches')
-        .select('id, slug, title, speaker, occasion, body')
-        .eq('slug', slug)
-        .maybeSingle()
+      const { data, error } = await readSpeeches(`${SPEECH_COLS}, body`, (cols) =>
+        client.from('speeches').select(cols).eq('slug', slug).maybeSingle(),
+      )
       if (missingTable(error)) return null
       fail(error)
-      return (data as Speech | null) ?? null
+      return (data as unknown as Speech | null) ?? null
+    },
+    async getSpeechPdf(slug) {
+      const { data, error } = await client.from('speeches').select('pdf_name, pdf_base64').eq('slug', slug).maybeSingle()
+      if (missingTable(error) || missingColumn(error)) return null
+      fail(error)
+      if (!data?.pdf_base64) return null
+      const bytes = Uint8Array.from(atob(data.pdf_base64), (c) => c.charCodeAt(0))
+      return { name: data.pdf_name || `${slug}.pdf`, blob: new Blob([bytes], { type: 'application/pdf' }) }
     },
     listSpeechQuotes: () => quotesCache.get(),
     async listFeaturedPhotos() {
