@@ -20,10 +20,26 @@ export const linkedinUrl = (v?: string | null) =>
   v ? handleUrl(v, 'https://www.linkedin.com/in/', /^(www\.)?linkedin\.com\//i) : null
 export const instagramUrl = (v?: string | null) =>
   v ? handleUrl(v, 'https://www.instagram.com/', /^(www\.)?instagram\.com\//i) : null
+export const orcidUrl = (v?: string | null) => {
+  const id = v?.match(/\d{4}-\d{4}-\d{4}-\d{3}[\dX]/i)?.[0]
+  return id ? `https://orcid.org/${id.toUpperCase()}` : null
+}
 export const twitterUrl = (v?: string | null) =>
   v ? handleUrl(v, 'https://x.com/', /^(www\.)?(x|twitter)\.com\//i) : null
 
 const icons = {
+  wikipedia: (
+    <path d="M3 5h5v1.4H6.8l3.2 8.1 1.6-3.9-1.7-4.2H8.7V5h4.6v1.4h-1.1l1.1 2.6 1.1-2.6h-1.2V5h4.2v1.4h-1.2l-2.2 5 2.4 5.7 3.3-10.7h-1.3V5H22v1.4h-1l-4.2 12.9h-.9L13 12.6l-2.8 6.7h-.9L4.4 6.4H3z" />
+  ),
+  orcid: (
+    <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM8.3 17H6.7V9.3h1.6zM7.5 8.2a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm2.9.9h3.2c3 0 4.4 2.2 4.4 4 0 2-1.6 4-4.4 4h-3.2zm1.6 1.4v5.2h1.5c2.2 0 2.8-1.5 2.8-2.6 0-1.4-.9-2.6-2.8-2.6z" />
+  ),
+  scholar: (
+    <path d="M12 3 1 9l11 6 9-4.9V17h2V9zm-6.8 9.6v3.6L12 20l6.8-3.8v-3.6L12 16.3z" />
+  ),
+  hospital: (
+    <path d="M10 3h4v5h5v4h-5v5h-4v-5H5V8h5zM3 20h18v2H3z" />
+  ),
   linkedin: (
     <path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.75h4v11H3zm7 0h3.8v1.5h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1v5.45h-4v-4.83c0-1.15-.02-2.63-1.6-2.63-1.6 0-1.85 1.25-1.85 2.55v4.91h-4z" />
   ),
@@ -53,6 +69,10 @@ export default function SocialLinks({ person }: { person: Member }) {
     { kind: 'website' as const, label: 'Website', href: websiteUrl(person.website), tone: 'hover:bg-navy hover:text-white hover:border-navy' },
     { kind: 'instagram' as const, label: 'Instagram', href: instagramUrl(person.instagram), tone: 'hover:bg-rose hover:text-navy hover:border-rose' },
     { kind: 'twitter' as const, label: 'X', href: twitterUrl(person.twitter), tone: 'hover:bg-ink hover:text-white hover:border-ink' },
+    { kind: 'wikipedia' as const, label: 'Wikipedia', href: websiteUrl(person.links?.wikipedia), tone: 'hover:bg-ink hover:text-white hover:border-ink' },
+    { kind: 'orcid' as const, label: 'ORCID', href: orcidUrl(person.links?.orcid), tone: 'hover:bg-[#a6ce39] hover:text-navy hover:border-[#a6ce39]' },
+    { kind: 'scholar' as const, label: 'Google Scholar', href: websiteUrl(person.links?.scholar), tone: 'hover:bg-navy hover:text-white hover:border-navy' },
+    { kind: 'hospital' as const, label: 'Hospital page', href: websiteUrl(person.links?.hospital), tone: 'hover:bg-navy hover:text-white hover:border-navy' },
   ].filter((l) => l.href)
   if (links.length === 0) return null
   return (

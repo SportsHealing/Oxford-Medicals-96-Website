@@ -1,6 +1,6 @@
 # Project status: Oxford Medics 96
 
-Last updated: 2026-10-08 (Europe/London), sign-up update
+Last updated: 2026-10-10 (Europe/London)
 
 ## Current phase
 
@@ -82,23 +82,27 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
 - `supabase/migrations/0008_photo_thumbnails.sql`, `scripts/make-thumbnails.mjs`: 640px thumbnails for grids (run 2026-10-08: 787 made, 0 failed).
 - `supabase/migrations/0009_membership_on_invite.sql`: adding an address to the list now also grants membership to an existing account, repairs people already stuck, and lists sign-in attempts from addresses not on the list (Admin page).
 - `supabase/migrations/0010_join_requests.sql`, `supabase/functions/join-requests/index.ts`, `docs/sign-up-setup.md`: self-service sign-up (email on list, or name on the class list, or request to join with admin accept/decline and decision emails), class list (`roster`) and import, Admin redesigned into Requests, People and Add people tabs. Tested against a local Postgres copy of the schema (24 scenarios, 32 name-matching cases).
+- 2026-10-10 build (brief phases 1 to 3): members' Home at "/" with a crossfade carousel of featured photos (admins press Feature on Home on a photo, up to 5; falls back to the most-tagged photos), public front page shows `public/landing.jpg` (+ `landing-800.jpg`) when present, otherwise Rita. Person finder on Classmates (search incl. name at medical school, specialty, town; specialty-group filters; "/" shortcut). "Where are we now" map (Classmates, Map view; `src/components/ClassmatesMap.tsx`, d3-geo, outlines and town list in `public/geo/` generated from Natural Earth via world-atlas and GeoNames via all-the-cities). Me page: name at medical school, specialty, town picker, Wikipedia/ORCID/Scholar/hospital links, opt-in "show my email". Gallery draws 48 at a time; less-visited pages load on demand. `supabase/migrations/0011_profiles_map_home.sql` adds the columns (site works before it runs; the new fields appear after).
 - `docs/website-brief-v2.md`: brief for the next build (home carousel, roster, person finder, map, news feed). No personal data.
 
 ## To-do list
 
 **Now (sign-in reliability)**
 - [x] Owner: run `supabase/migrations/0009_membership_on_invite.sql` in the Supabase SQL Editor.
-- [ ] Owner: sign-up setup steps 1 to 7 in `docs/sign-up-setup.md` (SQL 0010, `join-requests` function, `ADMIN_EMAILS` secret, redeploy `send-invites`, email templates, import the two lists, test).
+- [x] Owner: sign-up setup steps 1 to 7 in `docs/sign-up-setup.md` (done 2026-10-10).
+- [ ] Owner: run `supabase/migrations/0011_profiles_map_home.sql` in the SQL Editor (turns on the new profile fields, map, email opt-in and Home photos).
+- [ ] Owner: send the reunion group photo as a normal message so it can be resized and published as `public/landing.jpg` (public front page). Confirm everyone is happy for it to be public.
+- [ ] Owner: choose up to 5 Home photos (open a photo, Feature on Home).
 - [ ] Owner: check the bounced invite addresses in Resend and correct them via the sign-up sheet import.
 - [ ] Owner: check Resend (Emails log and Domains page) for failed or bounced invites; add a DMARC record in Route 53 if Resend flags it.
 - [ ] Owner: in Supabase, Authentication, Rate Limits, raise "emails sent per hour" so a batch of new invitees can all get codes.
 - [x] Owner: decided the GitHub repository stays public (2026-10-08).
 
 **Next build (later, from `docs/website-brief-v2.md`)**
-- [ ] Phase 1: home carousel of 3 group photos, gallery paging, image sizes, code splitting. (Repo privacy clean-up done 2026-10-08.)
-- [ ] Phase 2: person finder for members with previous names and contact rules. (Class list table and Admin import done 2026-10-10 with the sign-up work.)
-- [ ] Phase 3: "Where are we now" map and profile links.
-- [ ] Phase 4: news feed (weekly scan, admin approval, opt-out).
+- [x] Phase 1: Home carousel, gallery paging, code splitting (2026-10-10). Image width/height columns skipped: grids use fixed-shape cards, so there is no layout shift to fix.
+- [x] Phase 2: person finder for members (2026-10-10). Shows joined members only; showing class-list names of people who have not joined is decision D4.
+- [x] Phase 3: "Where are we now" map and profile links (2026-10-10). Members place themselves by adding a town.
+- [ ] Phase 4: news feed (weekly scan, admin approval, opt-out). Needs owner decisions D5 to D7 and an Anthropic API key.
 - [ ] Owner decisions D1 to D10 in the brief; owner supplies the 3 group photos.
 
 **Earlier items still open**

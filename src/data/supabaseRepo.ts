@@ -10,6 +10,7 @@ import type {
   Member,
   Photo,
   ProfileInput,
+  PublicLinks,
   Repo,
   RosterPerson,
   Tag,
@@ -40,7 +41,18 @@ type MemberRow = {
   allows_tags: boolean
   is_admin: boolean
   avatar_path: string | null
+  previous_name?: string | null
+  specialty?: string | null
+  show_email?: boolean
+  town?: string | null
+  country?: string | null
+  lat?: number | null
+  lng?: number | null
+  links?: PublicLinks | null
 }
+
+// Added by migration 0011. Until it has run, members are read without them.
+const EXTRA_COLS = 'previous_name, specialty, show_email, town, country, lat, lng, links'
 
 type TagRow = {
   id: string
@@ -83,6 +95,14 @@ const toMember = (r: MemberRow): Member => ({
   acceptsContact: r.accepts_contact,
   allowsTags: r.allows_tags,
   isAdmin: r.is_admin,
+  previousName: r.previous_name ?? null,
+  specialty: r.specialty ?? null,
+  showEmail: r.show_email ?? false,
+  town: r.town ?? null,
+  country: r.country ?? null,
+  lat: r.lat ?? null,
+  lng: r.lng ?? null,
+  links: r.links ?? {},
 })
 
 const AVATAR_URL_SECONDS = 60 * 60
@@ -206,11 +226,40 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
     fail(error)
     return withUrls((data ?? []) as unknown as PhotoRow[])
   })
-  const membersCache = memo(async () => {
-    const { data, error } = await client.from('members').select(MEMBER_COLS).order('full_name')
-    fail(error)
-    return withAvatars((data ?? []) as unknown as MemberRow[])
-  })
+  // null until we know whether migration 0011 has run.
+  let hasExtras: boolean | null = null
+  const missingColumn = (e: { code?: string; message: string } | null) =>
+    Boolean(e) && (e!.code === '42703' || /column .* does not exist/i.test(e!.message))
+  const readMembers = async (filterId?: string) => {
+    const run = (cols: string) => {
+      const q = client.from('members').select(cols)
+      return filterId ? q.eq('id', filterId) : q.order('full_name')
+    }
+    if (hasExtras !== false) {
+      const res = await run(`${MEMBER_COLS}, ${EXTRA_COLS}`)
+      if (!missingColumn(res.error)) {
+        hasExtras = true
+        fail(res.error)
+        return (res.data ?? []) as unknown as MemberRow[]
+      }
+      hasExtras = false
+    }
+    const res = await run(MEMBER_COLS)
+    fail(res.error)
+    return (res.data ?? []) as unknown as MemberRow[]
+  }
+  // Emails of members who chose to show them.
+  const shownEmails = async () => {
+    const { data, error } = await client.rpc('member_contact_emails')
+    if (error) return new Map<string, string>()
+    return new Map(((data ?? []) as { id: string; email: string }[]).map((d) => [d.id, d.email]))
+  }
+  const withExtras = async (rows: MemberRow[]) => {
+    const [members, emails] = await Promise.all([withAvatars(rows), shownEmails()])
+    return members.map((m) => ({ ...m, email: emails.get(m.id) ?? null }))
+  }
+
+  const membersCache = memo(async () => withExtras(await readMembers()))
   client.auth.onAuthStateChange((event) => {
     if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
       photosCache.clear()
@@ -220,11 +269,11 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
 
   return {
     listMembers: () => membersCache.get(),
+    hasProfileExtras: () => hasExtras !== false,
     async getMember(id) {
-      const { data, error } = await client.from('members').select(MEMBER_COLS).eq('id', id).maybeSingle()
-      fail(error)
-      if (!data) return null
-      const [m] = await withAvatars([data as unknown as MemberRow])
+      const rows = await readMembers(id)
+      if (rows.length === 0) return null
+      const [m] = await withExtras(rows)
       return m
     },
     async setAvatar(file) {
@@ -249,6 +298,35 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       if (cur?.avatar_path) await client.storage.from('avatars').remove([cur.avatar_path])
     },
     listPhotos: () => photosCache.get(),
+    async listFeaturedPhotos() {
+      const { data, error } = await client
+        .from('photos')
+        .select('id, title, year, place, caption, storage_path, thumb_path, uploaded_by, photo_tags(*)')
+        .not('featured_rank', 'is', null)
+        .order('featured_rank')
+      if (missingColumn(error)) return []
+      fail(error)
+      return withUrls((data ?? []) as unknown as PhotoRow[])
+    },
+    async listHomeFallbackPhotos() {
+      const { data, error } = await client
+        .from('photos')
+        .select('id, title, year, place, caption, storage_path, thumb_path, uploaded_by, photo_tags(*)')
+        .order('created_at')
+        .limit(60)
+      fail(error)
+      const rows = ((data ?? []) as unknown as PhotoRow[])
+        .map((r) => ({ r, n: (r.photo_tags ?? []).filter((t) => t.status === 'confirmed').length }))
+        .sort((a, b) => b.n - a.n)
+        .slice(0, 3)
+        .map((x) => x.r)
+      return withUrls(rows)
+    },
+    async setFeatured(photoId, rank) {
+      const { error } = await client.from('photos').update({ featured_rank: rank }).eq('id', photoId)
+      if (missingColumn(error)) throw new Error('Run database update 0011 first (Supabase, SQL Editor).')
+      fail(error)
+    },
     async getPhoto(id) {
       const { data, error } = await client
         .from('photos')
@@ -331,6 +409,22 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
         })
         .eq('id', await me())
       fail(error)
+      if (hasExtras === false) return
+      const extra = await client
+        .from('members')
+        .update({
+          previous_name: input.previousName || null,
+          specialty: input.specialty || null,
+          show_email: input.showEmail ?? false,
+          town: input.town || null,
+          country: input.country || null,
+          lat: input.lat ?? null,
+          lng: input.lng ?? null,
+          links: input.links ?? {},
+        })
+        .eq('id', await me())
+      if (missingColumn(extra.error)) hasExtras = false
+      else fail(extra.error)
     },
     async sendContact(toMemberId, message) {
       const { error } = await client

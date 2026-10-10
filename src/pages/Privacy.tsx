@@ -12,7 +12,7 @@ export default function Privacy() {
       <div className="grid gap-5 sm:grid-cols-2">
         <Section title="Who can see what">
           <li>Only signed-in members see photos, profiles and tags.</li>
-          <li>The public sees the front page and this page. Nothing else.</li>
+          <li>The public sees the front page and this page. Nothing else. The front page shows one class photo.</li>
           <li>Search engines are asked not to index the site.</li>
         </Section>
 
@@ -20,6 +20,7 @@ export default function Privacy() {
           <li>Your name, college and the answers you gave in the questionnaire.</li>
           <li>Your email address, used to sign you in and to pass on messages.</li>
           <li>Photos you appear in, and tags that say you are in them.</li>
+          <li>If you add them: your specialty, your name at medical school, your town (shown on your profile and the classmates map) and links to your public pages.</li>
         </Section>
 
         <Section title="Joining">
@@ -43,7 +44,8 @@ export default function Privacy() {
 
         <Section title="Messages">
           <li>When you message a classmate, they get your message and your email address.</li>
-          <li>Their address is never shown to you unless they reply.</li>
+          <li>Their address is never shown to you unless they reply, or they chose to show it on their profile.</li>
+          <li>Showing your email to classmates is off unless you turn it on, on your Me page.</li>
           <li>Anyone can switch off messages on their profile.</li>
         </Section>
 

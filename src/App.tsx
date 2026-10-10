@@ -1,5 +1,6 @@
 import { lazy } from 'react'
 import { Route, Routes } from 'react-router-dom'
+import { useAuth } from './auth.tsx'
 import Layout from './components/Layout.tsx'
 import RequireMember from './components/RequireMember.tsx'
 import Landing from './pages/Landing.tsx'
@@ -16,12 +17,20 @@ const Contact = lazy(() => import('./pages/Contact.tsx'))
 const Me = lazy(() => import('./pages/Me.tsx'))
 const Admin = lazy(() => import('./pages/Admin.tsx'))
 const Privacy = lazy(() => import('./pages/Privacy.tsx'))
+const Home = lazy(() => import('./pages/Home.tsx'))
+
+// Members get their Home page at "/"; everyone else sees the public front page.
+function Front() {
+  const { memberId, loading } = useAuth()
+  if (loading) return null
+  return memberId ? <Home /> : <Landing />
+}
 
 export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Landing />} />
+        <Route index element={<Front />} />
         <Route path="sign-in" element={<SignIn />} />
         <Route path="privacy" element={<Privacy />} />
         <Route element={<RequireMember />}>

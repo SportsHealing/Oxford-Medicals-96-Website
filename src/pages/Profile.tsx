@@ -25,7 +25,7 @@ export default function Profile() {
   const inPhotos = photos.filter((p) =>
     p.tags.some((t) => t.memberId === person.id && (t.status === 'confirmed' || isMe)),
   )
-  const hasNow = person.jobTitle || person.workplace || person.careerPath || person.interests
+  const hasNow = person.jobTitle || person.workplace || person.careerPath || person.interests || person.specialty
   const hasThen = person.clinicalTraining || person.memory || person.tingewick
 
   return (
@@ -46,9 +46,17 @@ export default function Profile() {
             <h1 className="text-4xl">{person.name}</h1>
             <p className="mt-1 font-sans text-muted">
               {person.knownAs ? `Known as ${person.knownAs} · ` : ''}
+              {person.previousName ? `At Oxford: ${person.previousName} · ` : ''}
               {person.college ? `${person.college} · ` : ''}
               Graduated 1996
             </p>
+            {(person.specialty || person.town) && (
+              <p className="mt-1 font-sans text-ink">
+                {[person.specialty, person.town && `${person.town}${person.country && person.country !== 'United Kingdom' ? `, ${person.country}` : ''}`]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
+            )}
           </div>
           <div className="flex flex-wrap gap-2">
             {isMe ? (
@@ -61,6 +69,11 @@ export default function Profile() {
               </Link>
             ) : (
               <span className="btn cursor-default border border-line text-muted">Not taking messages</span>
+            )}
+            {!isMe && person.email && (
+              <a href={`mailto:${person.email}`} className="btn-outline" title={person.email}>
+                Email {person.knownAs || person.name.split(' ')[0]}
+              </a>
             )}
           </div>
           <div className="w-full">

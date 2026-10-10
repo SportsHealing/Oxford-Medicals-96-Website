@@ -138,6 +138,19 @@ export const members: Member[] = [
   },
 ]
 
+// Finder and map details for the sample people.
+const sampleExtras: Record<string, Partial<Member>> = {
+  'sample-alder': { specialty: 'Cardiology', town: 'Reading', country: 'United Kingdom', lat: 51.454, lng: -0.978, links: { wikipedia: 'https://en.wikipedia.org/wiki/Cardiology' } },
+  'sample-birch': { specialty: 'General practice', town: 'Northampton', country: 'United Kingdom', lat: 52.24, lng: -0.9, previousName: 'Sample Ash', showEmail: true, email: 'birch@example.com' },
+  'sample-cedar': { specialty: 'Neurology', town: 'London', country: 'United Kingdom', lat: 51.507, lng: -0.128, links: { orcid: '0000-0002-1825-0097' } },
+  'sample-elm': { specialty: 'Clinical radiology', town: 'London', country: 'United Kingdom', lat: 51.507, lng: -0.128 },
+  'sample-hazel': { specialty: 'Medical oncology', town: 'Edinburgh', country: 'United Kingdom', lat: 55.953, lng: -3.188 },
+  'sample-linden': { specialty: 'Anaesthetics', town: 'Singapore', country: 'Singapore', lat: 1.352, lng: 103.82 },
+  'sample-rowan': { specialty: 'Orthopaedic surgery', town: 'Oxford', country: 'United Kingdom', lat: 51.752, lng: -1.258 },
+  'sample-willow': { specialty: 'Paediatrics', town: 'Wexford', country: 'Ireland', lat: 52.336, lng: -6.463 },
+}
+for (const m of members) Object.assign(m, sampleExtras[m.id])
+
 type PhotoSeed = Omit<Photo, 'tags' | 'thumb'> & { tags: [string, number, number, Tag['status']][] }
 
 const seeds: PhotoSeed[] = [
@@ -248,6 +261,8 @@ const roster: RosterPerson[] = [
   { id: 'r-2', fullName: 'Sample Willow', otherNames: [], email: 'willow@example.com', specialty: 'General practice', cohort: 'clinical', memberId: null, joinedByName: false },
 ]
 
+const featured: string[] = ['photo-06', 'photo-01']
+
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v))
 
 export const sampleRepo: Repo = {
@@ -262,6 +277,17 @@ export const sampleRepo: Repo = {
   },
   async getPhoto(id) {
     return clone(photos.find((p) => p.id === id) ?? null)
+  },
+  async listFeaturedPhotos() {
+    return clone(featured.map((id) => photos.find((p) => p.id === id)).filter((p): p is Photo => Boolean(p)))
+  },
+  async listHomeFallbackPhotos() {
+    return clone(photos.slice(0, 3))
+  },
+  async setFeatured(photoId, rank) {
+    const i = featured.indexOf(photoId)
+    if (i >= 0) featured.splice(i, 1)
+    if (rank !== null) featured.splice(rank - 1, 0, photoId)
   },
   async suggestTag(photoId, memberId, x, y) {
     const photo = photos.find((p) => p.id === photoId)
@@ -391,6 +417,7 @@ export const sampleRepo: Repo = {
   async unrecognisedSignins() {
     return [{ email: 'birch.personal@example.com', firstTried: '2026-10-05T09:00:00Z', signedIn: true }]
   },
+  hasProfileExtras: () => true,
   async adminMembers() {
     return members.map((m) => ({
       id: m.id,

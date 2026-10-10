@@ -18,9 +18,24 @@ export type Member = {
   allowsTags: boolean
   isAdmin: boolean
   avatarUrl?: string | null
+  /** Name at medical school, if different (for example a maiden name). */
+  previousName?: string | null
+  specialty?: string | null
+  /** Where they are now. Shown on the profile and the classmates map. */
+  town?: string | null
+  country?: string | null
+  lat?: number | null
+  lng?: number | null
+  links?: PublicLinks
+  /** Whether they chose to show their email to classmates. */
+  showEmail?: boolean
+  /** Only filled in when they chose to show it. */
+  email?: string | null
 }
 
-export type ProfileInput = Omit<Member, 'id' | 'isAdmin' | 'avatarUrl'>
+export type PublicLinks = { wikipedia?: string; orcid?: string; scholar?: string; hospital?: string }
+
+export type ProfileInput = Omit<Member, 'id' | 'isAdmin' | 'avatarUrl' | 'email'>
 
 export type TagStatus = 'pending' | 'confirmed' | 'rejected'
 
@@ -114,9 +129,17 @@ export type UnrecognisedSignin = {
 
 export type Repo = {
   listMembers(): Promise<Member[]>
+  /** False until database update 0011 has run (finder, map and link fields). */
+  hasProfileExtras(): boolean
   getMember(id: string): Promise<Member | null>
   listPhotos(): Promise<Photo[]>
   getPhoto(id: string): Promise<Photo | null>
+  /** Photos chosen for the members' Home page, in order (empty before update 0011). */
+  listFeaturedPhotos(): Promise<Photo[]>
+  /** A few well-tagged photos to show on Home when none have been chosen. */
+  listHomeFallbackPhotos(): Promise<Photo[]>
+  /** Admin only: put a photo on Home (rank 1 shows first) or take it off (null). */
+  setFeatured(photoId: string, rank: number | null): Promise<void>
   suggestTag(photoId: string, memberId: string, x: number, y: number): Promise<void>
   decideTag(tagId: string, status: 'confirmed' | 'rejected'): Promise<void>
   removeTag(tagId: string): Promise<void>

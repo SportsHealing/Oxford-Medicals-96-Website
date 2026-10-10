@@ -16,8 +16,13 @@ export default function PhotoView() {
   const queue = (params.get('queue') ?? '').split(',').filter(Boolean)
   const { data, loading, error, reload } = useLoad(
     async () => {
-      const [photo, members, all] = await Promise.all([repo.getPhoto(id), repo.listMembers(), repo.listPhotos()])
-      return { photo, members, all }
+      const [photo, members, all, featured] = await Promise.all([
+        repo.getPhoto(id),
+        repo.listMembers(),
+        repo.listPhotos(),
+        isAdmin ? repo.listFeaturedPhotos().catch(() => []) : Promise.resolve([]),
+      ])
+      return { photo, members, all, featured: featured.map((p) => p.id) }
     },
     [id],
   )
@@ -31,7 +36,27 @@ export default function PhotoView() {
   if (loading) return <Loading what="Opening the photo" />
   if (error) return <LoadError message={error} />
   if (!data?.photo) return <NotFound />
-  const { photo, members, all } = data
+  const { photo, members, all, featured } = data
+  const featuredAt = featured.indexOf(photo.id)
+  const toggleFeatured = async () => {
+    setProblem(null)
+    if (featuredAt < 0 && featured.length >= 5) {
+      setProblem('Home already shows 5 photos. Remove one first (open it and press Remove from Home).')
+      return
+    }
+    try {
+      if (featuredAt >= 0) {
+        await repo.setFeatured(photo.id, null)
+        // Close the gap so the remaining photos keep their order.
+        await Promise.all(featured.slice(featuredAt + 1).map((pid, i) => repo.setFeatured(pid, featuredAt + i + 1)))
+      } else {
+        await repo.setFeatured(photo.id, featured.length + 1)
+      }
+      reload()
+    } catch (e) {
+      setProblem(e instanceof Error ? e.message : 'Could not change the Home photos')
+    }
+  }
 
   const index = all.findIndex((p) => p.id === photo.id)
   const prev = all[index - 1]
@@ -185,11 +210,25 @@ export default function PhotoView() {
             <p className="label-caps">{[photo.year, photo.place].filter(Boolean).join(' · ') || 'Undated'}</p>
             <h1 className="mt-1 text-3xl">{photo.title}</h1>
             {photo.caption && <p className="mt-3 text-muted">{photo.caption}</p>}
-            {canDelete && (
-              <button type="button" className="mt-3 font-sans text-xs text-muted hover:text-rose-deep" onClick={() => void deletePhoto()}>
-                Delete this photo
-              </button>
-            )}
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+              {isAdmin && (
+                <button
+                  type="button"
+                  className={`rounded-full px-3 py-1 font-sans text-xs font-semibold transition ${
+                    featuredAt >= 0 ? 'bg-rose text-navy hover:bg-rose-hover' : 'border border-line text-navy hover:border-navy'
+                  }`}
+                  onClick={() => void toggleFeatured()}
+                >
+                  {featuredAt >= 0 ? `On Home (${featuredAt + 1} of ${featured.length}) · Remove from Home` : 'Feature on Home'}
+                </button>
+              )}
+              {canDelete && (
+                <button type="button" className="font-sans text-xs text-muted hover:text-rose-deep" onClick={() => void deletePhoto()}>
+                  Delete this photo
+                </button>
+              )}
+            </div>
+            {problem && !draft && <p className="mt-2 font-sans text-sm text-rose-deep">{problem}</p>}
           </div>
 
           {draft && (

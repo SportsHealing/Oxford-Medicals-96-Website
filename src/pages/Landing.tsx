@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth.tsx'
 import { asset } from '../asset.ts'
 
 export default function Landing() {
   const { memberId } = useAuth()
+  // The class photo, if it has been added to the site; otherwise Rita.
+  const [photoOk, setPhotoOk] = useState(true)
 
   return (
     <div className="-mt-10 space-y-20 sm:-mt-14">
@@ -11,7 +14,7 @@ export default function Landing() {
       <section className="relative left-1/2 -ml-[50vw] w-screen overflow-hidden bg-navy text-white">
         <div aria-hidden className="pointer-events-none absolute -top-40 right-[-8rem] h-[28rem] w-[28rem] rounded-full bg-rose/15 blur-3xl" />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 sm:py-24 md:grid-cols-[1.2fr_1fr]">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 sm:py-24 md:grid-cols-[1fr_1.15fr]">
           <div>
             <p className="mb-5 font-sans text-[0.78rem] font-semibold tracking-[0.14em] text-rose uppercase">
               Oxford Medical School &middot; Class of 1996
@@ -41,15 +44,35 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="mx-auto w-60 sm:w-72">
-            <div className="relative">
-              <div className="absolute inset-0 translate-x-3 translate-y-3 rounded-[2.25rem] border border-rose/40" />
-              <div className="relative flex aspect-square items-center justify-center rounded-[2.25rem] bg-rose-soft shadow-2xl">
-                <img src={asset('/rita.svg')} alt="Rita the Pink Elephant" className="w-3/5" />
+          {photoOk ? (
+            <figure className="md:-mr-6">
+              <div className="relative">
+                <div aria-hidden className="absolute inset-0 translate-x-3 translate-y-3 rounded-3xl border border-rose/40" />
+                <img
+                  src={asset('/landing.jpg')}
+                  srcSet={`${asset('/landing-800.jpg')} 800w, ${asset('/landing.jpg')} 1600w`}
+                  sizes="(min-width: 768px) 560px, 100vw"
+                  width={1600}
+                  height={1067}
+                  alt="The Oxford medical class of 1996, together again in Oxford"
+                  fetchPriority="high"
+                  onError={() => setPhotoOk(false)}
+                  className="relative aspect-[3/2] w-full rounded-3xl bg-navy-soft object-cover shadow-2xl"
+                />
               </div>
+              <figcaption className="mt-6 text-center font-serif text-white/60 italic">Back in Oxford, thirty years on.</figcaption>
+            </figure>
+          ) : (
+            <div className="mx-auto w-60 sm:w-72">
+              <div className="relative">
+                <div className="absolute inset-0 translate-x-3 translate-y-3 rounded-[2.25rem] border border-rose/40" />
+                <div className="relative flex aspect-square items-center justify-center rounded-[2.25rem] bg-rose-soft shadow-2xl">
+                  <img src={asset('/rita.svg')} alt="Rita the Pink Elephant" className="w-3/5" />
+                </div>
+              </div>
+              <p className="mt-8 text-center font-serif text-white/60 italic">Rita, as ever, presiding.</p>
             </div>
-            <p className="mt-8 text-center font-serif text-white/60 italic">Rita, as ever, presiding.</p>
-          </div>
+          )}
         </div>
       </section>
 

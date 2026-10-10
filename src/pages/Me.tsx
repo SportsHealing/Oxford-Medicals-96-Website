@@ -7,6 +7,9 @@ import { repo } from '../data/repo.ts'
 import type { Member, ProfileInput } from '../data/types.ts'
 import { LoadError, Loading, useLoad } from '../lib/useLoad.tsx'
 import { makeAvatar } from '../lib/prepareImage.ts'
+import { SPECIALTIES } from '../lib/specialties.ts'
+import TownPicker from '../components/TownPicker.tsx'
+import type { PublicLinks } from '../data/types.ts'
 
 function toInput(m: Member): ProfileInput {
   return {
@@ -26,6 +29,14 @@ function toInput(m: Member): ProfileInput {
     twitter: m.twitter ?? '',
     acceptsContact: m.acceptsContact,
     allowsTags: m.allowsTags,
+    previousName: m.previousName ?? '',
+    specialty: m.specialty ?? '',
+    town: m.town ?? '',
+    country: m.country ?? '',
+    lat: m.lat ?? null,
+    lng: m.lng ?? null,
+    links: m.links ?? {},
+    showEmail: m.showEmail ?? false,
   }
 }
 
@@ -99,6 +110,9 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
 
   const set = (k: keyof ProfileInput) => (e: { target: { value: string } }) =>
     setForm((f) => ({ ...f, [k]: e.target.value }))
+  const setLink = (k: keyof PublicLinks) => (e: { target: { value: string } }) =>
+    setForm((f) => ({ ...f, links: { ...f.links, [k]: e.target.value.trim() || undefined } }))
+  const extras = repo.hasProfileExtras()
 
   const save = async (e: FormEvent) => {
     e.preventDefault()
@@ -178,6 +192,14 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
               <Field label="Known as (optional)" value={form.knownAs ?? ''} onChange={set('knownAs')} placeholder="e.g. Sam" />
               <Field label="College" value={form.college ?? ''} onChange={set('college')} placeholder="e.g. Balliol" />
             </div>
+            {extras && (
+              <Field
+                label="Name at medical school, if different"
+                value={form.previousName ?? ''}
+                onChange={set('previousName')}
+                placeholder="So classmates can find you, e.g. a maiden name"
+              />
+            )}
           </section>
 
           <section className="space-y-4">
@@ -186,6 +208,23 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
               <Field label="Job title and specialty" value={form.jobTitle ?? ''} onChange={set('jobTitle')} />
               <Field label="Where you work" value={form.workplace ?? ''} onChange={set('workplace')} />
             </div>
+            {extras && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="label-caps">Specialty</span>
+                  <input className="field mt-1.5" list="specialty-list" value={form.specialty ?? ''} onChange={set('specialty')} placeholder="Start typing, or write your own" />
+                  <datalist id="specialty-list">
+                    {SPECIALTIES.map((s) => (
+                      <option key={s} value={s} />
+                    ))}
+                  </datalist>
+                </label>
+                <TownPicker
+                  value={{ town: form.town ?? '', country: form.country ?? '', lat: form.lat ?? null, lng: form.lng ?? null }}
+                  onChange={(v) => setForm((f) => ({ ...f, ...v }))}
+                />
+              </div>
+            )}
             <Area label="Your career since Oxford, in a few lines" value={form.careerPath ?? ''} onChange={set('careerPath')} />
             <Field label="Interests outside medicine" value={form.interests ?? ''} onChange={set('interests')} />
           </section>
@@ -197,6 +236,14 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
               <Field label="Website" value={form.website ?? ''} onChange={set('website')} placeholder="yourwebsite.com" />
               <Field label="Instagram" value={form.instagram ?? ''} onChange={set('instagram')} placeholder="@yourname" />
               <Field label="X (Twitter)" value={form.twitter ?? ''} onChange={set('twitter')} placeholder="@yourname" />
+              {extras && (
+                <>
+                  <Field label="Wikipedia page" value={form.links?.wikipedia ?? ''} onChange={setLink('wikipedia')} placeholder="en.wikipedia.org/wiki/..." />
+                  <Field label="ORCID iD" value={form.links?.orcid ?? ''} onChange={setLink('orcid')} placeholder="0000-0000-0000-0000" />
+                  <Field label="Google Scholar" value={form.links?.scholar ?? ''} onChange={setLink('scholar')} placeholder="scholar.google.com/citations?user=..." />
+                  <Field label="Hospital or practice page" value={form.links?.hospital ?? ''} onChange={setLink('hospital')} placeholder="Link to your profile page" />
+                </>
+              )}
             </div>
             <p className="font-sans text-sm text-muted">Paste a link or just your @name. Shown as buttons on your profile.</p>
           </section>
@@ -222,6 +269,14 @@ function MePage({ memberId, data, reload }: { memberId: string; data: Loaded; re
               checked={form.allowsTags}
               onChange={(v) => setForm((f) => ({ ...f, allowsTags: v }))}
             />
+            {extras && (
+              <Toggle
+                label="Show my email address to classmates"
+                hint="Off unless you turn it on. Without it, classmates reach you through the message form."
+                checked={form.showEmail ?? false}
+                onChange={(v) => setForm((f) => ({ ...f, showEmail: v }))}
+              />
+            )}
           </section>
 
           {problem && <p className="font-sans text-sm text-rose-deep">{problem}</p>}
