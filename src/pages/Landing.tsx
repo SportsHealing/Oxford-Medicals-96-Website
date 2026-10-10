@@ -50,10 +50,10 @@ export default function Landing() {
                 <div aria-hidden className="absolute inset-0 translate-x-3 translate-y-3 rounded-3xl border border-rose/40" />
                 <img
                   src={asset('/landing.jpg')}
-                  srcSet={`${asset('/landing-800.jpg')} 800w, ${asset('/landing.jpg')} 1600w`}
+                  srcSet={`${asset('/landing-800.jpg')} 800w, ${asset('/landing.jpg')} 1500w`}
                   sizes="(min-width: 768px) 560px, 100vw"
-                  width={1600}
-                  height={1067}
+                  width={1500}
+                  height={1000}
                   alt="The Oxford medical class of 1996, together again in Oxford"
                   fetchPriority="high"
                   onError={() => setPhotoOk(false)}

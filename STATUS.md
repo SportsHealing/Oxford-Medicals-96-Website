@@ -91,7 +91,7 @@ Phase 3: Phase B. Site live at https://oxfordmedics96.com in live mode. Sign-in 
 - [x] Owner: run `supabase/migrations/0009_membership_on_invite.sql` in the Supabase SQL Editor.
 - [x] Owner: sign-up setup steps 1 to 7 in `docs/sign-up-setup.md` (done 2026-10-10).
 - [ ] Owner: run `supabase/migrations/0011_profiles_map_home.sql` in the SQL Editor (turns on the new profile fields, map, email opt-in and Home photos).
-- [ ] Owner: send the reunion group photo as a normal message so it can be resized and published as `public/landing.jpg` (public front page). Confirm everyone is happy for it to be public.
+- [x] Reunion group photo published on the public front page as `public/landing.jpg` and `landing-800.jpg` (resized, location and camera data removed), 2026-10-10. To take it down, delete both files; Rita shows again.
 - [ ] Owner: choose up to 5 Home photos (open a photo, Feature on Home).
 - [ ] Owner: check the bounced invite addresses in Resend and correct them via the sign-up sheet import.
 - [ ] Owner: check Resend (Emails log and Domains page) for failed or bounced invites; add a DMARC record in Route 53 if Resend flags it.
