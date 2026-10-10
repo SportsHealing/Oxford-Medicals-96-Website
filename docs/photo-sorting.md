@@ -32,11 +32,11 @@ title such as "Rowing eight on the river". It never names people, and it
 never changes a photo someone has already sorted. Every suggestion is marked
 **AI** in sorting mode and can be changed.
 
-Cost: roughly $5 to $10 for 800 photos (Claude Opus 5.5, charged by Anthropic).
-It takes about 20 minutes with the page left open.
+Cost: well under $1 for 800 photos (Claude Haiku 5.5, charged by Anthropic).
+It takes 10 to 20 minutes with the page left open.
 
 1. Make an Anthropic API key: go to console.anthropic.com, sign in, add a
-   payment method and about $10 of credit (Settings, Billing), then
+   payment method and a small amount of credit ($5 is plenty) (Settings, Billing), then
    Settings, API keys, **Create key**. Copy it. Do not paste it anywhere else,
    including chats.
 2. Supabase, Edge Functions, Secrets: add a secret named `ANTHROPIC_API_KEY`

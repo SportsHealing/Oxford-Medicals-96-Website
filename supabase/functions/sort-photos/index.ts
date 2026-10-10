@@ -17,7 +17,8 @@ import Anthropic from 'npm:@anthropic-ai/sdk'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { encodeBase64 } from 'jsr:@std/encoding/base64'
 
-const MODEL = 'claude-opus-5-5'
+// Claude Haiku 5.5: quick and cheap, well under $1 for the whole archive.
+const MODEL = 'claude-haiku-5-5'
 const BATCH = 6
 
 // Keep in step with src/lib/photoCategories.ts and migration 0014.
@@ -123,11 +124,10 @@ Deno.serve(async (req) => {
 
     let response
     try {
-      response = await client.beta.messages.create({
+      // Haiku has no server-side fallback model; a declined photo just stays unsorted.
+      response = await client.messages.create({
         model: MODEL,
         max_tokens: 2000,
-        betas: ['server-side-fallback-2026-07-01'],
-        fallbacks: 'default',
         output_config: {
           effort: 'low',
           format: {
