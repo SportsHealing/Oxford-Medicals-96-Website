@@ -1,12 +1,26 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PageHeader from '../components/PageHeader.tsx'
 import { repo } from '../data/repo.ts'
 import { LoadError, Loading, useLoad } from '../lib/useLoad.tsx'
 
+const PAGE = 48
+
 export default function Gallery() {
   const { data: photos, loading, error } = useLoad(() => repo.listPhotos(), [])
   const [year, setYear] = useState<string>('all')
+  // Draw 48 cards at a time and add more as the visitor scrolls near the end.
+  const [limit, setLimit] = useState(PAGE)
+  const sentinel = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = sentinel.current
+    if (!el) return
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) setLimit((n) => n + PAGE)
+    }, { rootMargin: '800px' })
+    io.observe(el)
+    return () => io.disconnect()
+  })
 
   if (loading) return <Loading what="Fetching the photos" />
   if (error) return <LoadError message={error} />
@@ -39,11 +53,11 @@ export default function Gallery() {
         <>
           {years.length > 1 && (
             <div className="mb-8 flex flex-wrap gap-2">
-              <Chip active={year === 'all'} onClick={() => setYear('all')}>
+              <Chip active={year === 'all'} onClick={() => { setYear('all'); setLimit(PAGE) }}>
                 All years
               </Chip>
               {years.map((y) => (
-                <Chip key={y} active={year === y} onClick={() => setYear(y)}>
+                <Chip key={y} active={year === y} onClick={() => { setYear(y); setLimit(PAGE) }}>
                   {y}
                 </Chip>
               ))}
@@ -51,7 +65,7 @@ export default function Gallery() {
           )}
 
           <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {shown.map((photo) => {
+            {shown.slice(0, limit).map((photo) => {
               const confirmed = photo.tags.filter((t) => t.status === 'confirmed').length
               const pending = photo.tags.filter((t) => t.status === 'pending').length
               return (
@@ -82,6 +96,7 @@ export default function Gallery() {
               )
             })}
           </ul>
+          {shown.length > limit && <div ref={sentinel} className="h-10" aria-hidden />}
         </>
       )}
     </div>

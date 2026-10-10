@@ -1,8 +1,9 @@
+import { Suspense } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth.tsx'
 import { asset } from '../asset.ts'
 import { repo } from '../data/repo.ts'
-import { useLoad } from '../lib/useLoad.tsx'
+import { Loading, useLoad } from '../lib/useLoad.tsx'
 import Avatar from './Avatar.tsx'
 import PasswordPrompt from './PasswordPrompt.tsx'
 
@@ -78,7 +79,9 @@ export default function Layout() {
       </header>
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-10 sm:py-14">
-        <Outlet />
+        <Suspense fallback={<Loading />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <footer className="bg-navy text-white/75">
