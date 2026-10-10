@@ -7,6 +7,7 @@ export default function Landing() {
   const { memberId } = useAuth()
   // The class photo, if it has been added to the site; otherwise Rita.
   const [photoOk, setPhotoOk] = useState(true)
+  const [thenOk, setThenOk] = useState(true)
 
   return (
     <div className="-mt-10 space-y-20 sm:-mt-14">
@@ -59,8 +60,27 @@ export default function Landing() {
                   onError={() => setPhotoOk(false)}
                   className="relative aspect-[3/2] w-full rounded-3xl bg-navy-soft object-cover shadow-2xl"
                 />
+                <span className="absolute top-3 right-3 rounded-full bg-navy/80 px-3 py-1 font-sans text-xs font-semibold tracking-wide text-white backdrop-blur">
+                  2026
+                </span>
+                {thenOk && (
+                  // The same class thirty years earlier, laid on top like an old print.
+                  <div className="absolute -bottom-10 -left-3 w-[44%] -rotate-[4deg] rounded-md bg-white p-1.5 pb-1 shadow-2xl sm:-left-8 sm:w-[40%]">
+                    <img
+                      src={asset('/then-1996.jpg')}
+                      width={600}
+                      height={488}
+                      alt="The Oxford medical class of 1996, thirty years earlier"
+                      onError={() => setThenOk(false)}
+                      className="block h-auto w-full rounded-sm"
+                    />
+                    <p className="py-0.5 text-center font-serif text-sm text-navy italic sm:text-base">1996</p>
+                  </div>
+                )}
               </div>
-              <figcaption className="mt-6 text-center font-serif text-white/60 italic">Back in Oxford, thirty years on.</figcaption>
+              <figcaption className={`${thenOk ? 'mt-4 pl-[48%] text-left text-sm sm:mt-14 sm:pl-[38%] sm:text-base' : 'mt-6 text-center'} font-serif text-white/60 italic`}>
+                Back in Oxford, thirty years on.
+              </figcaption>
             </figure>
           ) : (
             <div className="mx-auto w-60 sm:w-72">
