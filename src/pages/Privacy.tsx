@@ -11,7 +11,8 @@ export default function Privacy() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Section title="Who can see what">
-          <li>Only signed-in members see photos, profiles and tags.</li>
+          <li>Only signed-in members see photos, profiles, tags and the reunion speeches.</li>
+          <li>Speeches are shared with the speakers' permission.</li>
           <li>The public sees the front page and this page. Nothing else. The front page shows one class photo.</li>
           <li>Search engines are asked not to index the site.</li>
         </Section>

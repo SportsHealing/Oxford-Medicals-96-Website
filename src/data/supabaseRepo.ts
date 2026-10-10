@@ -14,6 +14,9 @@ import type {
   Repo,
   RosterPerson,
   Tag,
+  Speech,
+  SpeechQuote,
+  SpeechSummary,
 } from './types.ts'
 
 // Column list for members. Never select '*': email is deliberately not
@@ -226,6 +229,33 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
     fail(error)
     return withUrls((data ?? []) as unknown as PhotoRow[])
   })
+  // Before database update 0012 runs there are simply no speeches.
+  const missingTable = (e: { code?: string; message: string } | null) =>
+    Boolean(e) && (e!.code === '42P01' || e!.code === 'PGRST205' || /relation .* does not exist|could not find the table/i.test(e!.message))
+  const speechesCache = memo(async (): Promise<SpeechSummary[]> => {
+    const { data, error } = await client.from('speeches').select('id, slug, title, speaker, occasion').order('sort').order('created_at')
+    if (missingTable(error)) return []
+    fail(error)
+    return (data ?? []) as SpeechSummary[]
+  })
+  const quotesCache = memo(async (): Promise<SpeechQuote[]> => {
+    const { data, error } = await client
+      .from('speech_quotes')
+      .select('id, text, attribution, sort, speeches(slug, title, speaker, sort)')
+    if (missingTable(error)) return []
+    fail(error)
+    type Row = { id: string; text: string; attribution: string | null; sort: number; speeches: { slug: string; title: string; speaker: string | null; sort: number } | null }
+    return ((data ?? []) as unknown as Row[])
+      .filter((r) => r.speeches)
+      .sort((a, b) => a.sort - b.sort || a.speeches!.sort - b.speeches!.sort)
+      .map((r) => ({
+        id: r.id,
+        text: r.text,
+        attribution: r.attribution || r.speeches!.speaker || '',
+        speechSlug: r.speeches!.slug,
+        speechTitle: r.speeches!.title,
+      }))
+  })
   // null until we know whether migration 0011 has run.
   let hasExtras: boolean | null = null
   const missingColumn = (e: { code?: string; message: string } | null) =>
@@ -298,6 +328,18 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       if (cur?.avatar_path) await client.storage.from('avatars').remove([cur.avatar_path])
     },
     listPhotos: () => photosCache.get(),
+    listSpeeches: () => speechesCache.get(),
+    async getSpeech(slug) {
+      const { data, error } = await client
+        .from('speeches')
+        .select('id, slug, title, speaker, occasion, body')
+        .eq('slug', slug)
+        .maybeSingle()
+      if (missingTable(error)) return null
+      fail(error)
+      return (data as Speech | null) ?? null
+    },
+    listSpeechQuotes: () => quotesCache.get(),
     async listFeaturedPhotos() {
       const { data, error } = await client
         .from('photos')

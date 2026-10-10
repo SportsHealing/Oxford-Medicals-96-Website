@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth.tsx'
 import PhotoCarousel from '../components/PhotoCarousel.tsx'
+import QuoteBanner from '../components/QuoteBanner.tsx'
 import { repo } from '../data/repo.ts'
 import { useLoad } from '../lib/useLoad.tsx'
 
@@ -8,13 +9,14 @@ import { useLoad } from '../lib/useLoad.tsx'
 export default function Home() {
   const { memberId, isAdmin } = useAuth()
   const { data } = useLoad(async () => {
-    const [featured, me, pending] = await Promise.all([
+    const [featured, me, pending, quotes] = await Promise.all([
       repo.listFeaturedPhotos().catch(() => []),
       memberId ? repo.getMember(memberId) : Promise.resolve(null),
       repo.myPendingTags().catch(() => []),
+      repo.listSpeechQuotes().catch(() => []),
     ])
     const photos = featured.length ? featured : await repo.listHomeFallbackPhotos().catch(() => [])
-    return { photos, chosen: featured.length > 0, me, pending: pending.length }
+    return { photos, chosen: featured.length > 0, me, pending: pending.length, quotes }
   }, [memberId])
 
   const first = data?.me?.knownAs || data?.me?.name.split(' ')[0]
@@ -35,6 +37,8 @@ export default function Home() {
         </p>
       )}
 
+      {data && data.quotes.length > 0 && <QuoteBanner quotes={data.quotes} />}
+
       {data && (data.pending > 0 || incomplete) && (
         <div className="card flex flex-wrap items-center gap-4 border-rose/60 bg-rose-soft/60 p-5">
           <p className="min-w-0 flex-1 text-ink">
@@ -48,10 +52,11 @@ export default function Home() {
         </div>
       )}
 
-      <ul className="grid gap-5 sm:grid-cols-3">
+      <ul className={`grid gap-5 sm:grid-cols-2 ${data?.quotes.length ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}>
         <Tile to="/photos" title="Photos" body="The whole archive, year by year. Put names to faces." />
         <Tile to="/classmates" title="Classmates" body="Find anyone by name, specialty or town." />
         <Tile to="/classmates?view=map" title="Where are we now" body="See where everyone ended up." />
+        {data && data.quotes.length > 0 && <Tile to="/speeches" title="Speeches" body="Words from the thirtieth reunion, in full." />}
       </ul>
     </div>
   )

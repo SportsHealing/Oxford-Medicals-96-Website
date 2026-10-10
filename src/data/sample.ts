@@ -1,7 +1,7 @@
 // Sample data and an in-memory repo for prototype mode.
 // Every person and photo here is fictional.
 import { asset } from '../asset.ts'
-import type { AllowedEmail, InboxMessage, JoinRequest, Member, Photo, ProfileInput, Repo, RosterPerson, Tag } from './types.ts'
+import type { AllowedEmail, InboxMessage, JoinRequest, Member, Photo, ProfileInput, Repo, RosterPerson, Speech, SpeechQuote, Tag } from './types.ts'
 
 /** In prototype mode you are signed in as this person. */
 export const SAMPLE_ME = 'sample-alder'
@@ -263,6 +263,38 @@ const roster: RosterPerson[] = [
 
 const featured: string[] = ['photo-06', 'photo-01']
 
+// Placeholder speeches for the demo. The real ones live only in the database.
+const speeches: Speech[] = [
+  {
+    id: 'speech-1',
+    slug: 'sample-welcome',
+    title: 'A sample welcome',
+    speaker: 'Sample Alder',
+    occasion: 'Demo reunion dinner',
+    body: [
+      'This is placeholder text for the demo site. The real speeches are added by the organisers.',
+      '## Then',
+      'We arrived knowing very little and left knowing a little more. Somewhere in between we became friends.',
+      '## Now',
+      'Thirty years on, the faces are familiar and the stories are new.',
+      '**A toast to the next thirty.**',
+    ].join('\n\n'),
+  },
+  {
+    id: 'speech-2',
+    slug: 'sample-reflection',
+    title: 'A sample reflection',
+    speaker: 'Sample Birch',
+    occasion: 'Written after the demo dinner',
+    body: ['Another placeholder, to show how a second speech looks.', 'It was good to see you all.', '*Sample Birch*'].join('\n\n'),
+  },
+]
+const quotes: SpeechQuote[] = [
+  { id: 'q-1', text: 'Somewhere in between we became friends.', attribution: 'Sample Alder', speechSlug: 'sample-welcome', speechTitle: 'A sample welcome' },
+  { id: 'q-2', text: 'It was good to see you all.', attribution: 'Sample Birch', speechSlug: 'sample-reflection', speechTitle: 'A sample reflection' },
+  { id: 'q-3', text: 'Thirty years on, the faces are familiar and the stories are new.', attribution: 'Sample Alder', speechSlug: 'sample-welcome', speechTitle: 'A sample welcome' },
+]
+
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v))
 
 export const sampleRepo: Repo = {
@@ -274,6 +306,15 @@ export const sampleRepo: Repo = {
   },
   async listPhotos() {
     return clone(photos)
+  },
+  async listSpeeches() {
+    return clone(speeches.map(({ body: _body, ...rest }) => rest))
+  },
+  async getSpeech(slug) {
+    return clone(speeches.find((s) => s.slug === slug) ?? null)
+  },
+  async listSpeechQuotes() {
+    return clone(quotes)
   },
   async getPhoto(id) {
     return clone(photos.find((p) => p.id === id) ?? null)

@@ -127,6 +127,28 @@ export type UnrecognisedSignin = {
   signedIn: boolean
 }
 
+export type SpeechSummary = {
+  id: string
+  slug: string
+  title: string
+  speaker: string | null
+  occasion: string | null
+}
+
+export type Speech = SpeechSummary & {
+  /** Paragraphs separated by a blank line. See SpeechBody for the few marks allowed. */
+  body: string
+}
+
+export type SpeechQuote = {
+  id: string
+  text: string
+  /** Who said it: the speaker, or someone they quoted. */
+  attribution: string
+  speechSlug: string
+  speechTitle: string
+}
+
 export type Repo = {
   listMembers(): Promise<Member[]>
   /** False until database update 0011 has run (finder, map and link fields). */
@@ -145,6 +167,11 @@ export type Repo = {
   removeTag(tagId: string): Promise<void>
   /** Tags of the current member that still need their decision, with the photo. */
   myPendingTags(): Promise<{ tag: Tag; photo: Photo }[]>
+  /** Speeches from reunions (empty before database update 0012). */
+  listSpeeches(): Promise<SpeechSummary[]>
+  getSpeech(slug: string): Promise<Speech | null>
+  /** Quotes for the Home page banner, in order. */
+  listSpeechQuotes(): Promise<SpeechQuote[]>
   myEmail(): Promise<string | null>
   updateProfile(input: ProfileInput): Promise<void>
   sendContact(toMemberId: string, message: string): Promise<void>

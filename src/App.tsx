@@ -18,6 +18,8 @@ const Me = lazy(() => import('./pages/Me.tsx'))
 const Admin = lazy(() => import('./pages/Admin.tsx'))
 const Privacy = lazy(() => import('./pages/Privacy.tsx'))
 const Home = lazy(() => import('./pages/Home.tsx'))
+const Speeches = lazy(() => import('./pages/Speeches.tsx'))
+const SpeechView = lazy(() => import('./pages/SpeechView.tsx'))
 
 // Members get their Home page at "/"; everyone else sees the public front page.
 function Front() {
@@ -40,6 +42,8 @@ export default function App() {
           <Route path="classmates" element={<Classmates />} />
           <Route path="classmates/:id" element={<Profile />} />
           <Route path="classmates/:id/contact" element={<Contact />} />
+          <Route path="speeches" element={<Speeches />} />
+          <Route path="speeches/:slug" element={<SpeechView />} />
           <Route path="me" element={<Me />} />
           <Route path="admin" element={<Admin />} />
         </Route>
