@@ -351,9 +351,6 @@ export const sampleRepo: Repo = {
   async listFeaturedPhotos() {
     return clone(featured.map((id) => photos.find((p) => p.id === id)).filter((p): p is Photo => Boolean(p)))
   },
-  async listHomeFallbackPhotos() {
-    return clone(photos.slice(0, 3))
-  },
   async setFeatured(photoId, rank) {
     const i = featured.indexOf(photoId)
     if (i >= 0) featured.splice(i, 1)

@@ -160,8 +160,6 @@ export type Repo = {
   getPhoto(id: string): Promise<Photo | null>
   /** Photos chosen for the members' Home page, in order (empty before update 0011). */
   listFeaturedPhotos(): Promise<Photo[]>
-  /** A few well-tagged photos to show on Home when none have been chosen. */
-  listHomeFallbackPhotos(): Promise<Photo[]>
   /** Admin only: put a photo on Home (rank 1 shows first) or take it off (null). */
   setFeatured(photoId: string, rank: number | null): Promise<void>
   suggestTag(photoId: string, memberId: string, x: number, y: number): Promise<void>

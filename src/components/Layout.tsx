@@ -41,6 +41,9 @@ export default function Layout() {
                 <>
                   {memberId && (
                     <>
+                      <NavLink to="/" end className={navClass}>
+                        Home
+                      </NavLink>
                       <NavLink to="/photos" className={navClass}>
                         Photos
                       </NavLink>

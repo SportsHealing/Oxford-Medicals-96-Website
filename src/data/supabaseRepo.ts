@@ -369,20 +369,6 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       fail(error)
       return withUrls((data ?? []) as unknown as PhotoRow[])
     },
-    async listHomeFallbackPhotos() {
-      const { data, error } = await client
-        .from('photos')
-        .select('id, title, year, place, caption, storage_path, thumb_path, uploaded_by, photo_tags(*)')
-        .order('created_at')
-        .limit(60)
-      fail(error)
-      const rows = ((data ?? []) as unknown as PhotoRow[])
-        .map((r) => ({ r, n: (r.photo_tags ?? []).filter((t) => t.status === 'confirmed').length }))
-        .sort((a, b) => b.n - a.n)
-        .slice(0, 3)
-        .map((x) => x.r)
-      return withUrls(rows)
-    },
     async setFeatured(photoId, rank) {
       const { error } = await client.from('photos').update({ featured_rank: rank }).eq('id', photoId)
       if (missingColumn(error)) throw new Error('Run database update 0011 first (Supabase, SQL Editor).')
