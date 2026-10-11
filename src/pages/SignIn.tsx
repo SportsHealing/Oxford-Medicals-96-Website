@@ -30,7 +30,7 @@ export default function SignIn() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const from = (location.state as { from?: string } | null)?.from ?? '/photos'
+  const from = (location.state as { from?: string } | null)?.from ?? '/'
   // While joining, the person is signed in before they are a member: stay here.
   const midJoin = mode === 'join' && step !== 'form'
   if (signedInAs && !midJoin) return <Navigate to={from} replace />
@@ -99,7 +99,7 @@ export default function SignIn() {
       if (pwProblem) return setError(`Your email is confirmed, but the password was not saved: ${pwProblem}`)
       const result = await claimAccess(name, previousName, cleanEmail)
       if ('error' in result) return setError(result.error)
-      if (result.status === 'member' || result.status === 'joined_by_name') navigate('/photos', { replace: true })
+      if (result.status === 'member' || result.status === 'joined_by_name') navigate('/', { replace: true })
       else setStep(result.status)
     })
   }

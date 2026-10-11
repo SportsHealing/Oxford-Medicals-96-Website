@@ -28,7 +28,7 @@ export default function Admin() {
     return { allowed, members, requests, roster, unrecognised }
   }, [])
 
-  if (!isAdmin) return <Navigate to="/photos" replace />
+  if (!isAdmin) return <Navigate to="/" replace />
   if (loading) return <Loading what="Loading admin tools" />
   if (error) return <LoadError message={error} />
   if (!data) return null

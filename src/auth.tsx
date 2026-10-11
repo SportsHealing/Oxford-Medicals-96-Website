@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!supabase) return null
     const { error } = await supabase.auth.signInWithOtp({
       email: value,
-      options: { emailRedirectTo: `${window.location.origin}/photos` },
+      options: { emailRedirectTo: `${window.location.origin}/` },
     })
     if (!error) return null
     const m = error.message.toLowerCase()
