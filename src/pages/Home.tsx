@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth.tsx'
 import PhotoCarousel from '../components/PhotoCarousel.tsx'
@@ -7,19 +8,24 @@ import ThenAndNow from '../components/ThenAndNow.tsx'
 import { repo } from '../data/repo.ts'
 import { useLoad } from '../lib/useLoad.tsx'
 
+// The map code and outlines load only when there is someone to show on it.
+const WorldHeatMap = lazy(() => import('../components/WorldHeatMap.tsx'))
+
 // The members' front page: the class then and now, words from the reunion,
 // then the quickest ways into the rest of the site.
 export default function Home() {
   const { memberId, isAdmin } = useAuth()
   const { data } = useLoad(async () => {
-    const [featured, me, pending, quotes, speeches] = await Promise.all([
+    const [featured, me, pending, quotes, speeches, people] = await Promise.all([
       repo.listFeaturedPhotos().catch(() => []),
       memberId ? repo.getMember(memberId) : Promise.resolve(null),
       repo.myPendingTags().catch(() => []),
       repo.listSpeechQuotes().catch(() => []),
       repo.listSpeeches().catch(() => []),
+      repo.listMembers().catch(() => []),
     ])
-    return { featured, me, pending: pending.length, quotes, speeches }
+    const located = people.filter((p) => p.lat != null && p.lng != null && p.town)
+    return { featured, me, pending: pending.length, quotes, speeches, people: located }
   }, [memberId])
 
   const first = data?.me?.knownAs || data?.me?.name.split(' ')[0]
@@ -68,6 +74,12 @@ export default function Home() {
             ))}
           </ul>
         </section>
+      )}
+
+      {data && data.people.length > 0 && (
+        <Suspense fallback={null}>
+          <WorldHeatMap people={data.people} />
+        </Suspense>
       )}
 
       {data && data.featured.length > 0 && (
