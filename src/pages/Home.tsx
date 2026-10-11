@@ -1,15 +1,12 @@
-import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth.tsx'
 import PhotoCarousel from '../components/PhotoCarousel.tsx'
 import QuoteBanner from '../components/QuoteBanner.tsx'
 import SpeechCard from '../components/SpeechCard.tsx'
 import ThenAndNow from '../components/ThenAndNow.tsx'
+import WhereWeAre from '../components/WhereWeAre.tsx'
 import { repo } from '../data/repo.ts'
 import { useLoad } from '../lib/useLoad.tsx'
-
-// The map code and outlines load only when there is someone to show on it.
-const WorldHeatMap = lazy(() => import('../components/WorldHeatMap.tsx'))
 
 // The members' front page: the class then and now, words from the reunion,
 // then the quickest ways into the rest of the site.
@@ -76,11 +73,7 @@ export default function Home() {
         </section>
       )}
 
-      {data && data.people.length > 0 && (
-        <Suspense fallback={null}>
-          <WorldHeatMap people={data.people} />
-        </Suspense>
-      )}
+      {data && <WhereWeAre people={data.people} />}
 
       {data && data.featured.length > 0 && (
         <section>

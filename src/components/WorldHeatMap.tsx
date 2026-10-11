@@ -18,7 +18,7 @@ const coreRadius = (n: number) => 3 + 1.6 * Math.sqrt(n)
 
 // A world map where each town glows; more classmates, bigger and brighter glow.
 // Overlapping glows add up, so clusters (London, Oxford) read as hot spots.
-export default function WorldHeatMap({ people }: { people: Member[] }) {
+export default function WorldHeatMap({ people, eyebrow = 'Where are we now' }: { people: Member[]; eyebrow?: string }) {
   const [world, setWorld] = useState<GeoPermissibleObjects | null>(null)
   const [failed, setFailed] = useState(false)
   const [hover, setHover] = useState<{ place: Place; x: number; y: number } | null>(null)
@@ -69,7 +69,7 @@ export default function WorldHeatMap({ people }: { people: Member[] }) {
     <section className="overflow-hidden rounded-3xl bg-navy text-white shadow-card">
       <div className="flex flex-wrap items-end gap-x-6 gap-y-2 px-6 pt-6 sm:px-8 sm:pt-8">
         <div className="min-w-0 flex-[1_1_16rem]">
-          <p className="font-sans text-[0.78rem] font-semibold tracking-[0.14em] text-rose uppercase">Where are we now</p>
+          <p className="font-sans text-[0.78rem] font-semibold tracking-[0.14em] text-rose uppercase">{eyebrow}</p>
           <h2 className="mt-1 text-3xl text-white sm:text-4xl">
             {placed} {placed === 1 ? 'classmate' : 'classmates'}, {countries} {countries === 1 ? 'country' : 'countries'}
           </h2>
