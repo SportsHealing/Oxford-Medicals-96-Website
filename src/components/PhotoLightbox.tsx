@@ -72,9 +72,10 @@ export default function PhotoLightbox({ photos, startIndex, onClose }: Props) {
     }
   }, [])
 
-  // Warm the cache for the photos either side so arrows feel instant.
+  // Fetch the next photo ahead so the arrow feels instant. Just one: each
+  // full-size photo counts against the Supabase download allowance.
   useEffect(() => {
-    for (const d of [-1, 1, 2]) {
+    for (const d of [1]) {
       const p = photos[index + d]
       if (p) new Image().src = p.src
     }

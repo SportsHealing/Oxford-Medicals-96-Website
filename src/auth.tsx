@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { SAMPLE_ME } from './data/sample.ts'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase.ts'
+import { forgetPhotos } from './lib/photoCache.ts'
 
 // Two modes:
 // - Live: Supabase magic-link sign-in. A person counts as a member only if
@@ -225,6 +226,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signOut = async () => {
+    await forgetPhotos()
     if (supabase) {
       await supabase.auth.signOut()
     } else {
