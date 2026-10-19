@@ -25,6 +25,10 @@ export default function Home() {
     return { featured, me, pending: pending.length, quotes, speeches, people: located }
   }, [memberId])
 
+  // Home shows the most recent year's speeches; the Speeches tab has them all.
+  const newest = Math.max(0, ...(data?.speeches ?? []).map((s) => s.year ?? 0))
+  const latest = (data?.speeches ?? []).filter((s) => !newest || s.year === newest)
+
   const first = data?.me?.knownAs || data?.me?.name.split(' ')[0]
   const incomplete = data?.me && repo.hasProfileExtras() && (!data.me.specialty || !data.me.town)
 
@@ -62,12 +66,21 @@ export default function Home() {
 
       {data && data.speeches.length > 0 && (
         <section>
-          <p className="eyebrow mb-2">The reunion dinner</p>
-          <h2 className="text-3xl sm:text-4xl">The speeches</h2>
-          <span className="mt-3 mb-6 block h-[3px] w-12 rounded-full bg-rose" />
+          <div className="mb-6 flex flex-wrap items-end gap-x-6 gap-y-2">
+            <div className="min-w-0 flex-[1_1_16rem]">
+              <p className="eyebrow mb-2">The reunion dinner</p>
+              <h2 className="text-3xl sm:text-4xl">The speeches</h2>
+              <span className="mt-3 block h-[3px] w-12 rounded-full bg-rose" />
+            </div>
+            {latest.length < data.speeches.length && (
+              <Link to="/speeches" className="font-sans text-sm font-semibold text-navy no-underline hover:underline">
+                All speeches over the years &rarr;
+              </Link>
+            )}
+          </div>
           <ul className="grid gap-5 sm:grid-cols-2">
-            {data.speeches.map((s) => (
-              <SpeechCard key={s.id} speech={s} />
+            {latest.map((s) => (
+              <SpeechCard key={s.id} speech={s} showYear={false} />
             ))}
           </ul>
         </section>

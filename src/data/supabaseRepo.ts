@@ -143,6 +143,28 @@ function memo<T>(load: () => Promise<T>) {
   }
 }
 
+const slugify = (t: string) =>
+  t
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+
+const cleanFileName = (name: string, title: string) => {
+  const base = name.replace(/\.pdf$/i, '').replace(/[^\w .()-]+/g, ' ').trim() || title.trim() || 'speech'
+  return `${base.slice(0, 80)}.pdf`
+}
+
+const fileToBase64 = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const r = new FileReader()
+    r.onload = () => resolve(String(r.result).replace(/^data:[^,]*,/, ''))
+    r.onerror = () => reject(new Error('Could not read the file'))
+    r.readAsDataURL(file)
+  })
+
 export function createSupabaseRepo(client: SupabaseClient): Repo {
   const fail = (error: { message: string } | null) => {
     if (error) throw new Error(error.message)
@@ -253,20 +275,23 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
   // Before database update 0012 runs there are simply no speeches.
   const missingTable = (e: { code?: string; message: string } | null) =>
     Boolean(e) && (e!.code === '42P01' || e!.code === 'PGRST205' || /relation .* does not exist|could not find the table/i.test(e!.message))
-  // pdf_name arrives with database update 0013; until then there are no PDFs.
-  let hasPdfs = true
+  // pdf_name arrives with database update 0013 and year with 0015; until
+  // then speeches load without them. Each level falls back to the one before.
+  let speechLevel = 2
   const SPEECH_COLS = 'id, slug, title, speaker, occasion'
+  const SPEECH_EXTRAS = ['', ', pdfName:pdf_name', ', pdfName:pdf_name, year']
   const readSpeeches = async <T>(cols: string, run: (cols: string) => PromiseLike<{ data: T | null; error: { code?: string; message: string } | null }>) => {
-    if (hasPdfs) {
-      const res = await run(`${cols}, pdfName:pdf_name`)
-      if (!missingColumn(res.error)) return res
-      hasPdfs = false
+    for (;;) {
+      const res = await run(cols + SPEECH_EXTRAS[speechLevel])
+      if (speechLevel === 0 || !missingColumn(res.error)) return res
+      speechLevel--
     }
-    return run(cols)
   }
   const speechesCache = memo(async (): Promise<SpeechSummary[]> => {
     const { data, error } = await readSpeeches(SPEECH_COLS, (cols) =>
-      client.from('speeches').select(cols).order('sort').order('created_at'),
+      speechLevel === 2
+        ? client.from('speeches').select(cols).order('year', { ascending: false, nullsFirst: false }).order('sort').order('created_at')
+        : client.from('speeches').select(cols).order('sort').order('created_at'),
     )
     if (missingTable(error)) return []
     fail(error)
@@ -380,6 +405,37 @@ export function createSupabaseRepo(client: SupabaseClient): Repo {
       return { name: data.pdf_name || `${slug}.pdf`, blob: new Blob([bytes], { type: 'application/pdf' }) }
     },
     listSpeechQuotes: () => quotesCache.get(),
+    hasSpeechLibrary: () => speechLevel === 2,
+    async addSpeech(input) {
+      if (speechLevel < 2) throw new Error('Run database update 0015 first (Supabase, SQL Editor).')
+      const pdf = await fileToBase64(input.file)
+      const base = slugify(`${input.title} ${input.year ?? ''}`) || 'speech'
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const slug = attempt === 0 ? base : `${base}-${Math.random().toString(36).slice(2, 6)}`
+        const { error } = await client.from('speeches').insert({
+          slug,
+          title: input.title.trim(),
+          speaker: input.speaker?.trim() || null,
+          occasion: input.occasion?.trim() || null,
+          year: input.year,
+          pdf_name: cleanFileName(input.file.name, input.title),
+          pdf_base64: pdf,
+        })
+        if (!error) {
+          speechesCache.clear()
+          return slug
+        }
+        if (error.code !== '23505') fail(error) // 23505: that address is taken, try another
+      }
+      throw new Error('Could not save the speech. Please try again.')
+    },
+    async deleteSpeech(id) {
+      const { data, error } = await client.from('speeches').delete().eq('id', id).select('id')
+      fail(error)
+      if (!data?.length) throw new Error('Only admins can delete speeches.')
+      speechesCache.clear()
+      quotesCache.clear()
+    },
     async listFeaturedPhotos() {
       const { data, error } = await readPhotos((cols) =>
         client.from('photos').select(`${cols}, photo_tags(*)`).not('featured_rank', 'is', null).order('featured_rank'),

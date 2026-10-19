@@ -287,6 +287,7 @@ const speeches: Speech[] = [
     title: 'A sample welcome',
     speaker: 'Sample Alder',
     occasion: 'Demo reunion dinner',
+    year: 2026,
     pdfName: 'A sample welcome.pdf',
     body: [
       'This is placeholder text for the demo site. The real speeches are added by the organisers.',
@@ -303,9 +304,24 @@ const speeches: Speech[] = [
     title: 'A sample reflection',
     speaker: 'Sample Birch',
     occasion: 'Written after the demo dinner',
+    year: 2026,
     body: ['Another placeholder, to show how a second speech looks.', 'It was good to see you all.', '*Sample Birch*'].join('\n\n'),
   },
 ]
+// A speech from an earlier reunion that exists only as a PDF.
+speeches.push({
+  id: 'speech-3',
+  slug: 'sample-twentieth',
+  title: 'Twenty years on',
+  speaker: 'Sample Cedar',
+  occasion: '20th reunion dinner',
+  year: 2016,
+  pdfName: 'Twenty years on.pdf',
+  body: null,
+})
+// PDFs added in the demo this session, by slug.
+const addedPdfs = new Map<string, Blob>()
+
 const quotes: SpeechQuote[] = [
   { id: 'q-1', text: 'Somewhere in between we became friends.', attribution: 'Sample Alder', speechSlug: 'sample-welcome', speechTitle: 'A sample welcome' },
   { id: 'q-2', text: 'It was good to see you all.', attribution: 'Sample Birch', speechSlug: 'sample-reflection', speechTitle: 'A sample reflection' },
@@ -348,7 +364,8 @@ export const sampleRepo: Repo = {
     return clone(photos)
   },
   async listSpeeches() {
-    return clone(speeches.map(({ body: _body, ...rest }) => rest))
+    const sorted = [...speeches].sort((a, b) => (b.year ?? 0) - (a.year ?? 0))
+    return clone(sorted.map(({ body: _body, ...rest }) => rest))
   },
   async getSpeech(slug) {
     return clone(speeches.find((s) => s.slug === slug) ?? null)
@@ -356,7 +373,27 @@ export const sampleRepo: Repo = {
   async getSpeechPdf(slug) {
     const s = speeches.find((x) => x.slug === slug)
     if (!s?.pdfName) return null
-    return { name: s.pdfName, blob: new Blob([samplePdf(s.title)], { type: 'application/pdf' }) }
+    return { name: s.pdfName, blob: addedPdfs.get(slug) ?? new Blob([samplePdf(s.title)], { type: 'application/pdf' }) }
+  },
+  hasSpeechLibrary: () => true,
+  async addSpeech(input) {
+    const slug = `${input.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-${input.year ?? 'x'}`
+    speeches.push({
+      id: `speech-${speeches.length + 1}`,
+      slug,
+      title: input.title,
+      speaker: input.speaker,
+      occasion: input.occasion,
+      year: input.year,
+      pdfName: input.file.name,
+      body: null,
+    })
+    addedPdfs.set(slug, input.file)
+    return slug
+  },
+  async deleteSpeech(id) {
+    const i = speeches.findIndex((s) => s.id === id)
+    if (i >= 0) speeches.splice(i, 1)
   },
   async listSpeechQuotes() {
     return clone(quotes)

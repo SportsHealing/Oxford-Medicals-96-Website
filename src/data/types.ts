@@ -143,12 +143,16 @@ export type SpeechSummary = {
   occasion: string | null
   /** File name of the downloadable PDF, if there is one. */
   pdfName?: string | null
+  /** The year it was given (after database update 0015). */
+  year?: number | null
 }
 
 export type Speech = SpeechSummary & {
-  /** Paragraphs separated by a blank line. See SpeechBody for the few marks allowed. */
-  body: string
+  /** Paragraphs separated by a blank line (see SpeechBody), or null for a PDF-only speech. */
+  body: string | null
 }
+
+export type SpeechInput = { title: string; speaker: string | null; occasion: string | null; year: number | null; file: File }
 
 export type SpeechQuote = {
   id: string
@@ -186,8 +190,14 @@ export type Repo = {
   /** Speeches from reunions (empty before database update 0012). */
   listSpeeches(): Promise<SpeechSummary[]>
   getSpeech(slug: string): Promise<Speech | null>
-  /** The speech's PDF, fetched only when someone asks to download it. */
+  /** The speech's PDF, fetched only when someone asks to view or download it. */
   getSpeechPdf(slug: string): Promise<{ name: string; blob: Blob } | null>
+  /** False until database update 0015 has run (years and PDF-only speeches). */
+  hasSpeechLibrary(): boolean
+  /** Admin only: add a speech as a PDF. Returns its slug. */
+  addSpeech(input: SpeechInput): Promise<string>
+  /** Admin only. */
+  deleteSpeech(id: string): Promise<void>
   /** Quotes for the Home page banner, in order. */
   listSpeechQuotes(): Promise<SpeechQuote[]>
   myEmail(): Promise<string | null>
