@@ -95,7 +95,8 @@ Everything below is what was in place on 2026-10-20 and what to do to bring it b
 
 **Now**
 - [x] Owner: `photos` step run on the Kululu folder, 2026-10-25: 777 pictures, 0 unreadable, 1 exact duplicate (shown once).
-- [ ] Owner: `upload` step (token with Contents and Actions read and write), `docs/photo-archive.md`. Until then the Photos page says the photos are on their way; the speeches and the map already work.
+- [x] Owner: `upload` step, 2026-10-25: 1,554 files packed (226 MB) onto the `archive` release; site rebuilt and deployed with the archive (Pages artifact 237 MB).
+- [ ] Owner: delete the GitHub token used for the upload.
 - [ ] Owner: optional, before Supabase pauses the old project: export the `photos` table as CSV (titles, years, places, categories) and give it to the `photos` step, and export the other tables for the future (see "Sign in").
 - [ ] Owner: share the class code with the year group, by a private message rather than a public post.
 - [ ] Owner: Supabase, remove the GitHub repository variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` if not wanted (harmless), and decide whether to keep the Supabase and Resend accounts (free to keep; export data first if not).
