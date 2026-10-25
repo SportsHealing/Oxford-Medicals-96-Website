@@ -3,65 +3,46 @@ import PageHeader from '../components/PageHeader.tsx'
 export default function Privacy() {
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader
-        eyebrow="Your data"
-        title="Privacy"
-        lede="This site exists for one group of people. Here is what we hold, why, and what you can do about it."
-      />
+      <PageHeader eyebrow="Your data" title="Privacy" lede="This site exists for one group of people. Here is what it holds, how it is protected, and what you can ask for." />
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Section title="Who can see what">
-          <li>Only signed-in members see photos, profiles, tags and the reunion speeches.</li>
-          <li>Speeches are shared with the speakers' permission.</li>
-          <li>The public sees the front page and this page. Nothing else. The front page shows one class photo.</li>
-          <li>Search engines are asked not to index the site.</li>
+          <li>Anyone can see this front page, the two class photos on it, and this notice.</li>
+          <li>The photo archive, the speeches and the map open only with the class code shared within the year group.</li>
+          <li>There are no accounts, passwords or sign-in emails. Search engines are asked not to index the site.</li>
         </Section>
 
-        <Section title="What we hold about you">
-          <li>Your name, college and the answers you gave in the questionnaire.</li>
-          <li>Your email address, used to sign you in and to pass on messages.</li>
-          <li>Photos you appear in, and tags that say you are in them.</li>
-          <li>If you add them: your specialty, your name at medical school, your town (shown on your profile and the classmates map) and links to your public pages.</li>
+        <Section title="How the code protects things">
+          <li>The photos and speeches are stored in scrambled (encrypted) form. The site never stores the code itself: the code is turned into the key that unscrambles them, on your device.</li>
+          <li>This keeps the archive from anyone browsing or stumbling on the files. It is not secrecy against a determined attacker with specialist tools, so please keep the code within the class and do not post it publicly.</li>
+          <li>If the code ever gets out, the organisers can choose a new one and republish the archive.</li>
         </Section>
 
-        <Section title="Joining">
-          <li>The organisers keep a class list of names, with email addresses where known, so classmates can join.</li>
-          <li>If you ask to join and are not on the list, only the organisers see your name and email, to decide.</li>
-          <li>If a request is declined we keep only that request, so you are not asked again. Ask us to delete it at any time.</li>
+        <Section title="What the site holds">
+          <li>Photos from our time at Oxford and since, with a title and, where known, a year, place and occasion. Location and camera data is removed from each picture.</li>
+          <li>Speeches, in their speakers&rsquo; own words, shared with their permission.</li>
+          <li>A map of where the class is known to be, showing towns and numbers only.</li>
+          <li>No names are attached to photos on the site, and no profiles, email addresses or messages are kept.</li>
         </Section>
 
-        <Section title="Tags">
-          <li>Anyone can suggest that you are in a photo.</li>
-          <li>The tag is shown to others only after you confirm it.</li>
-          <li>You can remove a tag of yourself at any time.</li>
-          <li>You can ask for a photo of you to be taken down.</li>
+        <Section title="On your device">
+          <li>Once you enter the code, it is remembered on that device so you are not asked again. Press <strong>Lock</strong> at the bottom of any page to forget it, for example on a shared computer.</li>
+          <li>Pictures you have looked at are kept on the device in their scrambled form, so they do not have to be downloaded twice. Lock removes them too.</li>
+          <li>The site sets no cookies and uses no analytics. Its fonts are loaded from Google Fonts.</li>
         </Section>
 
         <Section title="Face matching">
-          <li>We do not use face recognition at present.</li>
-          <li>Organisers may use an AI service (Anthropic) to suggest a category and title for each photo. It sees a small copy of the photo and does not identify anyone.</li>
-          <li>If we ever do, it will only suggest tags, never publish them, and only for members who opt in.</li>
-          <li>Facial data is special category data under UK GDPR. We will ask for explicit consent first.</li>
-        </Section>
-
-        <Section title="Messages">
-          <li>When you message a classmate, they get your message and your email address.</li>
-          <li>Their address is never shown to you unless they reply, or they chose to show it on their profile.</li>
-          <li>Showing your email to classmates is off unless you turn it on, on your Me page.</li>
-          <li>Anyone can switch off messages on their profile.</li>
+          <li>The site does not use face recognition and does not identify anyone in the photos.</li>
         </Section>
 
         <Section title="Your rights">
-          <li>See, change or delete your own profile at any time.</li>
-          <li>Ask for a copy of everything we hold about you.</li>
-          <li>Leave the site and have your data removed.</li>
+          <li>Ask for a photo of you, or a speech, to be taken down, and it will be removed at the next update.</li>
+          <li>Ask for a photo&rsquo;s title, year or place to be corrected.</li>
+          <li>Ask the organisers anything about how the site is run.</li>
         </Section>
       </div>
 
-      <p className="mt-8 font-sans text-sm text-muted">
-        Questions go to the site organisers. This notice will be finalised before real photos and
-        profiles go live.
-      </p>
+      <p className="mt-8 font-sans text-sm text-muted">Questions go to the site organisers. Updated October 2026.</p>
     </div>
   )
 }

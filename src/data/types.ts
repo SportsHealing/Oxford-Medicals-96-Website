@@ -1,158 +1,30 @@
-export type Member = {
-  id: string
-  name: string
-  knownAs?: string | null
-  college?: string | null
-  clinicalTraining?: string | null
-  memory?: string | null
-  tingewick?: string | null
-  jobTitle?: string | null
-  workplace?: string | null
-  careerPath?: string | null
-  interests?: string | null
-  linkedin?: string | null
-  website?: string | null
-  instagram?: string | null
-  twitter?: string | null
-  acceptsContact: boolean
-  allowsTags: boolean
-  isAdmin: boolean
-  avatarUrl?: string | null
-  /** Name at medical school, if different (for example a maiden name). */
-  previousName?: string | null
-  specialty?: string | null
-  /** Where they are now. Shown on the profile and the classmates map. */
-  town?: string | null
-  country?: string | null
-  lat?: number | null
-  lng?: number | null
-  links?: PublicLinks
-  /** Whether they chose to show their email to classmates. */
-  showEmail?: boolean
-  /** Only filled in when they chose to show it. */
-  email?: string | null
-}
-
-export type PublicLinks = { wikipedia?: string; orcid?: string; scholar?: string; hospital?: string }
-
-export type ProfileInput = Omit<Member, 'id' | 'isAdmin' | 'avatarUrl' | 'email'>
-
-export type TagStatus = 'pending' | 'confirmed' | 'rejected'
-
-export type Tag = {
-  id: string
-  photoId: string
-  memberId: string
-  x: number // percent from left
-  y: number // percent from top
-  status: TagStatus
-  suggestedBy: string | null
-}
-
 export type Photo = {
   id: string
   title: string
   year?: string | null
   place?: string | null
   caption?: string | null
-  src: string
-  /** Small copy for grids; the same as `src` when none has been made yet. */
-  thumb: string
-  uploadedBy?: string | null
-  /** One of PHOTO_CATEGORIES, or null when not sorted yet. */
+  /** One of PHOTO_CATEGORIES, or null when not sorted. */
   category?: string | null
-  /** 'ai' when the category is only a suggestion from the AI sorter. */
-  categorySource?: 'person' | 'ai' | null
-  tags: Tag[]
+  /** Archive paths of the encrypted full-size picture and its thumbnail. */
+  full: string
+  thumb: string
+  width?: number
+  height?: number
 }
 
-export type PhotoDetails = { title: string; year: string | null; place: string | null; caption: string | null; category: string | null }
-
-export type AiSortResult = { sorted: number; failed: string[]; remaining: number }
-
-export type PhotoInput = {
-  file: File
-  title: string
-  year?: string
-  place?: string
-  caption?: string
-}
-
-export type InboxMessage = {
-  id: string
-  message: string
-  createdAt: string
-  fromId: string
-  fromName: string
-  fromEmail: string
-}
-
-export type AllowedEmail = { email: string; note: string | null; inviteSentAt: string | null }
-
-export type InviteResult = { added: number; sent: number; failed: { email: string; reason: string }[] }
-
-export type AdminMember = {
-  id: string
-  email: string
-  name: string
-  isAdmin: boolean
-  createdAt: string
-}
-
-export type JoinRequest = {
-  id: string
-  userId: string
-  email: string
-  fullName: string
-  previousName: string | null
-  /** 'request': asked to join. 'name_match': got in by matching a name on the class list. */
-  kind: 'request' | 'name_match'
-  matchedName: string | null
-  status: 'pending' | 'accepted' | 'declined'
-  createdAt: string
-  decidedAt: string | null
-}
-
-export type RosterPerson = {
-  id: string
-  fullName: string
-  otherNames: string[]
-  email: string | null
-  specialty: string | null
-  cohort: 'clinical' | 'preclinical' | null
-  memberId: string | null
-  joinedByName: boolean
-}
-
-export type ImportRow = { name: string; email: string | null; specialty: string | null; cohort: 'clinical' | 'preclinical' | null }
-export type ImportSummary = { added: number; linked: number; alreadyKnown: number; emailsAdded: number; toCheck: string[] }
-export type DecisionResult = { status: 'accepted' | 'declined'; emailed: boolean; emailError?: string }
-
-export type UnrecognisedSignin = {
-  email: string
-  firstTried: string
-  /** True if they got as far as entering a code; false if they only asked for one. */
-  signedIn: boolean
-}
-
-export type SpeechSummary = {
+export type Speech = {
   id: string
   slug: string
   title: string
   speaker: string | null
   occasion: string | null
-  /** File name of the downloadable PDF, if there is one. */
-  pdfName?: string | null
-  /** The year it was given (after database update 0015). */
-  year?: number | null
-}
-
-export type Speech = SpeechSummary & {
+  year: number | null
   /** Paragraphs separated by a blank line (see SpeechBody), or null for a PDF-only speech. */
   body: string | null
+  /** The PDF, if there is one. */
+  pdf?: { name: string; base64: string } | null
 }
-
-export type SpeechInput = { title: string; speaker: string | null; occasion: string | null; year: number | null; file: File }
 
 export type SpeechQuote = {
   id: string
@@ -163,71 +35,8 @@ export type SpeechQuote = {
   speechTitle: string
 }
 
-export type Repo = {
-  listMembers(): Promise<Member[]>
-  /** False until database update 0011 has run (finder, map and link fields). */
-  hasProfileExtras(): boolean
-  getMember(id: string): Promise<Member | null>
-  listPhotos(): Promise<Photo[]>
-  getPhoto(id: string): Promise<Photo | null>
-  /** Photos chosen for the members' Home page, in order (empty before update 0011). */
-  listFeaturedPhotos(): Promise<Photo[]>
-  /** False until database update 0014 has run (photo categories). */
-  hasPhotoCategories(): boolean
-  /** Admins, or the person who uploaded it: change a photo's title, year, place, caption or category. */
-  updatePhoto(id: string, details: PhotoDetails): Promise<void>
-  /** Admin only: put many photos into one category (null takes them out). */
-  setPhotoCategory(ids: string[], category: string | null): Promise<void>
-  /** Admin only: ask the AI sorter to suggest categories for the next few unsorted photos. */
-  sortPhotosWithAi(skip: string[]): Promise<AiSortResult>
-  /** Admin only: put a photo on Home (rank 1 shows first) or take it off (null). */
-  setFeatured(photoId: string, rank: number | null): Promise<void>
-  suggestTag(photoId: string, memberId: string, x: number, y: number): Promise<void>
-  decideTag(tagId: string, status: 'confirmed' | 'rejected'): Promise<void>
-  removeTag(tagId: string): Promise<void>
-  /** Tags of the current member that still need their decision, with the photo. */
-  myPendingTags(): Promise<{ tag: Tag; photo: Photo }[]>
-  /** Speeches from reunions (empty before database update 0012). */
-  listSpeeches(): Promise<SpeechSummary[]>
-  getSpeech(slug: string): Promise<Speech | null>
-  /** The speech's PDF, fetched only when someone asks to view or download it. */
-  getSpeechPdf(slug: string): Promise<{ name: string; blob: Blob } | null>
-  /** False until database update 0015 has run (years and PDF-only speeches). */
-  hasSpeechLibrary(): boolean
-  /** Admin only: add a speech as a PDF. Returns its slug. */
-  addSpeech(input: SpeechInput): Promise<string>
-  /** Admin only. */
-  deleteSpeech(id: string): Promise<void>
-  /** Quotes for the Home page banner, in order. */
-  listSpeechQuotes(): Promise<SpeechQuote[]>
-  myEmail(): Promise<string | null>
-  updateProfile(input: ProfileInput): Promise<void>
-  sendContact(toMemberId: string, message: string): Promise<void>
-  inbox(): Promise<InboxMessage[]>
-  // Admin (addPhoto and deletePhoto are also open to members for their own photos)
-  /** Uploads a photo and returns its new id. */
-  addPhoto(input: PhotoInput): Promise<string>
-  deletePhoto(photoId: string): Promise<void>
-  listAllowedEmails(): Promise<AllowedEmail[]>
-  addAllowedEmails(emails: string[], note?: string): Promise<void>
-  removeAllowedEmail(email: string): Promise<void>
-  /** Adds addresses to the members list and emails each person an invitation. */
-  sendInvites(input: { emails: string[]; note?: string; message?: string }): Promise<InviteResult>
-  adminMembers(): Promise<AdminMember[]>
-  /** Admin only: requests to join, newest first. */
-  listJoinRequests(): Promise<JoinRequest[]>
-  /** Admin only: accept or decline; the person is emailed the decision. */
-  decideJoinRequest(id: string, accept: boolean, message?: string): Promise<DecisionResult>
-  deleteJoinRequest(id: string): Promise<void>
-  /** Admin only: the class list (names, and emails where known). */
-  listRoster(): Promise<RosterPerson[]>
-  importPeople(rows: ImportRow[]): Promise<ImportSummary>
-  /** Admin only: take away a member's access (for example a wrong name match). */
-  removeAccess(memberId: string): Promise<void>
-  /** Admin only: sign-in attempts from addresses not on the list. */
-  unrecognisedSignins(): Promise<UnrecognisedSignin[]>
-  setAdmin(memberId: string, makeAdmin: boolean): Promise<void>
-  /** Sets the signed-in member's profile picture (already cropped). */
-  setAvatar(file: File): Promise<void>
-  removeAvatar(): Promise<void>
-}
+/** What speeches.enc holds once decrypted. */
+export type SpeechesFile = { speeches: Speech[]; quotes: SpeechQuote[] }
+
+/** What photos.enc holds once decrypted. */
+export type PhotosFile = { photos: Photo[]; builtAt?: string }

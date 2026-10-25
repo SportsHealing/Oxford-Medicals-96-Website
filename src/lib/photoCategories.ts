@@ -1,6 +1,6 @@
 // The occasions the archive is sorted into. The order here is the order on the
-// Photos page. Keep the ids in step with supabase/migrations/0014 and the
-// sort-photos Edge Function.
+// Photos page. Keep the ids in step with the CATEGORIES list in
+// scripts/build-archive.mjs.
 export const PHOTO_CATEGORIES = [
   { id: 'graduation', label: 'Graduation', hint: 'Gowns, the Sheldonian, degree day' },
   { id: 'tingewick', label: 'Tingewick', hint: 'The pantomime, rehearsals and costumes' },

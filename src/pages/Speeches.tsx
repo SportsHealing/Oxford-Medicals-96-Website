@@ -1,40 +1,25 @@
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../auth.tsx'
-import AddSpeechForm from '../components/AddSpeechForm.tsx'
 import PageHeader from '../components/PageHeader.tsx'
 import SpeechCard from '../components/SpeechCard.tsx'
-import { repo } from '../data/repo.ts'
-import type { SpeechSummary } from '../data/types.ts'
+import { listSpeeches } from '../data/archive.ts'
+import type { Speech } from '../data/types.ts'
 import { LoadError, Loading, useLoad } from '../lib/useLoad.tsx'
 
 export default function Speeches() {
-  const { isAdmin } = useAuth()
-  const navigate = useNavigate()
-  const { data, loading, error } = useLoad(() => repo.listSpeeches(), [])
+  const { data, loading, error } = useLoad(() => listSpeeches(), [])
 
   if (loading) return <Loading what="Fetching the speeches" />
   if (error) return <LoadError message={error} />
 
   // Newest first, one section per year; speeches with no year go last.
-  const byYear = new Map<string, SpeechSummary[]>()
-  for (const s of [...(data ?? [])].sort((a, b) => (b.year ?? -1) - (a.year ?? -1))) {
+  const byYear = new Map<string, Speech[]>()
+  for (const s of data ?? []) {
     const k = s.year ? String(s.year) : 'Other years'
     byYear.set(k, [...(byYear.get(k) ?? []), s])
   }
-  const canAdd = isAdmin && repo.hasSpeechLibrary()
 
   return (
     <div>
-      <PageHeader
-        eyebrow="Over the years"
-        title="Speeches"
-        lede="Speeches from our reunions and gatherings, to read, view or download."
-      />
-      {canAdd && (
-        <div className="mb-10">
-          <AddSpeechForm onAdded={(slug) => navigate(`/speeches/${slug}`)} />
-        </div>
-      )}
+      <PageHeader eyebrow="Over the years" title="Speeches" lede="Speeches from our reunions and gatherings, to read, view or download." />
       {byYear.size === 0 ? (
         <p className="text-muted">No speeches have been added yet.</p>
       ) : (

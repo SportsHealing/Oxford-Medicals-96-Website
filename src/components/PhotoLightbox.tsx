@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react'
+import { pictureUrl } from '../data/archive.ts'
 import type { Photo } from '../data/types.ts'
+import EncImage from './EncImage.tsx'
 
 type Props = {
   photos: Photo[]
@@ -72,13 +74,10 @@ export default function PhotoLightbox({ photos, startIndex, onClose }: Props) {
     }
   }, [])
 
-  // Fetch the next photo ahead so the arrow feels instant. Just one: each
-  // full-size photo counts against the Supabase download allowance.
+  // Decrypt the next photo ahead so the arrow feels instant.
   useEffect(() => {
-    for (const d of [1]) {
-      const p = photos[index + d]
-      if (p) new Image().src = p.src
-    }
+    const p = photos[index + 1]
+    if (p) pictureUrl(p.full).catch(() => {})
   }, [index, photos])
 
   const onTouchStart = (e: TouchEvent) => {
@@ -122,7 +121,7 @@ export default function PhotoLightbox({ photos, startIndex, onClose }: Props) {
 
       <div className="relative flex min-h-0 flex-1 items-center justify-center px-2 sm:px-16" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         {index > 0 && <Arrow dir="prev" onClick={() => go(-1)} />}
-        <img key={photo.id} src={photo.src} alt={photo.title} draggable={false} className="max-h-full max-w-full object-contain select-none" />
+        <EncImage key={photo.id} path={photo.full} alt={photo.title} draggable={false} className="max-h-full max-w-full object-contain select-none" />
         {index < photos.length - 1 && <Arrow dir="next" onClick={() => go(1)} />}
       </div>
 
@@ -143,7 +142,7 @@ export default function PhotoLightbox({ photos, startIndex, onClose }: Props) {
                 current ? 'opacity-100 ring-2 ring-white' : 'opacity-50 hover:opacity-90'
               }`}
             >
-              <img src={p.thumb} alt="" loading="lazy" draggable={false} className="h-full w-full object-cover" />
+              <EncImage path={p.thumb} draggable={false} className="h-full w-full object-cover" />
             </button>
           )
         })}

@@ -1,52 +1,35 @@
 import { lazy } from 'react'
-import { Route, Routes } from 'react-router-dom'
-import { useAuth } from './auth.tsx'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import CodeGate from './components/CodeGate.tsx'
 import Layout from './components/Layout.tsx'
-import RequireMember from './components/RequireMember.tsx'
 import Landing from './pages/Landing.tsx'
-import SignIn from './pages/SignIn.tsx'
-import Gallery from './pages/Gallery.tsx'
-import Classmates from './pages/Classmates.tsx'
 import NotFound from './pages/NotFound.tsx'
 
-// Less-visited pages load on first visit, keeping the first download small.
-const AddPhotos = lazy(() => import('./pages/AddPhotos.tsx'))
+// Pages behind the class code load on first visit, keeping the front page small.
+const Gallery = lazy(() => import('./pages/Gallery.tsx'))
 const PhotoView = lazy(() => import('./pages/PhotoView.tsx'))
-const Profile = lazy(() => import('./pages/Profile.tsx'))
-const Contact = lazy(() => import('./pages/Contact.tsx'))
-const Me = lazy(() => import('./pages/Me.tsx'))
-const Admin = lazy(() => import('./pages/Admin.tsx'))
-const Privacy = lazy(() => import('./pages/Privacy.tsx'))
-const Home = lazy(() => import('./pages/Home.tsx'))
 const Speeches = lazy(() => import('./pages/Speeches.tsx'))
 const SpeechView = lazy(() => import('./pages/SpeechView.tsx'))
-
-// Members get their Home page at "/"; everyone else sees the public front page.
-function Front() {
-  const { memberId, loading } = useAuth()
-  if (loading) return null
-  return memberId ? <Home /> : <Landing />
-}
+const MapPage = lazy(() => import('./pages/MapPage.tsx'))
+const Privacy = lazy(() => import('./pages/Privacy.tsx'))
 
 export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Front />} />
-        <Route path="sign-in" element={<SignIn />} />
+        <Route index element={<Landing />} />
         <Route path="privacy" element={<Privacy />} />
-        <Route element={<RequireMember />}>
+        <Route element={<CodeGate />}>
           <Route path="photos" element={<Gallery />} />
-          <Route path="photos/new" element={<AddPhotos />} />
           <Route path="photos/:id" element={<PhotoView />} />
-          <Route path="classmates" element={<Classmates />} />
-          <Route path="classmates/:id" element={<Profile />} />
-          <Route path="classmates/:id/contact" element={<Contact />} />
           <Route path="speeches" element={<Speeches />} />
           <Route path="speeches/:slug" element={<SpeechView />} />
-          <Route path="me" element={<Me />} />
-          <Route path="admin" element={<Admin />} />
+          <Route path="map" element={<MapPage />} />
         </Route>
+        {/* Addresses from the sign-in era, in case anyone kept a link. */}
+        {['sign-in', 'classmates', 'classmates/*', 'me', 'admin', 'photos/new'].map((p) => (
+          <Route key={p} path={p} element={<Navigate to="/" replace />} />
+        ))}
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

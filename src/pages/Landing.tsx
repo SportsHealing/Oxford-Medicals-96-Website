@@ -1,10 +1,16 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../auth.tsx'
+import { useAccess } from '../access.tsx'
 import { asset } from '../asset.ts'
+import QuoteBanner from '../components/QuoteBanner.tsx'
+import { listQuotes } from '../data/archive.ts'
+import { useLoad } from '../lib/useLoad.tsx'
 
 export default function Landing() {
-  const { memberId } = useAuth()
+  const { status } = useAccess()
+  const open = status === 'open'
+  // Lines from the reunion speeches, once the code has been entered.
+  const { data: quotes } = useLoad(() => (open ? listQuotes() : Promise.resolve([])), [open])
   // The class photo, if it has been added to the site; otherwise Rita.
   const [photoOk, setPhotoOk] = useState(true)
   const [thenOk, setThenOk] = useState(true)
@@ -26,19 +32,13 @@ export default function Landing() {
               <span className="text-rose">Still the same faces.</span>
             </h1>
             <p className="mt-6 max-w-lg text-lg text-white/75">
-              A private place for the 1996 cohort. The old photos, who is in them, and what everyone
-              went on to do.
+              A private place for the 1996 cohort: the old photos, the reunion speeches, and where
+              everyone ended up.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              {memberId ? (
-                <Link to="/photos" className="btn-primary">
-                  Browse the photos
-                </Link>
-              ) : (
-                <Link to="/sign-in" className="btn-primary">
-                  Sign in or join
-                </Link>
-              )}
+              <Link to="/photos" className="btn-primary">
+                {open ? 'Browse the photos' : 'View photos'}
+              </Link>
               <Link to="/privacy" className="btn border border-white/25 text-white hover:border-white/60 hover:bg-white/5">
                 How your data is handled
               </Link>
@@ -96,22 +96,25 @@ export default function Landing() {
         </div>
       </section>
 
+      {open && quotes && quotes.length > 0 && <QuoteBanner quotes={quotes} />}
+
       <section>
-        <p className="eyebrow mb-3">How it works</p>
+        <p className="eyebrow mb-3">{open ? 'Inside' : "What's inside"}</p>
         <ol className="grid gap-5 md:grid-cols-3">
-          <Step n="1" title="Look through the photos" body="From matriculation to graduation, and every Tingewick in between." />
-          <Step n="2" title="Put names to faces" body="Suggest who is in a photo. The tag is shown once that person confirms it." />
-          <Step n="3" title="Catch up" body="Read what each person wrote about their life since Oxford, then get in touch." />
+          <Step n="1" to="/photos" title="The photos" body="Hundreds of pictures from matriculation to graduation and every Tingewick in between, sorted by occasion." />
+          <Step n="2" to="/speeches" title="The speeches" body="Words from the reunion dinner and the years before, to read, view or download." />
+          <Step n="3" to="/map" title="Where are we now" body="A map of where the class is known to be living and working, thirty years on." />
         </ol>
       </section>
 
       <section className="grid gap-8 rounded-3xl bg-stone p-8 md:grid-cols-[1fr_auto] md:items-center md:p-10">
         <div>
           <p className="eyebrow-stone">Private by design</p>
-          <h2 className="mt-1 text-2xl">Members only</h2>
+          <h2 className="mt-1 text-2xl">For the class of 1996</h2>
           <p className="mt-2 max-w-prose text-ink/80">
-            Nothing beyond this page is public. Photos and profiles are seen only by signed-in
-            members of the 1996 cohort, and every tag needs the person&rsquo;s say-so first.
+            Nothing beyond this page is public. The photos and speeches open only with the class code,
+            and they are stored in scrambled form that the code alone can unscramble. Please keep the
+            code within the year group.
           </p>
         </div>
         <Link to="/privacy" className="btn-dark justify-self-start md:justify-self-end">
@@ -122,14 +125,14 @@ export default function Landing() {
   )
 }
 
-function Step({ n, title, body }: { n: string; title: string; body: string }) {
+function Step({ n, to, title, body }: { n: string; to: string; title: string; body: string }) {
   return (
-    <li className="card card-hover p-6">
-      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-navy font-serif text-lg text-rose">
-        {n}
-      </span>
-      <h3 className="mt-4 text-xl">{title}</h3>
-      <p className="mt-1.5 text-muted">{body}</p>
+    <li>
+      <Link to={to} className="card card-hover block h-full p-6 no-underline">
+        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-navy font-serif text-lg text-rose">{n}</span>
+        <h3 className="mt-4 text-xl">{title}</h3>
+        <p className="mt-1.5 text-muted">{body}</p>
+      </Link>
     </li>
   )
 }

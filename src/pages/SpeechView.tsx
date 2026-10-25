@@ -1,30 +1,22 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { useAuth } from '../auth.tsx'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import SpeechBody from '../components/SpeechBody.tsx'
 import SpeechPdfButton from '../components/SpeechPdfButton.tsx'
-import { repo } from '../data/repo.ts'
+import { listSpeeches, speechPdfBlob } from '../data/archive.ts'
+import type { Speech } from '../data/types.ts'
 import { LoadError, Loading, useLoad } from '../lib/useLoad.tsx'
 import NotFound from './NotFound.tsx'
 
 export default function SpeechView() {
   const { slug = '' } = useParams()
-  const { isAdmin } = useAuth()
-  const navigate = useNavigate()
-  const { data, loading, error } = useLoad(
-    async () => {
-      const [speech, all] = await Promise.all([repo.getSpeech(slug), repo.listSpeeches()])
-      return { speech, others: all.filter((s) => s.slug !== slug) }
-    },
-    [slug],
-  )
-
-  const pdfOnly = Boolean(data?.speech && !data.speech.body && data.speech.pdfName)
+  const { data, loading, error } = useLoad(() => listSpeeches(), [])
 
   if (loading) return <Loading what="Opening the speech" />
   if (error) return <LoadError message={error} />
-  if (!data?.speech) return <NotFound />
-  const { speech, others } = data
+  const speech = (data ?? []).find((s) => s.slug === slug)
+  if (!speech) return <NotFound />
+  const others = (data ?? []).filter((s) => s.slug !== slug)
+  const pdfOnly = !speech.body && Boolean(speech.pdf)
 
   return (
     <article className={`mx-auto ${pdfOnly ? 'max-w-4xl' : 'max-w-2xl'}`}>
@@ -36,27 +28,11 @@ export default function SpeechView() {
         <h1 className="text-4xl leading-tight sm:text-5xl">{speech.title}</h1>
         <span className="mt-3 block h-[3px] w-12 rounded-full bg-rose" />
         {speech.speaker && <p className="mt-4 font-sans text-lg text-muted">{speech.speaker}</p>}
-        {speech.pdfName && <SpeechPdfButton slug={speech.slug} className="mt-5" />}
+        <SpeechPdfButton speech={speech} className="mt-5" />
       </header>
 
-      {speech.body ? <SpeechBody body={speech.body} /> : pdfOnly && <PdfPreview slug={speech.slug} />}
-      {speech.pdfName && speech.body && <SpeechPdfButton slug={speech.slug} className="mt-10" />}
-
-      {isAdmin && (
-        <button
-          type="button"
-          className="mt-10 block font-sans text-xs text-muted hover:text-rose-deep"
-          onClick={() => {
-            if (!confirm(`Delete "${speech.title}"? Members will no longer see it.`)) return
-            void repo.deleteSpeech(speech.id).then(
-              () => navigate('/speeches'),
-              (e: unknown) => alert(e instanceof Error ? e.message : 'Could not delete'),
-            )
-          }}
-        >
-          Delete this speech
-        </button>
-      )}
+      {speech.body ? <SpeechBody body={speech.body} /> : pdfOnly && <PdfPreview speech={speech} />}
+      {speech.body && <SpeechPdfButton speech={speech} className="mt-10" />}
 
       {others.length > 0 && (
         <aside className="mt-14 border-t border-line pt-6">
@@ -68,6 +44,7 @@ export default function SpeechView() {
                   {s.title}
                 </Link>
                 {s.speaker && <span className="font-sans text-muted"> &middot; {s.speaker}</span>}
+                {s.year && <span className="font-sans text-sm text-muted"> &middot; {s.year}</span>}
               </li>
             ))}
           </ul>
@@ -79,27 +56,15 @@ export default function SpeechView() {
 
 // A PDF-only speech shown on the page. Phones show PDFs poorly inside a page,
 // so there the View PDF button above is the way in.
-function PdfPreview({ slug }: { slug: string }) {
-  const [url, setUrl] = useState<string | null>(null)
+function PdfPreview({ speech }: { speech: Speech }) {
   const [wide] = useState(() => window.matchMedia?.('(min-width: 768px)').matches ?? false)
-
-  useEffect(() => {
-    if (!wide) return
-    let live = true
-    let made: string | null = null
-    repo.getSpeechPdf(slug).then(
-      (pdf) => {
-        if (!live || !pdf) return
-        made = URL.createObjectURL(pdf.blob)
-        setUrl(made)
-      },
-      () => {},
-    )
-    return () => {
-      live = false
-      if (made) URL.revokeObjectURL(made)
-    }
-  }, [slug, wide])
+  const url = useMemo(() => {
+    const blob = wide ? speechPdfBlob(speech) : null
+    return blob ? URL.createObjectURL(blob) : null
+  }, [speech, wide])
+  useEffect(() => () => {
+    if (url) URL.revokeObjectURL(url)
+  }, [url])
 
   if (!wide) return <p className="card p-5 text-muted">This speech is a PDF. Press View PDF above to read it, or Download to keep a copy.</p>
   if (!url) return <p className="py-10 text-center text-muted">Opening the PDF&hellip;</p>
