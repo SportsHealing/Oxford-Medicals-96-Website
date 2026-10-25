@@ -114,7 +114,8 @@ export function loadPhotos(): Promise<PhotosFile | null> {
   photosCache ??= readJson<PhotosFile>('photos.enc')
     .then((f) => ({
       ...f,
-      photos: [...f.photos].sort(
+      // The same picture listed twice is shown once.
+      photos: [...new Map(f.photos.map((p) => [p.id, p])).values()].sort(
         (a, b) =>
           categoryOrder(a.category) - categoryOrder(b.category) ||
           (a.year ?? '9999').localeCompare(b.year ?? '9999') ||

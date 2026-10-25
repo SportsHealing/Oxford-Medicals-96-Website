@@ -25,3 +25,10 @@ dist-ssr
 dist-preview
 .env.local
 .env.*.local
+
+# Photo archive: published as a release file by scripts/build-archive.mjs,
+# not kept in the repository. speeches.enc is kept.
+public/archive/p/
+public/archive/t/
+public/archive/photos.enc
+archive.tar

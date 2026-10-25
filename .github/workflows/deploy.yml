@@ -26,6 +26,21 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+      # The photo archive is too many files to keep in the repository, so the
+      # owner's script attaches it as one file (archive.tar) to the "archive"
+      # release. Unpack it next to the site; without it the site still works
+      # and says the photos are on their way.
+      - name: Add the photo archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release download archive --repo "$GITHUB_REPOSITORY" --pattern archive.tar --dir "$RUNNER_TEMP"; then
+            mkdir -p dist/archive
+            tar -xf "$RUNNER_TEMP/archive.tar" -C dist/archive
+            echo "Archive added: $(find dist/archive -type f | wc -l) files"
+          else
+            echo "No archive release yet."
+          fi
       # GitHub Pages serves 404.html for unknown paths, which lets the
       # client-side router handle deep links like /photos/photo-01.
       - run: cp dist/index.html dist/404.html

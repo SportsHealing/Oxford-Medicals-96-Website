@@ -38,9 +38,9 @@ Code-only access. Site live at https://oxfordmedics96.com as a static site: no a
 - `src/access.tsx`, `src/components/CodeGate.tsx`: the code prompt and whether the device has the code (key kept in localStorage; Lock in the footer forgets it).
 - `src/lib/vault.ts`: key recipe (PBKDF2-SHA256, 600,000 rounds, fixed salt; AES-256-GCM; 12-byte IV then ciphertext and tag). Must match `scripts/build-archive.mjs`.
 - `src/data/archive.ts`: fetches and decrypts `/archive/speeches.enc` (speeches and quotes), `/archive/photos.enc` (photo list) and the pictures `/archive/p/<id>.enc` (2400px) and `/archive/t/<id>.enc` (640px); decrypted pictures become object URLs for the visit. `src/components/EncImage.tsx` shows one.
-- `public/archive/`: the published archive. `speeches.enc` holds the two 2026 speeches (text, PDFs and 12 banner quotes), built 2026-10-25. `photos.enc` and the pictures are published by the owner.
+- `public/archive/`: the published archive. `speeches.enc` (in the repository) holds the two 2026 speeches (text, PDFs and 12 banner quotes), built 2026-10-25. The photos (`photos.enc`, `p/`, `t/`) are not in the repository: the owner's script uploads the whole archive as `archive.tar` to the GitHub release tagged `archive`, and `.github/workflows/deploy.yml` downloads and unpacks it into `dist/archive` on every build (a copy of `speeches.enc` in the tar overrides the repository's). GitHub's limit of about 500 created files an hour ruled out committing the ~1,550 files one by one.
 - `public/sw.js`: service worker keeping archive files on the device (lists network-first, pictures cache-first). Cleared by Lock.
-- `scripts/build-archive.mjs`: `photos <folder> [csv]`, `speeches <folder>`, `upload` (GitHub API, one commit). Photo ids are the first 16 hex characters of the SHA-1 of the file, the same as the old Supabase `storage_path`, so a CSV export of the old photos table matches by content.
+- `scripts/build-archive.mjs`: `photos <folder> [csv]`, `speeches <folder>`, `upload` (packs `archive.tar`, replaces it on the `archive` release, triggers the deploy workflow; token needs Contents and Actions read and write). Exact duplicate pictures are listed once. Photo ids are the first 16 hex characters of the SHA-1 of the file, the same as the old Supabase `storage_path`, so a CSV export of the old photos table matches by content.
 - `src/pages/Landing.tsx`: public front page with `public/landing.jpg` (2026 reunion photo) and `public/then-1996.jpg` as an old print, the View photos call to action, and, once the code is in, the quote banner. `public/known-locations.jpg`: the organisers' map (town counts only).
 - `src/pages/Gallery.tsx`, `PhotoView.tsx`, `src/components/PhotoLightbox.tsx`: the archive, grouped by the 10 occasions in `src/lib/photoCategories.ts`, with Previous/Next inside a category (`?in=`).
 - `src/pages/Speeches.tsx`, `SpeechView.tsx`, `src/components/SpeechBody.tsx`: speeches by year; text rendered from paragraphs, `## ` headings, bold, italic and embedded `data:image` pictures (never HTML); PDF-only speeches shown on the page on wide screens.
@@ -94,7 +94,8 @@ Everything below is what was in place on 2026-10-20 and what to do to bring it b
 ## To-do list
 
 **Now**
-- [ ] Owner: publish the photos: `docs/photo-archive.md` (download the project, `npm install`, run the `photos` step on the Kululu folder with the class code, then `upload`). Until then the Photos page says the photos are on their way; the speeches and the map already work.
+- [x] Owner: `photos` step run on the Kululu folder, 2026-10-25: 777 pictures, 0 unreadable, 1 exact duplicate (shown once).
+- [ ] Owner: `upload` step (token with Contents and Actions read and write), `docs/photo-archive.md`. Until then the Photos page says the photos are on their way; the speeches and the map already work.
 - [ ] Owner: optional, before Supabase pauses the old project: export the `photos` table as CSV (titles, years, places, categories) and give it to the `photos` step, and export the other tables for the future (see "Sign in").
 - [ ] Owner: share the class code with the year group, by a private message rather than a public post.
 - [ ] Owner: Supabase, remove the GitHub repository variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` if not wanted (harmless), and decide whether to keep the Supabase and Resend accounts (free to keep; export data first if not).
@@ -123,6 +124,6 @@ When the site is finished, remove everything installed on the user's PC during t
 ## Handover notes
 
 - Hosting: the site is built and served by GitHub Pages from the `main` branch; AWS (Route 53) only provides the domain name. The site is fully static, so it can move to any static host (Cloudflare Pages, Netlify) by building `dist/` and repointing the Route 53 records. GitHub Pages only works for a private repository on a paid GitHub plan.
-- The archive makes the repository large (about a quarter of a gigabyte once the photos are in). GitHub's limits allow it; keep it under 1 GB.
+- The photo archive lives on the `archive` release, not in the repository, so the repository stays small. GitHub Pages sites are limited to 1 GB; the archive is a few hundred MB.
 - Claude cannot be trained to recognise faces and does not identify people from their faces.
 - Rita logo is a placeholder drawing. Replace with a proper illustration or the cohort's own Rita artwork if they have one.

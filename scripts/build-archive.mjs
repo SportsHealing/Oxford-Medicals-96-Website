@@ -16,9 +16,10 @@
 //           pictures already done are skipped.
 // speeches: the folder holds speeches.json (see docs/photo-archive.md), the
 //           text files and PDFs it names. Writes public/archive/speeches.enc.
-// upload:   pushes public/archive to the main branch on GitHub in one commit,
-//           which publishes the site. Needs a GitHub token with "Contents:
-//           read and write" on the repository.
+// upload:   packs public/archive into one file, attaches it to the "archive"
+//           release on GitHub and asks GitHub to rebuild the site. Needs a
+//           GitHub token with "Contents" and "Actions" read and write on the
+//           repository.
 //
 // The code never goes into the archive: a wrong code simply cannot read it.
 // Must match src/lib/vault.ts.
@@ -154,12 +155,19 @@ async function buildPhotos(folder, csvPath) {
   const files = await walk(resolve(folder))
   console.log(`${files.length} pictures in ${folder}.`)
   const photos = []
-  let done = 0, skipped = 0, failed = 0
+  let done = 0, skipped = 0, failed = 0, duplicates = 0
+  const seen = new Set()
   for (const file of files) {
     const bytes = await readFile(file)
     const ext = extname(file).toLowerCase()
     const hash = createHash('sha1').update(bytes).digest('hex').slice(0, 16)
     const id = hash
+    // The same picture twice (for example a copy in two folders) is listed once.
+    if (seen.has(id)) {
+      duplicates++
+      continue
+    }
+    seen.add(id)
     const row = byPath.get(`import/${hash}${ext === '.jpeg' ? '.jpeg' : ext}`) ?? byPath.get(`import/${hash}.jpg`) ?? byName.get(basename(file).toLowerCase()) ?? {}
     const fullOut = join(OUT, 'p', `${id}.enc`)
     const thumbOut = join(OUT, 't', `${id}.enc`)
@@ -204,7 +212,7 @@ async function buildPhotos(folder, csvPath) {
     if ((done + skipped) % 50 === 0) console.log(`  ${done + skipped} of ${files.length}…`)
   }
   await writeEnc(join(OUT, 'photos.enc'), { builtAt: new Date().toISOString(), photos })
-  console.log(`Done: ${done} pictures made, ${skipped} already made, ${failed} could not be read. ${photos.length} in the list.`)
+  console.log(`Done: ${done} pictures made, ${skipped} already made, ${failed} could not be read${duplicates ? `, ${duplicates} exact duplicates left out` : ''}. ${photos.length} in the list.`)
   console.log(`Written to ${OUT}. Next:   node scripts/build-archive.mjs upload`)
 }
 
@@ -238,74 +246,113 @@ async function buildSpeeches(folder) {
 }
 
 // ---- upload to GitHub -----------------------------------------------------
+//
+// GitHub limits how many files can be added through its API in an hour, so
+// the archive goes up as one file (archive.tar) attached to a release called
+// "archive". The website build (.github/workflows/deploy.yml) downloads it and
+// unpacks it next to the site. Then this asks GitHub to rebuild the site.
+
+const RELEASE_TAG = 'archive'
+const ASSET = 'archive.tar'
+
+// A plain tar file: a 512-byte header per file, the file padded to 512 bytes,
+// and two empty blocks at the end.
+function tarOf(files) {
+  const parts = []
+  for (const { name, data } of files) {
+    const h = Buffer.alloc(512)
+    const put = (s, at, len) => h.write(s, at, Math.min(len, Buffer.byteLength(s)), 'ascii')
+    const oct = (n, len) => n.toString(8).padStart(len - 1, '0') + '\0'
+    if (Buffer.byteLength(name) > 100) throw new Error(`Name too long for the archive: ${name}`)
+    put(name, 0, 100)
+    put(oct(0o644, 8), 100, 8)
+    put(oct(0, 8), 108, 8)
+    put(oct(0, 8), 116, 8)
+    put(oct(data.length, 12), 124, 12)
+    put(oct(Math.floor(Date.now() / 1000), 12), 136, 12)
+    h.fill(' ', 148, 156)
+    put('0', 156, 1)
+    put('ustar\0', 257, 6)
+    put('00', 263, 2)
+    let sum = 0
+    for (const b of h) sum += b
+    put(sum.toString(8).padStart(6, '0') + '\0 ', 148, 8)
+    parts.push(h, data, Buffer.alloc((512 - (data.length % 512)) % 512))
+  }
+  parts.push(Buffer.alloc(1024))
+  return Buffer.concat(parts)
+}
 
 async function upload() {
   const token = (process.env.GITHUB_TOKEN ?? '').trim()
   const repo = process.env.GITHUB_REPO ?? 'SportsHealing/oxford-medicals-96-website'
   const branch = process.env.GITHUB_BRANCH ?? 'main'
+  const apiBase = process.env.GITHUB_API ?? 'https://api.github.com'
+  const uploadBase = process.env.GITHUB_UPLOADS ?? 'https://uploads.github.com'
   if (!token) {
-    console.error('Set GITHUB_TOKEN first (a fine-grained token with Contents: read and write on the repository).')
+    console.error('Set GITHUB_TOKEN first (a fine-grained token with Contents and Actions: read and write on the repository).')
     process.exit(1)
   }
-  if (!existsSync(OUT)) {
-    console.error('There is no public/archive folder yet. Run the photos or speeches step first.')
+  if (!existsSync(join(OUT, 'photos.enc')) && !existsSync(join(OUT, 'speeches.enc'))) {
+    console.error('There is nothing in public/archive yet. Run the photos or speeches step first.')
     process.exit(1)
   }
-  const api = async (path, init = {}) => {
-    const res = await fetch(`https://api.github.com${path}`, {
-      ...init,
-      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', ...(init.headers ?? {}) },
-    })
-    if (!res.ok) throw new Error(`GitHub ${init.method ?? 'GET'} ${path}: ${res.status} ${(await res.text()).slice(0, 200)}`)
-    return res.json()
+  const headers = { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }
+  const api = async (url, init = {}, okStatuses = []) => {
+    const res = await fetch(url.startsWith('http') ? url : `${apiBase}${url}`, { ...init, headers: { ...headers, ...(init.headers ?? {}) } })
+    if (!res.ok && !okStatuses.includes(res.status)) {
+      const text = (await res.text()).slice(0, 300)
+      const hint =
+        res.status === 401 ? ' The token is not valid; make a new one.'
+        : res.status === 403 || res.status === 404 ? ' Check the token is for this repository and has the permissions in the guide.'
+        : ''
+      throw new Error(`GitHub said ${res.status} for ${init.method ?? 'GET'} ${url}.${hint} ${text}`)
+    }
+    return res
   }
 
   const files = (await walkAll(OUT)).filter((f) => f.endsWith('.enc'))
-  console.log(`Uploading ${files.length} files to ${repo} (${branch})…`)
-  const head = await api(`/repos/${repo}/git/ref/heads/${branch}`)
-  const headSha = head.object.sha
-  const headCommit = await api(`/repos/${repo}/git/commits/${headSha}`)
+  console.log(`Packing ${files.length} files…`)
+  const tar = tarOf(await Promise.all(files.map(async (f) => ({ name: relative(OUT, f).split('\\').join('/'), data: await readFile(f) }))))
+  console.log(`Packed: ${(tar.length / 1024 / 1024).toFixed(0)} MB.`)
 
-  // Files already on GitHub with the same content are left alone.
-  const remote = new Map()
-  try {
-    const tree = await api(`/repos/${repo}/git/trees/${headCommit.tree.sha}?recursive=1`)
-    for (const t of tree.tree ?? []) if (t.type === 'blob' && t.path.startsWith('public/archive/')) remote.set(t.path, t.sha)
-  } catch {
-    /* a huge tree may be truncated; then everything is re-sent */
+  // The release that holds the archive, made the first time.
+  let res = await api(`/repos/${repo}/releases/tags/${RELEASE_TAG}`, {}, [404])
+  let release = res.status === 404 ? null : await res.json()
+  if (!release) {
+    res = await api(`/repos/${repo}/releases`, {
+      method: 'POST',
+      body: JSON.stringify({
+        tag_name: RELEASE_TAG,
+        target_commitish: branch,
+        name: 'Photo archive (encrypted)',
+        body: 'The encrypted photo and speech archive. The website build downloads archive.tar from here. Please do not delete.',
+        prerelease: true,
+      }),
+    })
+    release = await res.json()
+    console.log('Made the "archive" release on GitHub.')
   }
 
-  const entries = []
-  let sent = 0, same = 0
-  const queue = [...files]
-  const worker = async () => {
-    for (let file = queue.shift(); file; file = queue.shift()) {
-      const path = 'public/archive/' + relative(OUT, file).split('\\').join('/')
-      const content = await readFile(file)
-      const gitSha = createHash('sha1').update(`blob ${content.length}\0`).update(content).digest('hex')
-      if (remote.get(path) === gitSha) {
-        same++
-        entries.push({ path, mode: '100644', type: 'blob', sha: gitSha })
-        continue
-      }
-      const blob = await api(`/repos/${repo}/git/blobs`, { method: 'POST', body: JSON.stringify({ content: content.toString('base64'), encoding: 'base64' }) })
-      entries.push({ path, mode: '100644', type: 'blob', sha: blob.sha })
-      sent++
-      if ((sent + same) % 50 === 0) console.log(`  ${sent + same} of ${files.length}…`)
-    }
+  // Replace the previous archive.tar, if there is one.
+  for (const a of release.assets ?? []) {
+    if (a.name === ASSET) await api(`/repos/${repo}/releases/assets/${a.id}`, { method: 'DELETE' })
   }
-  await Promise.all(Array.from({ length: 4 }, worker))
-  if (sent === 0) {
-    console.log('Everything is already on GitHub. Nothing to do.')
-    return
-  }
-  const tree = await api(`/repos/${repo}/git/trees`, { method: 'POST', body: JSON.stringify({ base_tree: headCommit.tree.sha, tree: entries }) })
-  const commit = await api(`/repos/${repo}/git/commits`, {
+  console.log('Uploading… (a few minutes on a home connection)')
+  await api(`${uploadBase}/repos/${repo}/releases/${release.id}/assets?name=${ASSET}`, {
     method: 'POST',
-    body: JSON.stringify({ message: `Archive: ${sent} file${sent === 1 ? '' : 's'} updated`, tree: tree.sha, parents: [headSha] }),
+    headers: { 'Content-Type': 'application/x-tar', 'Content-Length': String(tar.length) },
+    body: tar,
   })
-  await api(`/repos/${repo}/git/refs/heads/${branch}`, { method: 'PATCH', body: JSON.stringify({ sha: commit.sha }) })
-  console.log(`Done: ${sent} files uploaded (${same} unchanged). The site will update in a few minutes.`)
+  console.log('Uploaded.')
+
+  // Ask GitHub to rebuild the site now.
+  res = await api(`/repos/${repo}/actions/workflows/deploy.yml/dispatches`, { method: 'POST', body: JSON.stringify({ ref: branch }) }, [403, 404])
+  if (res.ok) {
+    console.log('Done. GitHub is rebuilding the site; it will be live in about 3 minutes (Actions tab shows a green tick).')
+  } else {
+    console.log('Done. One more click: on GitHub open the Actions tab, choose "Deploy to GitHub Pages", press "Run workflow", then the green "Run workflow" button.')
+  }
 }
 
 async function walkAll(dir) {

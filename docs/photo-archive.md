@@ -2,8 +2,9 @@
 
 The site has no accounts. Everything beyond the front page opens with one
 8-digit class code. The photos and speeches are published as encrypted files
-in this repository (`public/archive/`): the code is turned into the key that
-unscrambles them, in the visitor's browser. The code itself is never stored
+(the speeches in this repository under `public/archive/`, the photos as one
+file attached to the "archive" release on GitHub): the code is turned into
+the key that unscrambles them, in the visitor's browser. The code itself is never stored
 on the site or in this repository, so keep it out of this folder, out of
 GitHub, and share it only within the year group.
 
@@ -55,16 +56,20 @@ skipped, so adding new photos to the folder and re-running is quick.
 
 ## Uploading to GitHub
 
-The script can push the archive to GitHub for you, which publishes the site.
-It needs a token that lets it write to this repository:
+GitHub only lets a few hundred files be added through its website tools in
+an hour, so the script packs the whole archive into one file (`archive.tar`)
+and attaches it to a GitHub "release" called **archive**. The website build
+unpacks it each time it publishes. The script needs a token that lets it do
+that:
 
 1. On GitHub, click your profile picture (top right), **Settings**.
 2. At the bottom of the left menu, **Developer settings**, then
    **Personal access tokens**, **Fine-grained tokens**, **Generate new token**.
 3. Name: `archive upload`. Expiration: 7 days. Repository access: **Only
-   select repositories**, pick this repository. Under **Permissions**,
-   **Repository permissions**, set **Contents** to **Read and write**.
-4. Press **Generate token** and copy it. It is shown once.
+   select repositories**, pick this repository.
+4. Under **Permissions**, **Repository permissions**, set **Contents** to
+   **Read and write** and **Actions** to **Read and write**.
+5. Press **Generate token** and copy it. It is shown once.
 
 Then in the Command Prompt:
 
@@ -73,22 +78,22 @@ set GITHUB_TOKEN=paste-the-token-here
 node scripts\build-archive.mjs upload
 ```
 
-Files already on GitHub are skipped, so re-uploads only send what changed.
-The site updates a few minutes after the upload finishes (Actions tab on
-GitHub shows a green tick). Afterwards, delete the token on GitHub.
+It packs, uploads (a few minutes on a home connection) and asks GitHub to
+rebuild the site. The site updates about three minutes later (the Actions
+tab on GitHub shows a green tick). If the script says "One more click", open
+the Actions tab, choose **Deploy to GitHub Pages**, press **Run workflow**,
+then the green **Run workflow** button. Afterwards, delete the token on
+GitHub.
 
-If the upload will not work, the fallback is GitHub Desktop (a free app):
-sign in, **Clone** this repository, copy your `public\archive` folder over
-the one in the clone, then **Commit to main** and **Push origin**.
+Do not delete the **archive** release on GitHub: the site needs it.
 
 ## Adding photos later
 
 Put the new pictures in the same folder and run the `photos` step and the
 `upload` step again. To remove a photo, delete it from the folder, delete
 the whole `public\archive\p` and `public\archive\t` folders, run `photos`
-again, then upload. (Files removed from `public\archive` are not removed
-from GitHub by the script; delete them on the GitHub website if you want
-them gone from the repository as well.)
+again, then upload. Each upload replaces the whole archive, so removed
+pictures are gone from the site.
 
 ## Speeches
 
