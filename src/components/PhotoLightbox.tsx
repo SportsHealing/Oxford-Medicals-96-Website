@@ -98,14 +98,10 @@ export default function PhotoLightbox({ photos, startIndex, onClose }: Props) {
       aria-label={`${photo.title}, photo ${index + 1} of ${photos.length}`}
     >
       <div className="flex items-center gap-4 px-4 py-3 font-sans">
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold">{photo.title}</p>
-          <p className="truncate text-xs text-white/60">
-            {[photo.year, photo.place].filter(Boolean).join(' · ')}
-            {[photo.year, photo.place].some(Boolean) ? ' · ' : ''}
-            {index + 1} of {photos.length}
-          </p>
-        </div>
+        {/* Full screen is for looking: no title, names or place, just the count. */}
+        <p className="min-w-0 flex-1 text-sm text-white/60">
+          {index + 1} of {photos.length}
+        </p>
         <button
           ref={closeBtn}
           type="button"

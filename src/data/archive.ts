@@ -24,6 +24,9 @@ export function setKey(k: VaultKey | null) {
   photosCache = null
 }
 
+/** The key from the class code, while the archive is open. */
+export const currentKey = () => key
+
 export class WrongCode extends Error {}
 
 // The two lists can be republished in place, so they follow normal caching;

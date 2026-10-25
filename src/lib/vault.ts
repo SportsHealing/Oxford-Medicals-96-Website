@@ -21,8 +21,30 @@ export async function deriveKey(code: string): Promise<VaultKey> {
     base,
     { name: 'AES-GCM', length: 256 },
     true,
-    ['decrypt'],
+    ['encrypt', 'decrypt'],
   )
+}
+
+// Same file layout as the archive: 12-byte IV, then ciphertext and tag.
+export async function encrypt(key: VaultKey, data: Uint8Array<ArrayBuffer>): Promise<Uint8Array<ArrayBuffer>> {
+  const iv = crypto.getRandomValues(new Uint8Array(12))
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data))
+  const out = new Uint8Array(12 + ct.length)
+  out.set(iv)
+  out.set(ct, 12)
+  return out
+}
+
+// Proof for the notes service that this browser has the class code, without
+// sending the code or the key. The service stores only SHA-256 of this value.
+export async function writeToken(key: VaultKey): Promise<string> {
+  const raw = new Uint8Array(await crypto.subtle.exportKey('raw', key))
+  const label = new TextEncoder().encode('om96-notes-write')
+  const both = new Uint8Array(raw.length + label.length)
+  both.set(raw)
+  both.set(label, raw.length)
+  const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', both))
+  return [...hash].map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
 export async function decrypt(key: VaultKey, file: ArrayBuffer): Promise<ArrayBuffer> {
@@ -45,7 +67,7 @@ export async function rememberedKey(): Promise<VaultKey | null> {
     const b64 = localStorage.getItem(KEY_STORE)
     if (!b64) return null
     const raw = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))
-    return await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, true, ['decrypt'])
+    return await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, true, ['encrypt', 'decrypt'])
   } catch {
     return null
   }

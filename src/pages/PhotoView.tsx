@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import EncImage from '../components/EncImage.tsx'
 import PhotoLightbox from '../components/PhotoLightbox.tsx'
+import PhotoNotes from '../components/PhotoNotes.tsx'
 import { listPhotos } from '../data/archive.ts'
+import { notesEnabled } from '../lib/notes.ts'
 import { categoryLabel } from '../lib/photoCategories.ts'
 import { LoadError, Loading, useLoad } from '../lib/useLoad.tsx'
 import NotFound from './NotFound.tsx'
@@ -68,12 +70,18 @@ export default function PhotoView() {
               {categoryLabel(photo.category)}
             </Link>
           )}
-          <p className="label-caps">{[photo.year, photo.place].filter(Boolean).join(' · ') || 'Undated'}</p>
+          <p className="label-caps">{(notesEnabled() ? photo.year : [photo.year, photo.place].filter(Boolean).join(' · ')) || 'Undated'}</p>
           <h1 className="mt-1 text-3xl">{photo.title}</h1>
           {photo.caption && <p className="mt-3 text-muted">{photo.caption}</p>}
-          <p className="mt-6 font-sans text-sm text-muted">
-            Know who is in this photo, or when it was taken? Tell one of the organisers and they will add it.
-          </p>
+          {notesEnabled() ? (
+            <div className="mt-8 border-t border-line pt-6">
+              <PhotoNotes photo={photo} />
+            </div>
+          ) : (
+            <p className="mt-6 font-sans text-sm text-muted">
+              Know who is in this photo, or when it was taken? Tell one of the organisers and they will add it.
+            </p>
+          )}
         </aside>
       </div>
       {full && (

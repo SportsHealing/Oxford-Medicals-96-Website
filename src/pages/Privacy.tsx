@@ -16,13 +16,15 @@ export default function Privacy() {
           <li>The photos and speeches are stored in scrambled (encrypted) form. The site never stores the code itself: the code is turned into the key that unscrambles them, on your device.</li>
           <li>This keeps the archive from anyone browsing or stumbling on the files. It is not secrecy against a determined attacker with specialist tools, so please keep the code within the class and do not post it publicly.</li>
           <li>If the code ever gets out, the organisers can choose a new one and republish the archive.</li>
+          <li>Names and places added to photos are scrambled with the code in your browser before they are saved, so the service that keeps them (Cloudflare) only holds unreadable data.</li>
         </Section>
 
         <Section title="What the site holds">
           <li>Photos from our time at Oxford and since, with a title and, where known, a year, place and occasion. Location and camera data is removed from each picture.</li>
           <li>Speeches, in their speakers&rsquo; own words, shared with their permission.</li>
           <li>A map of where the class is known to be, showing towns and numbers only.</li>
-          <li>No names are attached to photos on the site, and no profiles, email addresses or messages are kept.</li>
+          <li>Names and places that classmates add to photos. Anyone with the class code can add or correct them, and each photo keeps its last 20 versions so mistakes can be put right.</li>
+          <li>No profiles, email addresses or messages are kept.</li>
         </Section>
 
         <Section title="On your device">
@@ -37,7 +39,7 @@ export default function Privacy() {
 
         <Section title="Your rights">
           <li>Ask for a photo of you, or a speech, to be taken down, and it will be removed at the next update.</li>
-          <li>Ask for a photo&rsquo;s title, year or place to be corrected.</li>
+          <li>Correct a name or place on a photo yourself (Edit on the photo&rsquo;s page), or ask the organisers to remove your name from a photo.</li>
           <li>Ask the organisers anything about how the site is run.</li>
         </Section>
       </div>
