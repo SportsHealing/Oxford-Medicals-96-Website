@@ -21,6 +21,8 @@ export default function Gallery() {
   const year = params.get('y') ?? ''
   const view: 'thumbs' | 'large' = params.get('view') === 'large' ? 'large' : 'thumbs'
   const [query, setQuery] = useState(params.get('q') ?? '')
+  // Arriving from a front-page photo: scroll to it and highlight it.
+  const focus = params.get('focus') ?? ''
 
   const [limit, setLimit] = useState(PAGE[view])
   const sentinel = useRef<HTMLDivElement>(null)
@@ -90,6 +92,13 @@ export default function Gallery() {
           .filter((g) => g.photos.length > 0)
       : [{ id: cat, label: '', photos: shown }]
   const flat = groups.flatMap((g) => g.photos)
+  const focusAt = focus ? flat.findIndex((p) => p.id === focus) : -1
+
+  useEffect(() => {
+    if (focusAt < 0) return
+    const t = window.setTimeout(() => document.getElementById(`photo-${focus}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150)
+    return () => window.clearTimeout(t)
+  }, [focus, focusAt])
 
   if (loading) return <Loading what="Opening the photos" />
   if (error) return <LoadError message={error} />
@@ -109,7 +118,8 @@ export default function Gallery() {
     )
   }
 
-  let budget = limit
+  // Make sure the highlighted photo is among those drawn.
+  let budget = Math.max(limit, focusAt + 1 + PAGE[view])
 
   return (
     <div>
@@ -195,8 +205,13 @@ export default function Gallery() {
               {view === 'thumbs' ? (
                 <ul className="grid grid-cols-3 gap-1.5 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
                   {visible.map((p) => (
-                    <li key={p.id}>
-                      <Link to={`/photos/${p.id}${inParam}`} aria-label={p.title} className="group relative block aspect-square overflow-hidden rounded-lg bg-paper no-underline">
+                    <li key={p.id} id={`photo-${p.id}`} className={p.id === focus ? 'relative z-10' : undefined}>
+                      <Link
+                        to={`/photos/${p.id}${inParam}`}
+                        aria-label={p.title}
+                        aria-current={p.id === focus ? 'true' : undefined}
+                        className={`group relative block aspect-square overflow-hidden rounded-lg bg-paper no-underline ${p.id === focus ? 'ring-4 ring-rose ring-offset-2 ring-offset-paper' : ''}`}
+                      >
                         <EncImage path={p.thumb} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
                         <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy/85 to-transparent px-2 pt-6 pb-1.5 font-sans text-[0.72rem] leading-tight text-white opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
                           {p.title}
@@ -208,8 +223,12 @@ export default function Gallery() {
               ) : (
                 <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {visible.map((p) => (
-                    <li key={p.id}>
-                      <Link to={`/photos/${p.id}${inParam}`} className="card card-hover group block overflow-hidden no-underline">
+                    <li key={p.id} id={`photo-${p.id}`}>
+                      <Link
+                        to={`/photos/${p.id}${inParam}`}
+                        aria-current={p.id === focus ? 'true' : undefined}
+                        className={`card card-hover group block overflow-hidden no-underline ${p.id === focus ? 'ring-4 ring-rose' : ''}`}
+                      >
                         <div className="overflow-hidden bg-paper">
                           <EncImage path={p.thumb} alt={p.title} className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
                         </div>

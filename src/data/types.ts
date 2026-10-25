@@ -11,6 +11,8 @@ export type Photo = {
   thumb: string
   width?: number
   height?: number
+  /** True when the title was given by a person (not taken from the file name). */
+  named?: boolean
 }
 
 export type Speech = {

@@ -4,9 +4,11 @@ import { useAccess } from '../access.tsx'
 import { asset } from '../asset.ts'
 import { Loading } from '../lib/useLoad.tsx'
 
+// Menu items as coloured pills: soft rose, deeper rose on hover, navy when
+// it is the page you are on.
 const navClass = ({ isActive }: { isActive: boolean }) =>
-  `relative flex shrink-0 items-center gap-2 px-0.5 py-2 font-sans text-[0.9rem] font-semibold no-underline transition after:absolute after:inset-x-0 after:-bottom-px after:h-[3px] after:rounded-full after:transition sm:px-1 sm:text-[0.95rem] ${
-    isActive ? 'text-navy after:bg-rose' : 'text-muted after:bg-transparent hover:text-navy hover:after:bg-rose/50'
+  `flex shrink-0 items-center rounded-full px-3 py-1.5 font-sans text-[0.88rem] font-semibold no-underline transition sm:px-4 sm:py-2 sm:text-[0.95rem] ${
+    isActive ? 'bg-navy text-white shadow-card' : 'bg-rose-soft text-navy hover:bg-rose'
   }`
 
 export default function Layout() {
@@ -30,7 +32,7 @@ export default function Layout() {
               </span>
             </Link>
 
-            <nav className="ml-auto flex min-w-0 items-center gap-4 sm:gap-6">
+            <nav className="ml-auto flex min-w-0 items-center gap-1.5 sm:gap-2.5">
               {open ? (
                 <>
                   <NavLink to="/photos" className={navClass}>

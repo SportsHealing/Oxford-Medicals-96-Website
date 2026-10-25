@@ -45,9 +45,13 @@ export default function QuoteBanner({ quotes }: { quotes: SpeechQuote[] }) {
         if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1)
       }}
     >
-      <span aria-hidden className="pointer-events-none absolute -top-6 left-3 font-serif text-[9rem] leading-none text-rose/25 sm:left-6">
-        &ldquo;
-      </span>
+      {/* Drawn rather than typed, so it sits neatly inside the panel at any size. */}
+      <svg aria-hidden viewBox="0 0 48 36" className="mb-4 h-7 w-auto text-rose sm:mb-5 sm:h-9">
+        <path
+          fill="currentColor"
+          d="M0 36V22.6C0 9.9 6.2 2.4 18.6 0l2 4.2C13.9 6.3 10.3 10.4 9.8 16.6H19V36H0zm27 0V22.6C27 9.9 33.2 2.4 45.6 0l2 4.2c-6.7 2.1-10.3 6.2-10.8 12.4H46V36H27z"
+        />
+      </svg>
 
       <div className="relative grid" aria-live={paused || hover ? 'polite' : 'off'}>
         {quotes.map((q, i) => (

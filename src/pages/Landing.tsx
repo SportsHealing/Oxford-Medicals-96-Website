@@ -21,7 +21,7 @@ export default function Landing() {
       <section className="relative left-1/2 -ml-[50vw] w-screen overflow-hidden bg-navy text-white">
         <div aria-hidden className="pointer-events-none absolute -top-40 right-[-8rem] h-[28rem] w-[28rem] rounded-full bg-rose/15 blur-3xl" />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 sm:py-24 md:grid-cols-[1fr_1.15fr]">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 py-14 sm:py-16 md:grid-cols-[1fr_1.15fr]">
           <div>
             <p className="mb-5 font-sans text-[0.78rem] font-semibold tracking-[0.14em] text-rose uppercase">
               Oxford Medical School &middot; Class of 1996
@@ -45,43 +45,35 @@ export default function Landing() {
             </div>
           </div>
 
-          {photoOk ? (
-            <figure className="md:-mr-6">
-              <div className="relative">
-                <div aria-hidden className="absolute inset-0 translate-x-3 translate-y-3 rounded-3xl border border-rose/40" />
-                <img
+          {photoOk || thenOk ? (
+            // Then and now, one above the other. Each opens the photo grid
+            // with that picture highlighted (after the class code).
+            <div className="mx-auto flex w-full max-w-[30rem] flex-col gap-6 md:mr-0 md:max-w-[25rem]">
+              {thenOk && (
+                <ClassPhoto
+                  to="/photos?focus=class-1996"
+                  src={asset('/then-1996.jpg')}
+                  width={600}
+                  height={488}
+                  label="1996"
+                  alt="The Oxford medical class of 1996"
+                  onError={() => setThenOk(false)}
+                />
+              )}
+              {photoOk && (
+                <ClassPhoto
+                  to="/photos?focus=reunion-2026"
                   src={asset('/landing.jpg')}
                   srcSet={`${asset('/landing-800.jpg')} 800w, ${asset('/landing.jpg')} 1500w`}
-                  sizes="(min-width: 768px) 560px, 100vw"
                   width={1500}
                   height={1000}
-                  alt="The Oxford medical class of 1996, together again in Oxford"
-                  fetchPriority="high"
+                  label="Sept 2026"
+                  caption="Back in Oxford, thirty years on."
+                  alt="The Oxford medical class of 1996, together again in Oxford in September 2026"
                   onError={() => setPhotoOk(false)}
-                  className="relative aspect-[3/2] w-full rounded-3xl bg-navy-soft object-cover shadow-2xl"
                 />
-                <span className="absolute top-3 right-3 rounded-full bg-navy/80 px-3 py-1 font-sans text-xs font-semibold tracking-wide text-white backdrop-blur">
-                  2026
-                </span>
-                {thenOk && (
-                  // The same class thirty years earlier, laid on top like an old print.
-                  <div className="absolute -bottom-10 -left-3 w-[44%] -rotate-[4deg] rounded-md bg-white p-1.5 pb-1 shadow-2xl sm:-left-8 sm:w-[40%]">
-                    <img
-                      src={asset('/then-1996.jpg')}
-                      width={600}
-                      height={488}
-                      alt="The Oxford medical class of 1996, thirty years earlier"
-                      onError={() => setThenOk(false)}
-                      className="block h-auto w-full rounded-sm"
-                    />
-                    <p className="py-0.5 text-center font-serif text-sm text-navy italic sm:text-base">1996</p>
-                  </div>
-                )}
-              </div>
-              <figcaption className={`${thenOk ? 'mt-4 pl-[48%] text-left text-sm sm:mt-14 sm:pl-[38%] sm:text-base' : 'mt-6 text-center'} font-serif text-white/60 italic`}>
-                Back in Oxford, thirty years on.
-              </figcaption>
-            </figure>
+              )}
+            </div>
           ) : (
             <div className="mx-auto w-60 sm:w-72">
               <div className="relative">
@@ -134,5 +126,42 @@ function Step({ n, to, title, body }: { n: string; to: string; title: string; bo
         <p className="mt-1.5 text-muted">{body}</p>
       </Link>
     </li>
+  )
+}
+
+function ClassPhoto(props: {
+  to: string
+  src: string
+  srcSet?: string
+  width: number
+  height: number
+  label: string
+  alt: string
+  caption?: string
+  onError: () => void
+}) {
+  return (
+    <figure>
+      <Link to={props.to} className="group relative block no-underline" aria-label={`${props.alt}. Open it in the photos`}>
+        <span aria-hidden className="absolute inset-0 translate-x-2.5 translate-y-2.5 rounded-2xl border border-rose/40 transition group-hover:translate-x-3 group-hover:translate-y-3" />
+        <img
+          src={props.src}
+          srcSet={props.srcSet}
+          sizes="(min-width: 768px) 480px, 100vw"
+          width={props.width}
+          height={props.height}
+          alt={props.alt}
+          onError={props.onError}
+          className="relative block h-auto w-full rounded-2xl bg-navy-soft shadow-2xl transition group-hover:brightness-105"
+        />
+        <span className="absolute top-3 right-3 rounded-full bg-navy/80 px-3 py-1 font-sans text-xs font-semibold tracking-wide text-white backdrop-blur">
+          {props.label}
+        </span>
+        <span className="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 font-sans text-xs font-semibold text-navy opacity-0 shadow-card transition group-hover:opacity-100 group-focus-visible:opacity-100">
+          View in the photos &rarr;
+        </span>
+      </Link>
+      {props.caption && <figcaption className="mt-4 text-center font-serif text-white/60 italic">{props.caption}</figcaption>}
+    </figure>
   )
 }

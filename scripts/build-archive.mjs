@@ -200,6 +200,8 @@ async function buildPhotos(folder, csvPath) {
     photos.push({
       id,
       title: row.title?.trim() || titleFromName(file),
+      // The site shows "Photo 1", "Photo 2"... for photos without a real title.
+      named: Boolean(row.title?.trim()) && !/\.(jpe?g|png|webp|heic)$/i.test(row.title.trim()),
       year: row.year?.trim() || null,
       place: row.place?.trim() || null,
       caption: row.caption?.trim() || null,

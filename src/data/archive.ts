@@ -111,21 +111,29 @@ export function speechPdfBlob(speech: Speech): Blob | null {
 
 /** The photo list, or null while the photos have not been published yet. */
 export function loadPhotos(): Promise<PhotosFile | null> {
-  photosCache ??= readJson<PhotosFile>('photos.enc')
-    .then((f) => ({
-      ...f,
-      // The same picture listed twice is shown once.
-      photos: [...new Map(f.photos.map((p) => [p.id, p])).values()].sort(
-        (a, b) =>
-          categoryOrder(a.category) - categoryOrder(b.category) ||
-          (a.year ?? '9999').localeCompare(b.year ?? '9999') ||
-          a.title.localeCompare(b.title),
-      ),
-    }))
-    .catch((e: unknown) => {
+  const optional = (path: string) =>
+    readJson<PhotosFile>(path).catch((e: unknown) => {
       if (e instanceof Missing) return null
       throw e
     })
+  // photos.enc is the owner's archive; extra.enc (kept in the repository)
+  // adds the two front-page class photos so they can be found in the grid.
+  photosCache ??= Promise.all([optional('photos.enc'), optional('extra.enc')]).then(([main, extra]) => {
+    if (!main && !extra) return null
+    // The same picture listed twice is shown once.
+    const unique = [...new Map([...(extra?.photos ?? []), ...(main?.photos ?? [])].map((p) => [p.id, p])).values()]
+    const sorted = unique.sort(
+      (a, b) =>
+        categoryOrder(a.category) - categoryOrder(b.category) ||
+        (a.year ?? '9999').localeCompare(b.year ?? '9999') ||
+        a.title.localeCompare(b.title, 'en', { numeric: true }),
+    )
+    // Photos still named after their file (IMG_1234) are shown as "Photo 1",
+    // "Photo 2"..., in the order they appear.
+    let n = 0
+    const photos = sorted.map((p) => (p.named ? p : { ...p, title: `Photo ${++n}` }))
+    return { builtAt: main?.builtAt, photos }
+  })
   photosCache.catch(() => (photosCache = null))
   return photosCache
 }
